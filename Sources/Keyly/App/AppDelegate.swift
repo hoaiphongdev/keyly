@@ -200,7 +200,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func showAbout() {
         let alert = NSAlert()
         alert.messageText = "Keyly"
-        alert.informativeText = "Hold ⌘ (Command) key for 1.7 seconds to show shortcuts\n\nVersion 1.1.0"
+        alert.informativeText = "Hold ⌘ (Command) key for 1.7 seconds to show shortcuts"
         alert.alertStyle = .informational
         alert.addButton(withTitle: "OK")
         
@@ -210,11 +210,26 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             alert.icon = logoImage
         }
         
+        alert.window.level = .floating
+        NSApp.activate(ignoringOtherApps: true)
         alert.runModal()
     }
     
     @objc private func checkForUpdates() {
-        UpdateManager.shared.checkForUpdates()
+        if UpdateManager.shared.canCheckForUpdates {
+            UpdateManager.shared.checkForUpdates()
+        } else {
+            let alert = NSAlert()
+            alert.messageText = "Check for Updates"
+            alert.informativeText = isDevMode 
+                ? "Update checking is disabled in dev mode." 
+                : "You're running the latest version!"
+            alert.alertStyle = .informational
+            alert.addButton(withTitle: "OK")
+            alert.window.level = .floating
+            NSApp.activate(ignoringOtherApps: true)
+            alert.runModal()
+        }
     }
     
     @objc private func quitApp() {

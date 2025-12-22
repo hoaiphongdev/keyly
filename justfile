@@ -8,22 +8,18 @@ install:
     swift build -c release
     @echo "✅ Done"
 
-dev:
+# Run dev mode. Use 'just dev test-update' to mock update banner
+dev *args:
     swift build
-    KEYLY_DEV=1 .build/debug/Keyly
-
-# Test with mock update banner
-dev-update:
-    swift build
-    KEYLY_DEV=1 KEYLY_MOCK_UPDATE=1 .build/debug/Keyly
+    @if [ "{{args}}" = "test-update" ]; then \
+        KEYLY_DEV=1 KEYLY_MOCK_UPDATE=1 .build/debug/Keyly; \
+    else \
+        KEYLY_DEV=1 .build/debug/Keyly; \
+    fi
 
 prod:
     swift build -c release
     .build/release/Keyly
-
-release version:
-    @[ -n "{{version}}" ] || (echo "❌ version not set" && exit 1)
-    @./scripts/build-dmg.sh {{version}}
 
 test-install:
     @pkill -x "Keyly" 2>/dev/null || true
@@ -35,3 +31,11 @@ test-install:
 setup-keys:
     swift build
     ./scripts/generate-keys.sh
+
+release version:
+    @test -n "{{version}}" || (echo "❌ Version required. Example: just release 1.0.0" && exit 1)
+    @test -f sparkle_eddsa_public_key.txt || (echo "❌ Missing sparkle_eddsa_public_key.txt. Run 'just setup-keys' first." && exit 1)
+    ./scripts/build-dmg.sh {{version}}
+    ./scripts/update-appcast.sh {{version}}
+    @echo ""
+    @echo "✅ Release {{version}} ready!"

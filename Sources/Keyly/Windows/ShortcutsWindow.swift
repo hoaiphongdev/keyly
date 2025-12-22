@@ -8,6 +8,8 @@ final class ShortcutsWindow: NSWindowController {
     private var updateBanner: NSView?
     private var scrollViewTopConstraint: NSLayoutConstraint!
     private var shortcuts: [ShortcutItem] = []
+    private var updateButton: NSButton?
+    private var spinner: NSProgressIndicator?
     
     private let columnWidth: CGFloat = 200
     private let columnSpacing: CGFloat = 20
@@ -49,41 +51,99 @@ final class ShortcutsWindow: NSWindowController {
     private func updateUpdateBanner() {
         updateBanner?.removeFromSuperview()
         updateBanner = nil
+        updateButton = nil
+        spinner = nil
         scrollViewTopConstraint.constant = padding
         
-        guard UpdateManager.shared.updateAvailable else { return }
+        let state = UpdateManager.shared.updateState
+        guard state != .none && UpdateManager.shared.updateAvailable || state == .downloading || state == .readyToInstall else { return }
         
         let banner = NSView()
         banner.translatesAutoresizingMaskIntoConstraints = false
         banner.wantsLayer = true
-        banner.layer?.backgroundColor = NSColor.systemBlue.withAlphaComponent(0.2).cgColor
+        
+        let isReady = state == .readyToInstall
+        let bgColor = isReady ? NSColor.systemGreen.withAlphaComponent(0.2) : NSColor.systemBlue.withAlphaComponent(0.2)
+        let accentColor = isReady ? NSColor.systemGreen : NSColor.systemBlue
+        banner.layer?.backgroundColor = bgColor.cgColor
         banner.layer?.cornerRadius = 8
         
         let icon = NSImageView()
         icon.translatesAutoresizingMaskIntoConstraints = false
-        icon.image = NSImage(systemSymbolName: "arrow.down.circle.fill", accessibilityDescription: "Update")
-        icon.contentTintColor = .systemBlue
+        let iconName = isReady ? "checkmark.circle.fill" : "arrow.down.circle.fill"
+        icon.image = NSImage(systemSymbolName: iconName, accessibilityDescription: "Update")
+        icon.contentTintColor = accentColor
         
         let version = UpdateManager.shared.latestVersion ?? "new version"
-        let label = NSTextField(labelWithString: "Update available: v\(version)")
+        let labelText: String
+        switch state {
+        case .downloading:
+            labelText = "Downloading v\(version)..."
+        case .readyToInstall:
+            labelText = "v\(version) ready to install!"
+        default:
+            labelText = "Update available: v\(version)"
+        }
+        
+        let label = NSTextField(labelWithString: labelText)
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = NSFont.systemFont(ofSize: 12, weight: .medium)
         label.textColor = .labelColor
         
-        let updateBtn = NSButton(title: "Update Now", target: self, action: #selector(doUpdate))
-        updateBtn.translatesAutoresizingMaskIntoConstraints = false
-        updateBtn.bezelStyle = .rounded
-        updateBtn.font = NSFont.systemFont(ofSize: 11, weight: .semibold)
-        
-        let laterBtn = NSButton(title: "Later", target: self, action: #selector(dismissBanner))
-        laterBtn.translatesAutoresizingMaskIntoConstraints = false
-        laterBtn.bezelStyle = .inline
-        laterBtn.font = NSFont.systemFont(ofSize: 11)
-        
         banner.addSubview(icon)
         banner.addSubview(label)
-        banner.addSubview(updateBtn)
-        banner.addSubview(laterBtn)
+        
+        if state == .readyToInstall {
+            let relaunchBtn = NSButton(title: "Relaunch", target: self, action: #selector(doRelaunch))
+            relaunchBtn.translatesAutoresizingMaskIntoConstraints = false
+            relaunchBtn.bezelStyle = .rounded
+            relaunchBtn.font = NSFont.systemFont(ofSize: 11, weight: .semibold)
+            relaunchBtn.contentTintColor = .systemGreen
+            banner.addSubview(relaunchBtn)
+            
+            NSLayoutConstraint.activate([
+                relaunchBtn.trailingAnchor.constraint(equalTo: banner.trailingAnchor, constant: -10),
+                relaunchBtn.centerYAnchor.constraint(equalTo: banner.centerYAnchor)
+            ])
+        } else if state == .downloading {
+            let spinnerView = NSProgressIndicator()
+            spinnerView.translatesAutoresizingMaskIntoConstraints = false
+            spinnerView.style = .spinning
+            spinnerView.controlSize = .small
+            spinnerView.startAnimation(nil)
+            banner.addSubview(spinnerView)
+            spinner = spinnerView
+            
+            NSLayoutConstraint.activate([
+                spinnerView.trailingAnchor.constraint(equalTo: banner.trailingAnchor, constant: -14),
+                spinnerView.centerYAnchor.constraint(equalTo: banner.centerYAnchor),
+                spinnerView.widthAnchor.constraint(equalToConstant: 16),
+                spinnerView.heightAnchor.constraint(equalToConstant: 16)
+            ])
+        } else {
+            let updateBtn = NSButton(title: "Update Now", target: self, action: #selector(doUpdate))
+            updateBtn.translatesAutoresizingMaskIntoConstraints = false
+            updateBtn.bezelStyle = .rounded
+            updateBtn.font = NSFont.systemFont(ofSize: 11, weight: .semibold)
+            self.updateButton = updateBtn
+            
+            let laterBtn = NSButton(title: "Later", target: self, action: #selector(dismissBanner))
+            laterBtn.translatesAutoresizingMaskIntoConstraints = false
+            laterBtn.bezelStyle = .inline
+            laterBtn.font = NSFont.systemFont(ofSize: 11)
+            
+            banner.addSubview(updateBtn)
+            banner.addSubview(laterBtn)
+            
+            NSLayoutConstraint.activate([
+                laterBtn.trailingAnchor.constraint(equalTo: banner.trailingAnchor, constant: -10),
+                laterBtn.centerYAnchor.constraint(equalTo: banner.centerYAnchor),
+                
+                updateBtn.trailingAnchor.constraint(equalTo: laterBtn.leadingAnchor, constant: -8),
+                updateBtn.centerYAnchor.constraint(equalTo: banner.centerYAnchor)
+            ])
+        }
+        
         containerView.addSubview(banner)
         
         NSLayoutConstraint.activate([
@@ -98,22 +158,33 @@ final class ShortcutsWindow: NSWindowController {
             icon.heightAnchor.constraint(equalToConstant: 18),
             
             label.leadingAnchor.constraint(equalTo: icon.trailingAnchor, constant: 8),
-            label.centerYAnchor.constraint(equalTo: banner.centerYAnchor),
-            
-            laterBtn.trailingAnchor.constraint(equalTo: banner.trailingAnchor, constant: -10),
-            laterBtn.centerYAnchor.constraint(equalTo: banner.centerYAnchor),
-            
-            updateBtn.trailingAnchor.constraint(equalTo: laterBtn.leadingAnchor, constant: -8),
-            updateBtn.centerYAnchor.constraint(equalTo: banner.centerYAnchor)
+            label.centerYAnchor.constraint(equalTo: banner.centerYAnchor)
         ])
         
         updateBanner = banner
         scrollViewTopConstraint.constant = padding + bannerHeight
+        
+        UpdateManager.shared.onUpdateStateChanged = { [weak self] newState in
+            self?.updateUpdateBanner()
+        }
     }
     
     @objc private func doUpdate() {
-        UpdateManager.shared.checkForUpdates()
-        self.close()
+        let mockUpdate = ProcessInfo.processInfo.environment["KEYLY_MOCK_UPDATE"] == "1"
+        
+        if mockUpdate {
+            UpdateManager.shared.simulateDownload { [weak self] in
+                self?.updateUpdateBanner()
+            }
+            updateUpdateBanner()
+        } else {
+            UpdateManager.shared.checkForUpdates()
+            self.close()
+        }
+    }
+    
+    @objc private func doRelaunch() {
+        UpdateManager.shared.relaunchApp()
     }
     
     @objc private func dismissBanner() {

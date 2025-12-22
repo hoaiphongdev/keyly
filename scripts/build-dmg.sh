@@ -43,8 +43,19 @@ echo "📦 Creating app bundle..."
 rm -rf "$APP_BUNDLE"
 mkdir -p "$APP_BUNDLE/Contents/MacOS"
 mkdir -p "$APP_BUNDLE/Contents/Resources"
+mkdir -p "$APP_BUNDLE/Contents/Frameworks"
 
 cp "$BUILD_DIR/$APP_NAME" "$APP_BUNDLE/Contents/MacOS/"
+
+# Copy Sparkle.framework
+if [ -d "$BUILD_DIR/Sparkle.framework" ]; then
+    cp -R "$BUILD_DIR/Sparkle.framework" "$APP_BUNDLE/Contents/Frameworks/"
+    # Fix rpath to find framework in Frameworks folder
+    install_name_tool -add_rpath "@executable_path/../Frameworks" "$APP_BUNDLE/Contents/MacOS/$APP_NAME" 2>/dev/null || true
+    echo "   ✅ Sparkle.framework copied"
+else
+    echo "   ⚠️ Sparkle.framework not found in $BUILD_DIR"
+fi
 
 if [ -d "$BUILD_DIR/Keyly_Keyly.bundle" ]; then
     cp -r "$BUILD_DIR/Keyly_Keyly.bundle" "$APP_BUNDLE/Contents/Resources/"

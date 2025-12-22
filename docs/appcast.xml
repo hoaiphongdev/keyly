@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <channel>
+        <title>Keyly Updates</title>
+        <link>https://hoaiphongdev.github.io/keyly/appcast.xml</link>
+        <description>Most recent updates to Keyly</description>
+        <language>en</language>
+        
+        <!-- Latest release -->
+        <item>
+            <title>Version 1.0.0</title>
+            <pubDate>Sun, 22 Dec 2024 12:00:00 +0000</pubDate>
+            <sparkle:version>1.0.0</sparkle:version>
+            <sparkle:shortVersionString>1.0.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>12.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                <h2>What's New in 1.0.0</h2>
+                <ul>
+                    <li>Hold ⌘ for 1 second to show keyboard shortcuts</li>
+                    <li>Extracts real shortcuts from app menu bar via Accessibility API</li>
+                    <li>Multi-column layout with category grouping</li>
+                    <li>Floating window with blur effect</li>
+                    <li>Custom shortcut configs via .keyly files</li>
+                    <li>Settings menu with Reload, Open Config, Accessibility Settings, Check for Updates, Quit</li>
+                    <li>Automatic updates via Sparkle</li>
+                </ul>
+            ]]></description>
+            <enclosure 
+                url="https://github.com/hoaiphongdev/keyly/releases/download/v1.0.0/Keyly.dmg"
+                sparkle:edSignature="SIGNATURE_PLACEHOLDER"
+                length="0"
+                type="application/octet-stream"/>
+        </item>
+        
+    </channel>
+</rss>
+

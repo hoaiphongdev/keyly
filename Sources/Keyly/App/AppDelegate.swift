@@ -18,6 +18,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         requestAccessibilityPermissions()
         setupConfigManager()
         
+        _ = UpdateManager.shared
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+            UpdateManager.shared.checkForUpdatesInBackground()
+        }
+        
         if isDevMode {
             setupDevMode()
         } else {
@@ -84,6 +89,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         let menu = NSMenu()
         menu.addItem(NSMenuItem(title: "About Keyly", action: #selector(showAbout), keyEquivalent: ""))
+        
+        let checkUpdatesItem = NSMenuItem(title: "Check for Updates...", action: #selector(checkForUpdates), keyEquivalent: "")
+        checkUpdatesItem.target = self
+        menu.addItem(checkUpdatesItem)
+        
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Quit", action: #selector(quitApp), keyEquivalent: "q"))
         statusItem?.menu = menu
@@ -201,6 +211,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         
         alert.runModal()
+    }
+    
+    @objc private func checkForUpdates() {
+        UpdateManager.shared.checkForUpdates()
     }
     
     @objc private func quitApp() {

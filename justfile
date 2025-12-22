@@ -12,6 +12,11 @@ dev:
     swift build
     KEYLY_DEV=1 .build/debug/Keyly
 
+# Test with mock update banner
+dev-update:
+    swift build
+    KEYLY_DEV=1 KEYLY_MOCK_UPDATE=1 .build/debug/Keyly
+
 prod:
     swift build -c release
     .build/release/Keyly
@@ -25,3 +30,8 @@ test-install:
     @rm -rf /Applications/Keyly.app
     @./scripts/install.sh .build/Keyly.dmg
     @open /Applications/Keyly.app
+
+# One-time setup: generate Sparkle keys
+setup-keys:
+    swift build
+    ./scripts/generate-keys.sh

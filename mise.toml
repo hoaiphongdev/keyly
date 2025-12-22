@@ -1,0 +1,6 @@
+[tools]
+swift = "6.2"
+
+[env]
+KEYLY_DEV = ""
+

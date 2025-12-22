@@ -5,6 +5,8 @@ final class ShortcutsWindow: NSWindowController {
     private var scrollView: NSScrollView!
     private var gridContainer: NSView!
     private var settingsButton: NSButton!
+    private var updateBanner: NSView?
+    private var scrollViewTopConstraint: NSLayoutConstraint!
     private var shortcuts: [ShortcutItem] = []
     
     private let columnWidth: CGFloat = 200
@@ -12,6 +14,7 @@ final class ShortcutsWindow: NSWindowController {
     private let rowSpacing: CGFloat = 12
     private let padding: CGFloat = 16
     private let footerHeight: CGFloat = 32
+    private let bannerHeight: CGFloat = 48
     
     convenience init() {
         let screenSize = NSScreen.main?.visibleFrame.size ?? NSSize(width: 1200, height: 800)
@@ -38,8 +41,86 @@ final class ShortcutsWindow: NSWindowController {
     func displayShortcuts(_ shortcuts: [ShortcutItem], appName: String) {
         self.shortcuts = shortcuts
         rebuildContent()
+        updateUpdateBanner()
         resizeWindowToFit()
         window?.center()
+    }
+    
+    private func updateUpdateBanner() {
+        updateBanner?.removeFromSuperview()
+        updateBanner = nil
+        scrollViewTopConstraint.constant = padding
+        
+        guard UpdateManager.shared.updateAvailable else { return }
+        
+        let banner = NSView()
+        banner.translatesAutoresizingMaskIntoConstraints = false
+        banner.wantsLayer = true
+        banner.layer?.backgroundColor = NSColor.systemBlue.withAlphaComponent(0.2).cgColor
+        banner.layer?.cornerRadius = 8
+        
+        let icon = NSImageView()
+        icon.translatesAutoresizingMaskIntoConstraints = false
+        icon.image = NSImage(systemSymbolName: "arrow.down.circle.fill", accessibilityDescription: "Update")
+        icon.contentTintColor = .systemBlue
+        
+        let version = UpdateManager.shared.latestVersion ?? "new version"
+        let label = NSTextField(labelWithString: "Update available: v\(version)")
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = NSFont.systemFont(ofSize: 12, weight: .medium)
+        label.textColor = .labelColor
+        
+        let updateBtn = NSButton(title: "Update Now", target: self, action: #selector(doUpdate))
+        updateBtn.translatesAutoresizingMaskIntoConstraints = false
+        updateBtn.bezelStyle = .rounded
+        updateBtn.font = NSFont.systemFont(ofSize: 11, weight: .semibold)
+        
+        let laterBtn = NSButton(title: "Later", target: self, action: #selector(dismissBanner))
+        laterBtn.translatesAutoresizingMaskIntoConstraints = false
+        laterBtn.bezelStyle = .inline
+        laterBtn.font = NSFont.systemFont(ofSize: 11)
+        
+        banner.addSubview(icon)
+        banner.addSubview(label)
+        banner.addSubview(updateBtn)
+        banner.addSubview(laterBtn)
+        containerView.addSubview(banner)
+        
+        NSLayoutConstraint.activate([
+            banner.topAnchor.constraint(equalTo: containerView.topAnchor, constant: padding),
+            banner.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: padding),
+            banner.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -padding),
+            banner.heightAnchor.constraint(equalToConstant: bannerHeight - padding),
+            
+            icon.leadingAnchor.constraint(equalTo: banner.leadingAnchor, constant: 10),
+            icon.centerYAnchor.constraint(equalTo: banner.centerYAnchor),
+            icon.widthAnchor.constraint(equalToConstant: 18),
+            icon.heightAnchor.constraint(equalToConstant: 18),
+            
+            label.leadingAnchor.constraint(equalTo: icon.trailingAnchor, constant: 8),
+            label.centerYAnchor.constraint(equalTo: banner.centerYAnchor),
+            
+            laterBtn.trailingAnchor.constraint(equalTo: banner.trailingAnchor, constant: -10),
+            laterBtn.centerYAnchor.constraint(equalTo: banner.centerYAnchor),
+            
+            updateBtn.trailingAnchor.constraint(equalTo: laterBtn.leadingAnchor, constant: -8),
+            updateBtn.centerYAnchor.constraint(equalTo: banner.centerYAnchor)
+        ])
+        
+        updateBanner = banner
+        scrollViewTopConstraint.constant = padding + bannerHeight
+    }
+    
+    @objc private func doUpdate() {
+        UpdateManager.shared.checkForUpdates()
+        self.close()
+    }
+    
+    @objc private func dismissBanner() {
+        updateBanner?.removeFromSuperview()
+        updateBanner = nil
+        scrollViewTopConstraint.constant = padding
+        containerView.layoutSubtreeIfNeeded()
     }
     
     private func setupUI() {
@@ -69,8 +150,10 @@ final class ShortcutsWindow: NSWindowController {
         gridContainer.translatesAutoresizingMaskIntoConstraints = false
         scrollView.documentView = gridContainer
         
+        scrollViewTopConstraint = scrollView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: padding)
+        
         NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: padding),
+            scrollViewTopConstraint,
             scrollView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: padding),
             scrollView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -padding),
             scrollView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -padding - footerHeight)
@@ -116,6 +199,10 @@ final class ShortcutsWindow: NSWindowController {
         accessibilityItem.target = self
         menu.addItem(accessibilityItem)
         
+        let checkUpdatesItem = NSMenuItem(title: "Check for Updates...", action: #selector(checkForUpdates), keyEquivalent: "")
+        checkUpdatesItem.target = self
+        menu.addItem(checkUpdatesItem)
+        
         menu.addItem(NSMenuItem.separator())
         
         let quitItem = NSMenuItem(title: "Quit Keyly", action: #selector(quitApp), keyEquivalent: "q")
@@ -132,6 +219,11 @@ final class ShortcutsWindow: NSWindowController {
         if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
             NSWorkspace.shared.open(url)
         }
+        self.close()
+    }
+    
+    @objc private func checkForUpdates() {
+        UpdateManager.shared.checkForUpdates()
         self.close()
     }
     

@@ -57,6 +57,12 @@ else
     ICON_FILE=""
 fi
 
+# Read EdDSA public key if exists
+EDDSA_PUBLIC_KEY=""
+if [ -f "sparkle_eddsa_public_key.txt" ]; then
+    EDDSA_PUBLIC_KEY=$(cat sparkle_eddsa_public_key.txt)
+fi
+
 cat > "$APP_BUNDLE/Contents/Info.plist" << EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -85,7 +91,17 @@ cat > "$APP_BUNDLE/Contents/Info.plist" << EOF
     <key>NSHighResolutionCapable</key>
     <true/>
     <key>NSHumanReadableCopyright</key>
-    <string>Copyright © 2024</string>
+    <string>Copyright © 2025 Nguyễn Hoài Phong</string>
+    
+    <!-- Sparkle Auto-Update Configuration -->
+    <key>SUFeedURL</key>
+    <string>https://hoaiphongdev.github.io/keyly/appcast.xml</string>
+    <key>SUEnableAutomaticChecks</key>
+    <true/>
+    <key>SUScheduledCheckInterval</key>
+    <integer>86400</integer>
+    <key>SUPublicEDKey</key>
+    <string>$EDDSA_PUBLIC_KEY</string>
 </dict>
 </plist>
 EOF

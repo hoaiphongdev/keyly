@@ -32,10 +32,18 @@ setup-keys:
     swift build
     ./scripts/generate-keys.sh
 
+# Build, verify, sign, and update appcast for release
 release version:
     @test -n "{{version}}" || (echo "❌ Version required. Example: just release 1.0.0" && exit 1)
     @test -f sparkle_eddsa_public_key.txt || (echo "❌ Missing sparkle_eddsa_public_key.txt. Run 'just setup-keys' first." && exit 1)
+    @echo "🔨 Building Keyly v{{version}}..."
+    @echo ""
     ./scripts/build-dmg.sh {{version}}
+    @echo ""
+    @echo "🔍 Verifying build..."
+    ./scripts/verify-build.sh
+    @echo ""
+    @echo "📝 Updating appcast.xml..."
     ./scripts/update-appcast.sh {{version}}
     @echo ""
-    @echo "✅ Release {{version}} ready!"
+    @echo "✅ Release v{{version}} ready!"

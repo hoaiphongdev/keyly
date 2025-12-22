@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] - 2024-12-22
+
+### Auto-Update
+- Automatic update checking via Sparkle framework
+- Background update check on app launch (daily)
+- "Check for Updates..." option in settings menu
+- Update banner with download progress animation
+- Seamless in-app update flow: Available → Downloading → Ready to Install → Relaunch
+
+### UI Improvements
+- Update notification banner (blue for available, green for ready)
+- Loading spinner animation during download
+- Settings menu aligned to right edge of button
+- Increased banner height for better visibility
+
+### Developer Experience
+- `just dev test-update` to mock update banner locally
+- EdDSA key generation for secure updates
+- Automated appcast.xml signing via `just release <version>`
+- Private key gitignored for team collaboration
+
 ## [1.0.0] - 2024-12-22
 
 ### Features

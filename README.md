@@ -4,17 +4,19 @@ macOS menu bar app that displays keyboard shortcuts for the currently active app
 
 > **Inspiration**: This project is inspired by [CheatSheet](https://www.mediaatelier.com/CheatSheet). Keyly is a complete reimplementation in Swift with additional features like custom shortcut configs and settings menu.
 
-## Installation
+## 🚀 Installation
 
-### One-liner install
+> **1.** Open any terminal app on your Mac (Terminal, iTerm, Warp, etc.)
+>
+> **2.** Paste this command and press Enter:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/hoaiphongdev/keyly/main/scripts/install.sh | bash
 ```
 
-### Manual install
-
-Download the latest `Keyly.dmg` from [Releases](https://github.com/hoaiphongdev/keyly/releases), open it and drag to Applications.
+> **3.** Follow the on-screen instructions to grant Accessibility permission
+>
+> **4.** Done! Hold `⌘ Command` for 1 second to show shortcuts
 
 ## Features
 

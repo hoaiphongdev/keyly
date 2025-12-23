@@ -122,7 +122,9 @@ final class ShortcutsWindow: NSWindowController {
         quitItem.target = self
         menu.addItem(quitItem)
         
-        let location = NSPoint(x: settingsButton.frame.minX, y: settingsButton.frame.minY)
+        
+        let menuWidth = menu.size.width
+        let location = NSPoint(x: settingsButton.frame.maxX - menuWidth, y: settingsButton.frame.minY)
         menu.popUp(positioning: nil, at: location, in: containerView)
     }
     
@@ -190,13 +192,13 @@ final class ShortcutsWindow: NSWindowController {
         guard let window = window else { return }
         
         let screenSize = NSScreen.main?.visibleFrame.size ?? NSSize(width: 1200, height: 800)
-        let maxHeight = screenSize.height * 0.75
+        let maxHeight = screenSize.height * 0.8
         
-        let contentHeight = gridContainer.frame.height + padding * 2
+        let contentHeight = gridContainer.frame.height + padding * 2 + footerHeight
         let newHeight = min(contentHeight, maxHeight)
         
         let currentWidth = window.frame.width
-        window.setContentSize(NSSize(width: currentWidth, height: max(200, newHeight)))
+        window.setContentSize(NSSize(width: currentWidth, height: newHeight))
     }
     
     private func createCategoryColumn(title: String, items: [ShortcutItem]) -> NSView {

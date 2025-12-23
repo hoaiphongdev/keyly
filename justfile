@@ -16,5 +16,6 @@ prod:
     swift build -c release
     .build/release/Keyly
 
-release version=version:
-    ./scripts/build-dmg.sh {{version}}
+release version:
+    @[ -n "{{version}}" ] || (echo "❌ version not set" && exit 1)
+    @./scripts/build-dmg.sh {{version}}

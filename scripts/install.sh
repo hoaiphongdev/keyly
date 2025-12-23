@@ -51,11 +51,25 @@ hdiutil detach "$MOUNT_POINT" -force 2>/dev/null || true
 echo "🧹 Cleaning up..."
 rm -f /tmp/Keyly.dmg
 
+GREEN='\033[0;32m'
+CYAN='\033[0;36m'
+YELLOW='\033[0;33m'
+BOLD='\033[1m'
+DIM='\033[2m'
+NC='\033[0m'
+
 echo ""
-echo "✅ Keyly installed successfully!"
+echo -e "${GREEN}${BOLD}╔════════════════════════════════════════════════════════════╗${NC}"
+echo -e "${GREEN}${BOLD}║                  ✅ Keyly installed successfully!          ║${NC}"
+echo -e "${GREEN}${BOLD}╚════════════════════════════════════════════════════════════╝${NC}"
 echo ""
-echo "⚠️  IMPORTANT: Grant Accessibility permission."
-echo "   If shortcuts don't work, go to:"
-echo "   System Settings → Privacy & Security → Accessibility"
-echo "   Remove Keyly if listed, then re-add it."
+echo -e "${CYAN}${BOLD}🚀 Getting started:${NC}"
+echo -e "   ${BOLD}1.${NC} Open Spotlight ${CYAN}${BOLD}⌘ + Space${NC}, search ${BOLD}'Keyly'${NC} and open it"
+echo -e "   ${BOLD}2.${NC} Grant ${BOLD}Accessibility${NC} permission when prompted"
+echo -e "   ${BOLD}3.${NC} Done! Hold ${CYAN}⌘ Command${NC} for 1 second to show shortcuts"
+echo ""
+echo -e "${YELLOW}⚠️  If shortcuts don't work:${NC}"
+echo -e "   ${DIM}System Settings → Privacy & Security → Accessibility${NC}"
+echo -e "   ${DIM}Remove Keyly if listed, then re-add it.${NC}"
+echo ""
 

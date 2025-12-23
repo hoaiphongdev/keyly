@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.1] - 2024-12-23
+
+### Bug Fixes
+- Fix release scripts whitespace error in justfile
+- Fix settings menu popup alignment (now opens to the left)
+- Fix window height not scaling to content (now fits content, max 80% screen height)
+
 ## [1.0.0] - 2024-12-22
 
 ### Features

@@ -57,7 +57,6 @@ final class ShortcutExtractor {
         
         if let itemTitle = title as? String, !itemTitle.isEmpty,
            let cmdChar = shortcut as? String, !cmdChar.isEmpty {
-            
             let skipTitles = ["Start Dictation", "Dictation", "Emoji & Symbols"]
             let emojiTitles = ["Emoji & Symbols", "Emoji"]
             
@@ -95,10 +94,10 @@ final class ShortcutExtractor {
     
     private func formatModifiers(_ modifiers: Int) -> String {
         var result = ""
-        if modifiers & 1 != 0 { result += Modifier.control }
-        if modifiers & 2 != 0 { result += Modifier.option }
-        if modifiers & 4 != 0 { result += Modifier.shift }
-        result += Modifier.command
+        if modifiers & ModifierFlag.control != 0 { result += Modifier.control }
+        if modifiers & ModifierFlag.option != 0 { result += Modifier.option }
+        if modifiers & ModifierFlag.shift != 0 { result += Modifier.shift }
+        if modifiers & ModifierFlag.noCommand == 0 { result += Modifier.command }
         return result
     }
     

@@ -9,6 +9,14 @@ enum Modifier {
     static let allCharacters: Set<Character> = ["⌘", "⌃", "⌥", "⇧"]
 }
 
+enum ModifierFlag {
+    static let control = 1      // ⌃
+    static let option = 2       // ⌥
+    static let shift = 4        // ⇧
+    static let noCommand = 8    // when set, ⌘ is NOT part of shortcut
+    static let function = 16    // fn key (globe on newer Macs)
+}
+
 enum KeySymbol {
     static let enter = "⏎"
     static let tab = "⇥"
@@ -79,6 +87,7 @@ enum ShortcutMapping {
         "\u{F72D}": "⏮",
         "\u{F72E}": "⏭",
         "\u{001B}": KeySymbol.escape,
+        "\u{238B}": KeySymbol.escape,  // ⎋ helm symbol (visual escape)
         "\u{F728}": "⌦",
         "\u{007F}": KeySymbol.delete,
         "\u{F729}": "↖",

@@ -19,3 +19,9 @@ prod:
 release version:
     @[ -n "{{version}}" ] || (echo "❌ version not set" && exit 1)
     @./scripts/build-dmg.sh {{version}}
+
+test-install:
+    @pkill -x "Keyly" 2>/dev/null || true
+    @rm -rf /Applications/Keyly.app
+    @./scripts/install.sh .build/Keyly.dmg
+    @open /Applications/Keyly.app

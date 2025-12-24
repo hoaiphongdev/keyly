@@ -154,7 +154,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func startHoldTimer() {
         commandKeyHoldTimer?.invalidate()
-        commandKeyHoldTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { [weak self] _ in
+        commandKeyHoldTimer = Timer.scheduledTimer(withTimeInterval: 1.7, repeats: false) { [weak self] _ in
             guard let self = self else { return }
             guard self.isCommandKeyPressed, !self.holdCancelled else { return }
             self.showShortcuts()
@@ -190,7 +190,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func showAbout() {
         let alert = NSAlert()
         alert.messageText = "Keyly"
-        alert.informativeText = "Hold ⌘ (Command) key for 1 second to show shortcuts\n\nVersion 1.0.1"
+        alert.informativeText = "Hold ⌘ (Command) key for 1.7 seconds to show shortcuts\n\nVersion 1.1.0"
         alert.alertStyle = .informational
         alert.addButton(withTitle: "OK")
         

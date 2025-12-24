@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] - 2024-12-24
+
+### Changed
+- Hold duration increased from 1s to 1.7s for better UX
+
 ## [1.0.0] - 2024-12-22
 
 ### Features

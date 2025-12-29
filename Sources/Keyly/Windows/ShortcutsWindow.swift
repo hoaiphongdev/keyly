@@ -56,13 +56,40 @@ final class ShortcutsWindow: NSWindowController {
         scrollViewTopConstraint.constant = padding
         
         let state = UpdateManager.shared.updateState
-        guard state != .none && UpdateManager.shared.updateAvailable || state == .downloading || state == .readyToInstall else { return }
+        switch state {
+        case .none, .error:
+            guard UpdateManager.shared.updateAvailable else { return }
+        case .checking, .available, .downloading, .readyToInstall:
+            break
+        }
         
         let banner = NSView()
         banner.translatesAutoresizingMaskIntoConstraints = false
         banner.wantsLayer = true
         
-        let isReady = state == .readyToInstall
+        let isReady: Bool
+        let isChecking: Bool
+        let isDownloading: Bool
+        
+        switch state {
+        case .readyToInstall:
+            isReady = true
+            isChecking = false
+            isDownloading = false
+        case .checking:
+            isReady = false
+            isChecking = true
+            isDownloading = false
+        case .downloading:
+            isReady = false
+            isChecking = false
+            isDownloading = true
+        default:
+            isReady = false
+            isChecking = false
+            isDownloading = false
+        }
+        
         let bgColor = isReady ? NSColor.systemGreen.withAlphaComponent(0.2) : NSColor.systemBlue.withAlphaComponent(0.2)
         let accentColor = isReady ? NSColor.systemGreen : NSColor.systemBlue
         banner.layer?.backgroundColor = bgColor.cgColor
@@ -70,13 +97,22 @@ final class ShortcutsWindow: NSWindowController {
         
         let icon = NSImageView()
         icon.translatesAutoresizingMaskIntoConstraints = false
-        let iconName = isReady ? "checkmark.circle.fill" : "arrow.down.circle.fill"
+        let iconName: String
+        if isReady {
+            iconName = "checkmark.circle.fill"
+        } else if isChecking {
+            iconName = "arrow.clockwise.circle.fill"
+        } else {
+            iconName = "arrow.down.circle.fill"
+        }
         icon.image = NSImage(systemSymbolName: iconName, accessibilityDescription: "Update")
         icon.contentTintColor = accentColor
         
         let version = UpdateManager.shared.latestVersion ?? "new version"
         let labelText: String
         switch state {
+        case .checking:
+            labelText = "Checking for updates..."
         case .downloading:
             labelText = "Downloading v\(version)..."
         case .readyToInstall:
@@ -93,7 +129,7 @@ final class ShortcutsWindow: NSWindowController {
         banner.addSubview(icon)
         banner.addSubview(label)
         
-        if state == .readyToInstall {
+        if isReady {
             let relaunchBtn = NSButton(title: "Relaunch", target: self, action: #selector(doRelaunch))
             relaunchBtn.translatesAutoresizingMaskIntoConstraints = false
             relaunchBtn.bezelStyle = .rounded
@@ -105,7 +141,7 @@ final class ShortcutsWindow: NSWindowController {
                 relaunchBtn.trailingAnchor.constraint(equalTo: banner.trailingAnchor, constant: -10),
                 relaunchBtn.centerYAnchor.constraint(equalTo: banner.centerYAnchor)
             ])
-        } else if state == .downloading {
+        } else if isChecking || isDownloading {
             let spinnerView = NSProgressIndicator()
             spinnerView.translatesAutoresizingMaskIntoConstraints = false
             spinnerView.style = .spinning
@@ -178,8 +214,7 @@ final class ShortcutsWindow: NSWindowController {
             }
             updateUpdateBanner()
         } else {
-            UpdateManager.shared.checkForUpdates()
-            self.close()
+            UpdateManager.shared.performUpdate()
         }
     }
     

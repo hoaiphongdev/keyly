@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2024-12-29
+
+### Auto-Update
+- Automatic update checking via GitHub Releases API (no Sparkle dependency)
+- Background update check on app launch (every 2 days)
+- "Check for Updates..." option in menu bar and settings menu
+- Update notification banner in shortcuts window
+  - Blue banner when update available
+  - Spinner animation during download
+  - Green banner when ready to install
+- One-click update: download → install → relaunch automatically
+- Update persists across app restarts (stored in UserDefaults)
+
+### Scripts
+- `check-update.sh`: Fetches latest version from GitHub Releases
+- `perform-update.sh`: Downloads DMG, installs update, relaunches app
+- Embedded script fallback for production builds
+
 ## [1.1.0] - 2024-12-24
 
 ### Changed

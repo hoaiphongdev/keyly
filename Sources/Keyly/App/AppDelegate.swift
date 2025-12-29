@@ -18,6 +18,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         requestAccessibilityPermissions()
         setupConfigManager()
         
+        _ = UpdateManager.shared
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+            UpdateManager.shared.checkForUpdatesInBackground()
+        }
+        
         if isDevMode {
             setupDevMode()
         } else {
@@ -84,6 +89,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         let menu = NSMenu()
         menu.addItem(NSMenuItem(title: "About Keyly", action: #selector(showAbout), keyEquivalent: ""))
+        
+        let checkUpdatesItem = NSMenuItem(title: "Check for Updates...", action: #selector(checkForUpdates), keyEquivalent: "")
+        checkUpdatesItem.target = self
+        menu.addItem(checkUpdatesItem)
+        
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Quit", action: #selector(quitApp), keyEquivalent: "q"))
         statusItem?.menu = menu
@@ -190,7 +200,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func showAbout() {
         let alert = NSAlert()
         alert.messageText = "Keyly"
-        alert.informativeText = "Hold ⌘ (Command) key for 1.7 seconds to show shortcuts\n\nVersion 1.1.0"
+        alert.informativeText = "Hold ⌘ (Command) key for 1.7 seconds to show shortcuts"
         alert.alertStyle = .informational
         alert.addButton(withTitle: "OK")
         
@@ -200,7 +210,26 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             alert.icon = logoImage
         }
         
+        alert.window.level = .floating
+        NSApp.activate(ignoringOtherApps: true)
         alert.runModal()
+    }
+    
+    @objc private func checkForUpdates() {
+        if UpdateManager.shared.canCheckForUpdates {
+            UpdateManager.shared.checkForUpdates()
+        } else {
+            let alert = NSAlert()
+            alert.messageText = "Check for Updates"
+            alert.informativeText = isDevMode 
+                ? "Update checking is disabled in dev mode." 
+                : "You're running the latest version!"
+            alert.alertStyle = .informational
+            alert.addButton(withTitle: "OK")
+            alert.window.level = .floating
+            NSApp.activate(ignoringOtherApps: true)
+            alert.runModal()
+        }
     }
     
     @objc private func quitApp() {

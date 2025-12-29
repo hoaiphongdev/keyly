@@ -26,7 +26,8 @@ curl -fsSL https://raw.githubusercontent.com/hoaiphongdev/keyly/main/scripts/ins
 - Multi-column layout with category grouping
 - Floating window with blur effect
 - Custom shortcut configs via `.keyly` files
-- Settings menu (Reload, Open Config, Accessibility Settings, Quit)
+- Settings menu (Reload, Open Config, Accessibility Settings, Check for Updates, Quit)
+- Automatic updates via Sparkle
 
 ## Requirements
 
@@ -66,6 +67,35 @@ CMD+SHIFT+T Reopen Last Tab
 [Bookmarks]
 CMD+D       Add Bookmark
 ```
+
+## Auto-Update
+
+Keyly uses [Sparkle](https://sparkle-project.org/) for automatic updates. Updates are checked daily and can also be triggered manually via:
+- Menu bar icon → Check for Updates...
+- Settings button → Check for Updates...
+
+### For Developers: Release Process
+
+1. **Generate EdDSA keys** (one-time setup):
+   ```bash
+   swift build  # Fetch Sparkle
+   ./scripts/generate-keys.sh
+   # Save the public key to sparkle_eddsa_public_key.txt
+   ```
+
+2. **Build release**:
+   ```bash
+   just release 1.0.0
+   ```
+
+3. **Sign the DMG**:
+   ```bash
+   ./scripts/sign-update.sh .build/Keyly.dmg
+   ```
+
+4. **Update appcast.xml** with the signature and upload to GitHub Pages
+
+5. **Create GitHub Release** and upload `Keyly.dmg`
 
 ## License
 

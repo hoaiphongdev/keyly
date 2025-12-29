@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <channel>
+        <title>Keyly Updates</title>
+        <link>https://hoaiphongdev.github.io/keyly/appcast.xml</link>
+        <description>Most recent updates to Keyly</description>
+        <language>en</language>
+        <!-- Latest Release -->
+        <item>
+            <title>Version 1.1.0</title>
+            <pubDate>Mon, 22 Dec 2025 17:05:38 +0000</pubDate>
+            <sparkle:version>1.1.0</sparkle:version>
+            <sparkle:shortVersionString>1.1.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>12.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                <h2>What's New in 1.1.0</h2>
+                <p>
+                    <a href="https://github.com/hoaiphongdev/keyly/blob/main/CHANGELOG.md">
+                        View full changelog on GitHub
+                    </a>
+                </p>
+            ]]></description>
+            <enclosure 
+                url="https://github.com/hoaiphongdev/keyly/releases/download/v1.1.0/Keyly.dmg"
+                sparkle:edSignature="UTiLAk+Dj0pjnflnSTatH3EGX29SD6uvJxXqD2Vj6tEAL10Z7RvgzPsR12sU0F4zBL2QIQxHP8fNWoYWW1MGBw=="
+                length="3771080"
+                type="application/octet-stream"/>
+        </item>
+</channel>
+</rss>

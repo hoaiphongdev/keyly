@@ -66,7 +66,7 @@ if [ -f "$DEST" ]; then
     echo "  [r] Remove and replace"
     echo "  [b] Backup and replace"
     echo "  [c] Cancel"
-    read -p "Action [r/b/c]: " action
+    read -p "Action [r/b/c]: " action < /dev/tty
     
     case $action in
         r|R)

@@ -1,0 +1,58 @@
+# Sheet Name: Cursor Shortcuts
+# App: /Applications/Cursor.app
+
+[General]
+CMD+I           Toggle Sidepanel
+CMD+L           Toggle Sidepanel
+CMD+E           Toggle Agent layout
+CMD+.           Mode Menu
+CMD+/           Loop between AI models
+CMD+SHIFT+J     Cursor settings
+CMD+SHIFT+SPACE Toggle Voice Mode
+CMD+,           General settings
+CMD+SHIFT+P     Command palette
+
+[Chat]
+RETURN          Nudge (default)
+CTRL+RETURN     Queue message
+CMD+RETURN      Force send message
+CMD+SHIFT+BACKSPACE Cancel generation
+CMD+SHIFT+L     Add selected code as context
+CMD+V           Add clipboard as context
+CMD+SHIFT+V     Add clipboard to input box
+CMD+BACKSPACE   Reject all changes
+TAB             Cycle to next message
+SHIFT+TAB       Rotate between Agent modes
+CMD+OPT+/       Model toggle
+CMD+N           New chat
+CMD+R           New chat
+CMD+T           New chat tab
+CMD+[           Previous chat
+CMD+]           Next chat
+CMD+W           Close chat
+ESCAPE          Unfocus field
+
+[Inline Edit]
+CMD+K           Open inline edit
+CMD+SHIFT+K     Toggle input focus
+RETURN          Submit
+CMD+SHIFT+BACKSPACE Cancel
+OPT+RETURN      Ask quick question
+
+[Code Selection & Context]
+CMD+SHIFT+L     Add selection to Chat
+CMD+SHIFT+K     Add selection to Edit
+CMD+L           Add selection to new chat
+CMD+M           Toggle file reading strategies
+CMD+RIGHT       Accept next word of suggestion
+CMD+RETURN      Search codebase in chat
+
+[Tab]
+TAB             Accept suggestion
+CMD+RIGHT       Accept next word
+
+[Terminal]
+CMD+K           Open terminal prompt bar
+CMD+RETURN      Run generated command
+ESCAPE          Accept command
+

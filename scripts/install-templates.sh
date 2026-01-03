@@ -12,25 +12,28 @@ YELLOW='\033[1;33m'
 NC='\033[0m'
 
 usage() {
-    echo "Usage: $0 -t <template> [-n <name>]"
+    echo "Usage: $0 -t <template> [-n <name>] [-f]"
     echo ""
     echo "Options:"
     echo "  -t    Template name (required)"
-    echo "  -n    Save as name (optional, defaults to template name)"
+    echo "  -n    Save as name (optional)"
+    echo "  -f    Force replace if exists"
     echo ""
     echo "Example:"
     echo "  $0 -t cursor.keyly"
-    echo "  $0 -t cursor.keyly -n my-cursor.keyly"
+    echo "  $0 -t cursor.keyly -f"
     exit 1
 }
 
 TEMPLATE=""
 NAME=""
+FORCE=false
 
-while getopts "t:n:h" opt; do
+while getopts "t:n:fh" opt; do
     case $opt in
         t) TEMPLATE="$OPTARG" ;;
         n) NAME="$OPTARG" ;;
+        f) FORCE=true ;;
         h) usage ;;
         *) usage ;;
     esac
@@ -60,29 +63,14 @@ fi
 DEST="$CONFIG_DIR/$NAME"
 
 if [ -f "$DEST" ]; then
-    echo -e "${YELLOW}File '$NAME' already exists${NC}"
-    echo ""
-    echo "Choose action:"
-    echo "  [r] Remove and replace"
-    echo "  [b] Backup and replace"
-    echo "  [c] Cancel"
-    read -p "Action [r/b/c]: " action < /dev/tty
-    
-    case $action in
-        r|R)
-            rm "$DEST"
-            echo -e "${GREEN}Removed${NC} $DEST"
-            ;;
-        b|B)
-            BACKUP="$DEST.backup.$(date +%Y%m%d%H%M%S)"
-            mv "$DEST" "$BACKUP"
-            echo -e "${GREEN}Backed up${NC} to $BACKUP"
-            ;;
-        *)
-            echo "Cancelled"
-            exit 0
-            ;;
-    esac
+    if [ "$FORCE" = true ]; then
+        rm "$DEST"
+        echo -e "${YELLOW}Replaced${NC} existing file"
+    else
+        echo -e "${RED}Error: File '$NAME' already exists${NC}"
+        echo "Use -f to force replace"
+        exit 1
+    fi
 fi
 
 echo -e "Downloading $TEMPLATE..."

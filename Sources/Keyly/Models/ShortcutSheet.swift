@@ -5,13 +5,15 @@ struct ShortcutSheet: Identifiable {
     let name: String
     let appPath: String
     let shortcuts: [ShortcutItem]
+    let categoryDescriptions: [String: String]
     let sourceFile: URL?
     
-    init(id: UUID = UUID(), name: String, appPath: String, shortcuts: [ShortcutItem], sourceFile: URL? = nil) {
+    init(id: UUID = UUID(), name: String, appPath: String, shortcuts: [ShortcutItem], categoryDescriptions: [String: String] = [:], sourceFile: URL? = nil) {
         self.id = id
         self.name = name
         self.appPath = appPath
         self.shortcuts = shortcuts
+        self.categoryDescriptions = categoryDescriptions
         self.sourceFile = sourceFile
     }
     

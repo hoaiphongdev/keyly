@@ -76,6 +76,7 @@ final class ConfigManager {
         var name = url.deletingPathExtension().lastPathComponent
         var appPath = ""
         var shortcuts: [ShortcutItem] = []
+        var categoryDescriptions: [String: String] = [:]
         var currentCategory = "General"
         
         let lines = content.components(separatedBy: .newlines)
@@ -102,6 +103,12 @@ final class ConfigManager {
                 continue
             }
             
+            if trimmed.hasPrefix(">") {
+                let desc = String(trimmed.dropFirst()).trimmingCharacters(in: .whitespaces)
+                categoryDescriptions[currentCategory] = desc
+                continue
+            }
+            
             if let shortcut = parseShortcutLine(trimmed, category: currentCategory) {
                 shortcuts.append(shortcut)
             }
@@ -112,7 +119,7 @@ final class ConfigManager {
             return nil
         }
         
-        return ShortcutSheet(name: name, appPath: appPath, shortcuts: shortcuts, sourceFile: url)
+        return ShortcutSheet(name: name, appPath: appPath, shortcuts: shortcuts, categoryDescriptions: categoryDescriptions, sourceFile: url)
     }
     
     private func parseShortcutLine(_ line: String, category: String) -> ShortcutItem? {

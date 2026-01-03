@@ -8,6 +8,7 @@ final class ShortcutsWindow: NSWindowController {
     private var updateBanner: NSView?
     private var scrollViewTopConstraint: NSLayoutConstraint!
     private var shortcuts: [ShortcutItem] = []
+    private var categoryDescriptions: [String: String] = [:]
     private var updateButton: NSButton?
     private var spinner: NSProgressIndicator?
     
@@ -40,8 +41,9 @@ final class ShortcutsWindow: NSWindowController {
         setupUI()
     }
     
-    func displayShortcuts(_ shortcuts: [ShortcutItem], appName: String) {
+    func displayShortcuts(_ shortcuts: [ShortcutItem], appName: String, categoryDescriptions: [String: String] = [:]) {
         self.shortcuts = shortcuts
+        self.categoryDescriptions = categoryDescriptions
         rebuildContent()
         updateUpdateBanner()
         resizeWindowToFit()
@@ -360,7 +362,8 @@ final class ShortcutsWindow: NSWindowController {
         var categoryViews: [NSView] = []
         for category in sortedCategories {
             guard let items = grouped[category] else { continue }
-            let view = createCategoryColumn(title: category, items: items)
+            let description = categoryDescriptions[category]
+            let view = createCategoryColumn(title: category, description: description, items: items)
             view.layoutSubtreeIfNeeded()
             categoryViews.append(view)
         }
@@ -399,7 +402,7 @@ final class ShortcutsWindow: NSWindowController {
         window.setContentSize(NSSize(width: currentWidth, height: newHeight))
     }
     
-    private func createCategoryColumn(title: String, items: [ShortcutItem]) -> NSView {
+    private func createCategoryColumn(title: String, description: String?, items: [ShortcutItem]) -> NSView {
         let column = NSStackView()
         column.orientation = .vertical
         column.alignment = .leading
@@ -410,6 +413,13 @@ final class ShortcutsWindow: NSWindowController {
         header.font = NSFont.systemFont(ofSize: 12, weight: .bold)
         header.textColor = .labelColor
         column.addArrangedSubview(header)
+        
+        if let desc = description, !desc.isEmpty {
+            let descLabel = NSTextField(labelWithString: desc)
+            descLabel.font = NSFont.systemFont(ofSize: 10)
+            descLabel.textColor = .tertiaryLabelColor
+            column.addArrangedSubview(descLabel)
+        }
         
         for item in items {
             let row = createShortcutRow(item)

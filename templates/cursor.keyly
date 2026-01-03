@@ -13,6 +13,7 @@
 ⇧⌘P             Command palette
 
 [Chat]
+> Focus on chat panel first.
 ⏎               Nudge (default)
 ⌃⏎              Queue message
 ⌘⏎              Force send message
@@ -33,6 +34,7 @@
 esc             Unfocus field
 
 [Inline Edit]
+> Press ⌘K in editor to start.
 ⌘K              Open inline edit
 ⇧⌘K             Toggle input focus
 ⏎               Submit
@@ -40,6 +42,7 @@ esc             Unfocus field
 ⌥⏎              Ask quick question
 
 [Code Selection & Context]
+> Select code in editor first.
 ⇧⌘L             Add selection to Chat
 ⇧⌘K             Add selection to Edit
 ⌘L              Add selection to new chat
@@ -48,10 +51,12 @@ esc             Unfocus field
 ⌘⏎              Search codebase in chat
 
 [Tab]
+> When suggestion appears.
 ⇥               Accept suggestion
 ⌘→              Accept next word
 
 [Terminal]
+> Focus on terminal panel first.
 ⌘K              Open terminal prompt bar
 ⌘⏎              Run generated command
 esc             Accept command

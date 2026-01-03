@@ -72,11 +72,15 @@ CMD+D       Add Bookmark
 
 Install pre-made shortcut templates from the community:
 
-```bash
-# Install a template
-curl -sL https://raw.githubusercontent.com/hoaiphongdev/keyly/main/scripts/install-templates.sh | bash -s -- -t cursor.keyly
+Install a template:
 
-# Install with custom name
+```bash
+curl -sL https://raw.githubusercontent.com/hoaiphongdev/keyly/main/scripts/install-templates.sh | bash -s -- -t cursor.keyly
+```
+
+Install with custom name:
+
+```bash
 curl -sL https://raw.githubusercontent.com/hoaiphongdev/keyly/main/scripts/install-templates.sh | bash -s -- -t cursor.keyly -n my-cursor.keyly
 ```
 

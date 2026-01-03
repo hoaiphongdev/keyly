@@ -18,10 +18,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         requestAccessibilityPermissions()
         setupConfigManager()
         
-        _ = UpdateManager.shared
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-            UpdateManager.shared.checkForUpdatesInBackground()
-        }
+        // MARK: - Update feature temporarily disabled
+        // _ = UpdateManager.shared
+        // DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+        //     UpdateManager.shared.checkForUpdatesInBackground()
+        // }
         
         if isDevMode {
             setupDevMode()
@@ -90,9 +91,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let menu = NSMenu()
         menu.addItem(NSMenuItem(title: "About Keyly", action: #selector(showAbout), keyEquivalent: ""))
         
-        let checkUpdatesItem = NSMenuItem(title: "Check for Updates...", action: #selector(checkForUpdates), keyEquivalent: "")
-        checkUpdatesItem.target = self
-        menu.addItem(checkUpdatesItem)
+        // MARK: - Update feature temporarily disabled
+        // let checkUpdatesItem = NSMenuItem(title: "Check for Updates...", action: #selector(checkForUpdates), keyEquivalent: "")
+        // checkUpdatesItem.target = self
+        // menu.addItem(checkUpdatesItem)
         
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Quit", action: #selector(quitApp), keyEquivalent: "q"))

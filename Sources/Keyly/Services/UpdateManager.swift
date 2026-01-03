@@ -1,20 +1,36 @@
 import Cocoa
 
+// MARK: - Update Feature Disabled
+// Set to true to re-enable update functionality
+let UPDATE_FEATURE_ENABLED = false
+
 enum UpdateState {
     case none
     case checking
     case available
-    case downloading
+    case downloading(progress: Double)
     case readyToInstall
     case error(String)
 }
 
-struct UpdateInfo: Codable {
-    let updateAvailable: Bool
-    let currentVersion: String
-    let latestVersion: String
-    let downloadUrl: String?
-    let fileSize: Int?
+struct GitHubRelease: Codable {
+    let tagName: String
+    let assets: [GitHubAsset]
+    
+    enum CodingKeys: String, CodingKey {
+        case tagName = "tag_name"
+        case assets
+    }
+}
+
+struct GitHubAsset: Codable {
+    let name: String
+    let browserDownloadUrl: String
+    
+    enum CodingKeys: String, CodingKey {
+        case name
+        case browserDownloadUrl = "browser_download_url"
+    }
 }
 
 final class UpdateManager: NSObject {
@@ -31,12 +47,17 @@ final class UpdateManager: NSObject {
     private let isDevMode = ProcessInfo.processInfo.environment["KEYLY_DEV"] == "1"
     private let mockUpdate = ProcessInfo.processInfo.environment["KEYLY_MOCK_UPDATE"] == "1"
     
-    private var checkTask: Process?
-    private var updateTask: Process?
-    
-    // 2 days
+    private let githubRepo = "hoaiphongdev/keyly"
     private let checkIntervalSeconds: TimeInterval = 2 * 24 * 60 * 60
     private let lastCheckKey = "KeylyLastUpdateCheck"
+    
+    private var downloadTask: URLSessionDownloadTask?
+    private lazy var urlSession: URLSession = {
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 30
+        config.timeoutIntervalForResource = 300
+        return URLSession(configuration: config, delegate: self, delegateQueue: .main)
+    }()
     
     private var lastCheckDate: Date? {
         get { UserDefaults.standard.object(forKey: lastCheckKey) as? Date }
@@ -56,14 +77,6 @@ final class UpdateManager: NSObject {
         Bundle.main.bundleURL.path
     }
     
-    private var isInsideAppBundle: Bool {
-        Bundle.main.bundleURL.pathExtension == "app"
-    }
-    
-    private var scriptsPath: URL? {
-        Bundle.main.bundleURL.appendingPathComponent("Contents/Resources/scripts")
-    }
-    
     private override init() {
         super.init()
         
@@ -76,15 +89,18 @@ final class UpdateManager: NSObject {
     }
     
     var canCheckForUpdates: Bool {
-        if isDevMode && !mockUpdate {
-            return false
-        }
+        // Update feature temporarily disabled
+        if !UPDATE_FEATURE_ENABLED { return false }
+        
+        if isDevMode && !mockUpdate { return false }
         if case .checking = updateState { return false }
         if case .downloading = updateState { return false }
         return true
     }
     
     func checkForUpdates() {
+        // Update feature temporarily disabled
+        guard UPDATE_FEATURE_ENABLED else { return }
         guard canCheckForUpdates else { return }
         
         if isDevMode && mockUpdate {
@@ -102,153 +118,82 @@ final class UpdateManager: NSObject {
         updateState = .checking
         onUpdateStateChanged?(.checking)
         
-        performUpdateCheck { [weak self] result in
-            DispatchQueue.main.async {
-                self?.lastCheckDate = Date()
-                self?.handleCheckResult(result, showAlert: true)
-            }
+        fetchLatestRelease { [weak self] result in
+            self?.lastCheckDate = Date()
+            self?.handleCheckResult(result, showAlert: true)
         }
     }
     
     func checkForUpdatesInBackground() {
+        // Update feature temporarily disabled
+        guard UPDATE_FEATURE_ENABLED else { return }
         guard canCheckForUpdates else { return }
         guard !isDevMode || mockUpdate else { return }
-        
         guard shouldCheckForUpdates else { return }
         
         if mockUpdate {
-            updateAvailable = true
+        updateAvailable = true
             latestVersion = "99.0.0"
-            updateState = .available
-            DispatchQueue.main.async {
-                self.onUpdateAvailable?()
-                self.onUpdateStateChanged?(.available)
+        updateState = .available
+        DispatchQueue.main.async {
+            self.onUpdateAvailable?()
+            self.onUpdateStateChanged?(.available)
             }
             return
         }
         
-        performUpdateCheck { [weak self] result in
-            DispatchQueue.main.async {
-                self?.lastCheckDate = Date()
-                self?.handleCheckResult(result, showAlert: false)
-            }
+        fetchLatestRelease { [weak self] result in
+            self?.lastCheckDate = Date()
+            self?.handleCheckResult(result, showAlert: false)
         }
     }
     
-    private func performUpdateCheck(completion: @escaping (Result<UpdateInfo, Error>) -> Void) {
-        let scriptPath = getScriptPath("check-update.sh")
-        
-        guard FileManager.default.fileExists(atPath: scriptPath) else {
-            runCheckUpdateScript(version: currentVersion, completion: completion)
+    private func fetchLatestRelease(completion: @escaping (Result<GitHubRelease, Error>) -> Void) {
+        let urlString = "https://api.github.com/repos/\(githubRepo)/releases/latest"
+        guard let url = URL(string: urlString) else {
+            completion(.failure(UpdateError.invalidURL))
             return
         }
         
-        let task = Process()
-        task.executableURL = URL(fileURLWithPath: "/bin/bash")
-        task.arguments = [scriptPath, currentVersion]
+        var request = URLRequest(url: url)
+        request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
         
-        let pipe = Pipe()
-        task.standardOutput = pipe
-        task.standardError = pipe
-        
-        checkTask = task
-        
-        DispatchQueue.global(qos: .utility).async { [weak self] in
-            do {
-                try task.run()
-                task.waitUntilExit()
-                
-                let data = pipe.fileHandleForReading.readDataToEndOfFile()
-                
-                if task.terminationStatus == 0 {
-                    let updateInfo = try JSONDecoder().decode(UpdateInfo.self, from: data)
-                    completion(.success(updateInfo))
-                } else if task.terminationStatus == 1 {
-                    let updateInfo = try? JSONDecoder().decode(UpdateInfo.self, from: data)
-                    if let info = updateInfo {
-                        completion(.success(info))
-                    } else {
-                        completion(.failure(UpdateError.noUpdate))
-                    }
-                } else {
-                    completion(.failure(UpdateError.networkError))
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    completion(.failure(error))
+                    return
                 }
-            } catch {
-                completion(.failure(error))
+                
+                guard let data = data else {
+                    completion(.failure(UpdateError.noData))
+                    return
+                }
+                
+                do {
+                    let release = try JSONDecoder().decode(GitHubRelease.self, from: data)
+                    completion(.success(release))
+                } catch {
+                    completion(.failure(error))
+                }
             }
-            
-            self?.checkTask = nil
-        }
+        }.resume()
     }
     
-    private func runCheckUpdateScript(version: String, completion: @escaping (Result<UpdateInfo, Error>) -> Void) {
-        let script = """
-        GITHUB_REPO="hoaiphongdev/keyly"
-        CURRENT_VERSION="\(version)"
-        
-        RELEASE_JSON=$(curl -sS --connect-timeout 10 --max-time 30 \
-            -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/${GITHUB_REPO}/releases/latest" 2>/dev/null) || exit 2
-        
-        TAG_NAME=$(echo "$RELEASE_JSON" | grep -o '"tag_name"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*"tag_name"[[:space:]]*:[[:space:]]*"//;s/"$//' || echo "")
-        LATEST_VERSION=$(echo "$TAG_NAME" | sed 's/^v//')
-        DOWNLOAD_URL=$(echo "$RELEASE_JSON" | grep -o '"browser_download_url"[[:space:]]*:[[:space:]]*"[^"]*\\.dmg"' | head -1 | sed 's/.*"browser_download_url"[[:space:]]*:[[:space:]]*"//;s/"$//' || echo "")
-        
-        version_gt() {
-            local IFS=.
-            local i ver1=($1) ver2=($2)
-            for ((i=0; i<${#ver1[@]} || i<${#ver2[@]}; i++)); do
-                local v1=${ver1[i]:-0}
-                local v2=${ver2[i]:-0}
-                if ((v1 > v2)); then return 0; fi
-                if ((v1 < v2)); then return 1; fi
-            done
-            return 1
-        }
-        
-        if version_gt "$LATEST_VERSION" "$CURRENT_VERSION"; then
-            echo "{\\"updateAvailable\\": true, \\"currentVersion\\": \\"$CURRENT_VERSION\\", \\"latestVersion\\": \\"$LATEST_VERSION\\", \\"downloadUrl\\": \\"$DOWNLOAD_URL\\"}"
-            exit 0
-        else
-            echo "{\\"updateAvailable\\": false, \\"currentVersion\\": \\"$CURRENT_VERSION\\", \\"latestVersion\\": \\"$LATEST_VERSION\\"}"
-            exit 1
-        fi
-        """
-        
-        let task = Process()
-        task.executableURL = URL(fileURLWithPath: "/bin/bash")
-        task.arguments = ["-c", script]
-        
-        let pipe = Pipe()
-        task.standardOutput = pipe
-        task.standardError = FileHandle.nullDevice
-        
-        DispatchQueue.global(qos: .utility).async {
-            do {
-                try task.run()
-                task.waitUntilExit()
-                
-                let data = pipe.fileHandleForReading.readDataToEndOfFile()
-                
-                if let updateInfo = try? JSONDecoder().decode(UpdateInfo.self, from: data) {
-                    completion(.success(updateInfo))
-                } else {
-                    completion(.failure(UpdateError.parseError))
-                }
-            } catch {
-                completion(.failure(error))
-            }
-        }
-    }
-    
-    private func handleCheckResult(_ result: Result<UpdateInfo, Error>, showAlert: Bool) {
+    private func handleCheckResult(_ result: Result<GitHubRelease, Error>, showAlert: Bool) {
         switch result {
-        case .success(let info):
-            updateAvailable = info.updateAvailable
-            latestVersion = info.latestVersion
-            downloadUrl = info.downloadUrl
+        case .success(let release):
+            let version = release.tagName.hasPrefix("v") 
+                ? String(release.tagName.dropFirst()) 
+                : release.tagName
             
-            if info.updateAvailable {
+            let dmgAsset = release.assets.first { $0.name.hasSuffix(".dmg") }
+            
+            latestVersion = version
+            downloadUrl = dmgAsset?.browserDownloadUrl
+            updateAvailable = isVersionNewer(version, than: currentVersion)
+            
+            if updateAvailable {
                 updateState = .available
                 onUpdateAvailable?()
                 onUpdateStateChanged?(.available)
@@ -272,132 +217,131 @@ final class UpdateManager: NSObject {
         }
     }
     
+    private func isVersionNewer(_ new: String, than current: String) -> Bool {
+        let newParts = new.split(separator: ".").compactMap { Int($0) }
+        let currentParts = current.split(separator: ".").compactMap { Int($0) }
+        
+        for i in 0..<max(newParts.count, currentParts.count) {
+            let newPart = i < newParts.count ? newParts[i] : 0
+            let currentPart = i < currentParts.count ? currentParts[i] : 0
+            
+            if newPart > currentPart { return true }
+            if newPart < currentPart { return false }
+        }
+        return false
+    }
+    
     func performUpdate() {
-        guard let url = downloadUrl else { return }
+        // Update feature temporarily disabled
+        guard UPDATE_FEATURE_ENABLED else { return }
+        guard let urlString = downloadUrl, let url = URL(string: urlString) else { return }
         
         if isDevMode && mockUpdate {
             simulateDownload { }
             return
         }
         
-        updateState = .downloading
-        onUpdateStateChanged?(.downloading)
+        updateState = .downloading(progress: 0)
+        onUpdateStateChanged?(updateState)
         
-        let scriptPath = getScriptPath("perform-update.sh")
+        downloadTask = urlSession.downloadTask(with: url)
+        downloadTask?.resume()
+    }
+    
+    private func installUpdate(from tempURL: URL) {
+        let fileManager = FileManager.default
         
-        let task = Process()
-        task.executableURL = URL(fileURLWithPath: "/bin/bash")
-        
-        if FileManager.default.fileExists(atPath: scriptPath) {
-            task.arguments = [scriptPath, url, appPath]
-        } else {
-            task.arguments = ["-c", getEmbeddedUpdateScript(downloadUrl: url, appPath: appPath)]
-        }
-        
-        updateTask = task
-        
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            do {
-                try task.run()
-                task.waitUntilExit()
-                
-                DispatchQueue.main.async {
-                    if task.terminationStatus == 0 {
-                        self?.updateState = .readyToInstall
-                        self?.onUpdateStateChanged?(.readyToInstall)
-                        NSApp.terminate(nil)
-                    } else {
-                        self?.updateState = .error("Update failed")
-                        self?.onUpdateStateChanged?(self?.updateState ?? .none)
-                    }
-                }
-            } catch {
-                DispatchQueue.main.async {
-                    self?.updateState = .error(error.localizedDescription)
-                    self?.onUpdateStateChanged?(self?.updateState ?? .none)
-                }
+        do {
+            let tempDir = fileManager.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+            try fileManager.createDirectory(at: tempDir, withIntermediateDirectories: true)
+            
+            let dmgPath = tempDir.appendingPathComponent("Keyly.dmg")
+            try fileManager.moveItem(at: tempURL, to: dmgPath)
+            
+            let mountPoint = tempDir.appendingPathComponent("mount")
+            try fileManager.createDirectory(at: mountPoint, withIntermediateDirectories: true)
+            
+            let mountProcess = Process()
+            mountProcess.executableURL = URL(fileURLWithPath: "/usr/bin/hdiutil")
+            mountProcess.arguments = ["attach", dmgPath.path, "-mountpoint", mountPoint.path, "-nobrowse", "-quiet"]
+            try mountProcess.run()
+            mountProcess.waitUntilExit()
+            
+            guard mountProcess.terminationStatus == 0 else {
+                throw UpdateError.mountFailed
             }
             
-            self?.updateTask = nil
-        }
-    }
-    
-    private func getEmbeddedUpdateScript(downloadUrl: String, appPath: String) -> String {
-        return """
-        set -euo pipefail
-        
-        DOWNLOAD_URL="\(downloadUrl)"
-        APP_PATH="\(appPath)"
-        
-        TEMP_DIR=$(mktemp -d)
-        DMG_PATH="$TEMP_DIR/Keyly.dmg"
-        MOUNT_POINT="$TEMP_DIR/mount"
-        
-        cleanup() {
-            if [[ -d "$MOUNT_POINT" ]]; then
-                hdiutil detach "$MOUNT_POINT" -quiet 2>/dev/null || true
-            fi
-            rm -rf "$TEMP_DIR"
-        }
-        trap cleanup EXIT
-        
-        curl -L --progress-bar --connect-timeout 30 --max-time 300 -o "$DMG_PATH" "$DOWNLOAD_URL" || exit 1
-        
-        mkdir -p "$MOUNT_POINT"
-        hdiutil attach "$DMG_PATH" -mountpoint "$MOUNT_POINT" -nobrowse -quiet || exit 1
-        
-        NEW_APP=$(find "$MOUNT_POINT" -maxdepth 1 -name "*.app" | head -1)
-        [[ -z "$NEW_APP" ]] && exit 1
-        
-        BACKUP_PATH="${APP_PATH}.backup"
-        [[ -d "$APP_PATH" ]] && { rm -rf "$BACKUP_PATH"; mv "$APP_PATH" "$BACKUP_PATH"; }
-        
-        cp -R "$NEW_APP" "$APP_PATH" || { [[ -d "$BACKUP_PATH" ]] && mv "$BACKUP_PATH" "$APP_PATH"; exit 1; }
-        
-        rm -rf "$BACKUP_PATH"
-        xattr -dr com.apple.quarantine "$APP_PATH" 2>/dev/null || true
-        
-        open -n "$APP_PATH" &
-        sleep 1
-        exit 0
-        """
-    }
-    
-    private func getScriptPath(_ scriptName: String) -> String {
-        if let resourcePath = Bundle.main.resourcePath {
-            let bundledPath = (resourcePath as NSString).appendingPathComponent("scripts/\(scriptName)")
-            if FileManager.default.fileExists(atPath: bundledPath) {
-                return bundledPath
+            let contents = try fileManager.contentsOfDirectory(at: mountPoint, includingPropertiesForKeys: nil)
+            guard let newApp = contents.first(where: { $0.pathExtension == "app" }) else {
+                throw UpdateError.noAppInDMG
             }
+            
+            let appURL = URL(fileURLWithPath: appPath)
+            let backupURL = appURL.deletingLastPathComponent().appendingPathComponent("Keyly.app.backup")
+            
+            if fileManager.fileExists(atPath: backupURL.path) {
+                try fileManager.removeItem(at: backupURL)
+            }
+            try fileManager.moveItem(at: appURL, to: backupURL)
+            
+            do {
+                try fileManager.copyItem(at: newApp, to: appURL)
+                try fileManager.removeItem(at: backupURL)
+            } catch {
+                try? fileManager.moveItem(at: backupURL, to: appURL)
+                throw error
+            }
+            
+            let unmountProcess = Process()
+            unmountProcess.executableURL = URL(fileURLWithPath: "/usr/bin/hdiutil")
+            unmountProcess.arguments = ["detach", mountPoint.path, "-quiet"]
+            try? unmountProcess.run()
+            unmountProcess.waitUntilExit()
+            
+            try? fileManager.removeItem(at: tempDir)
+            
+            let xattrProcess = Process()
+            xattrProcess.executableURL = URL(fileURLWithPath: "/usr/bin/xattr")
+            xattrProcess.arguments = ["-dr", "com.apple.quarantine", appPath]
+            try? xattrProcess.run()
+            xattrProcess.waitUntilExit()
+            
+        updateState = .readyToInstall
+            onUpdateStateChanged?(.readyToInstall)
+            
+            relaunchApp()
+            
+        } catch {
+            updateState = .error(error.localizedDescription)
+            onUpdateStateChanged?(updateState)
         }
-        
-        let projectPath = Bundle.main.bundleURL
-            .deletingLastPathComponent()
-            .deletingLastPathComponent()
-            .deletingLastPathComponent()
-            .appendingPathComponent("scripts/\(scriptName)")
-            .path
-        
-        return projectPath
     }
     
     func simulateDownload(completion: @escaping () -> Void) {
-        updateState = .downloading
-        onUpdateStateChanged?(.downloading)
+        updateState = .downloading(progress: 0)
+        onUpdateStateChanged?(.downloading(progress: 0))
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
-            self?.updateState = .readyToInstall
-            self?.onUpdateStateChanged?(.readyToInstall)
+        var progress = 0.0
+        Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] timer in
+            progress += 0.05
+            if progress >= 1.0 {
+                timer.invalidate()
+                self?.updateState = .readyToInstall
+                self?.onUpdateStateChanged?(.readyToInstall)
             completion()
+            } else {
+                self?.updateState = .downloading(progress: progress)
+                self?.onUpdateStateChanged?(.downloading(progress: progress))
+            }
         }
     }
     
     func relaunchApp() {
-        let url = Bundle.main.bundleURL
-        let config = NSWorkspace.OpenConfiguration()
-        NSWorkspace.shared.openApplication(at: url, configuration: config) { _, _ in
-            NSApp.terminate(nil)
-        }
+            let url = Bundle.main.bundleURL
+            let config = NSWorkspace.OpenConfiguration()
+            NSWorkspace.shared.openApplication(at: url, configuration: config) { _, _ in
+                NSApp.terminate(nil)
+            }
     }
     
     private func showUpdateAlert() {
@@ -452,18 +396,42 @@ final class UpdateManager: NSObject {
     }
 }
 
+extension UpdateManager: URLSessionDownloadDelegate {
+    func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
+        installUpdate(from: location)
+    }
+    
+    func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
+        let progress = Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)
+        updateState = .downloading(progress: progress)
+        onUpdateStateChanged?(updateState)
+    }
+    
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        if let error = error {
+            updateState = .error(error.localizedDescription)
+            onUpdateStateChanged?(updateState)
+        }
+    }
+}
+
 enum UpdateError: LocalizedError {
-    case noUpdate
-    case networkError
-    case parseError
+    case invalidURL
+    case noData
+    case mountFailed
+    case noAppInDMG
     case installFailed
     
     var errorDescription: String? {
         switch self {
-        case .noUpdate: return "No update available"
-        case .networkError: return "Network error"
-        case .parseError: return "Failed to parse update info"
+        case .invalidURL: return "Invalid URL"
+        case .noData: return "No data received"
+        case .mountFailed: return "Failed to mount DMG"
+        case .noAppInDMG: return "No app found in DMG"
         case .installFailed: return "Failed to install update"
         }
     }
 }
+
+
+

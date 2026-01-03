@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.1] - 2025-01-03
+
+### Fixed
+- Removed "Check for Updates..." from settings menu (was still visible after disabling auto-update)
+
 ## [1.4.0] - 2025-01-03
 
 ### Added

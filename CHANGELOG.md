@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2025-01-03
+
+### Changed
+- Hold duration increased from 1.7s to 2s for more intentional activation
+- Temporarily disabled auto-update feature
+
+### Added
+- Template installer script (`scripts/install-templates.sh`)
+- Cursor IDE keyboard shortcuts template
+- Support for fetching community templates from GitHub
+
+### Templates
+- New `-t` flag to specify template name (required)
+- New `-n` flag to customize local filename (optional)
+- Backup/replace prompt when template already exists
+- Validation for template existence before download
+
 ## [1.2.0] - 2024-12-29
 
 ### Auto-Update

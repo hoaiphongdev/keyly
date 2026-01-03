@@ -68,6 +68,24 @@ CMD+SHIFT+T Reopen Last Tab
 CMD+D       Add Bookmark
 ```
 
+## Community Templates
+
+Install pre-made shortcut templates from the community:
+
+```bash
+# Install a template
+curl -sL https://raw.githubusercontent.com/hoaiphongdev/keyly/main/scripts/install-templates.sh | bash -s -- -t cursor.keyly
+
+# Install with custom name
+curl -sL https://raw.githubusercontent.com/hoaiphongdev/keyly/main/scripts/install-templates.sh | bash -s -- -t cursor.keyly -n my-cursor.keyly
+```
+
+**Options:**
+- `-t <name>` - Template name (required)
+- `-n <name>` - Save as custom filename (optional)
+
+**Available templates:** [templates/](https://github.com/hoaiphongdev/keyly/tree/main/templates)
+
 ## Auto-Update
 
 Keyly uses [Sparkle](https://sparkle-project.org/) for automatic updates. Updates are checked daily and can also be triggered manually via:

@@ -16,11 +16,11 @@ curl -fsSL https://raw.githubusercontent.com/hoaiphongdev/keyly/main/scripts/ins
 
 > **3.** Follow the on-screen instructions to grant Accessibility permission
 >
-> **4.** Done! Hold `⌘ Command` for 1 second to show shortcuts
+> **4.** Done! Hold `⌘ Command` for 2 seconds to show shortcuts
 
 ## Features
 
-- Hold ⌘ for 1 second to show shortcuts
+- Hold ⌘ for 2 seconds to show shortcuts
 - Extracts real shortcuts from app menu bar via Accessibility API
 - Works with any macOS application
 - Multi-column layout with category grouping
@@ -47,7 +47,7 @@ On first launch, go to **System Settings → Privacy & Security → Accessibilit
 
 1. Run the app - you'll see a ⌘ icon in the menu bar
 2. Open any application
-3. Hold the **Command (⌘)** key for 1 second
+3. Hold the **Command (⌘)** key for 2 seconds
 4. A window will appear showing all keyboard shortcuts
 5. Release ⌘ to hide the window
 

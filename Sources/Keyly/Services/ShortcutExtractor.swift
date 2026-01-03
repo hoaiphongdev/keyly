@@ -35,7 +35,10 @@ final class ShortcutExtractor {
         AXUIElementCopyAttributeValue(menuBar, kAXChildrenAttribute as CFString, &children)
         
         if let menuItems = children as? [AXUIElement] {
-            for menuItem in menuItems {
+            for (index, menuItem) in menuItems.enumerated() {
+                if index == 0 { 
+                    continue 
+                }
                 shortcuts.append(contentsOf: extractShortcutsFromMenuItem(menuItem))
             }
         }

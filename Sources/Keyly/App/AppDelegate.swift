@@ -83,7 +83,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         
         if let button = statusItem?.button {
-            button.image = NSImage(systemSymbolName: "command", accessibilityDescription: "Keyly")
+            button.image = NSImage(systemSymbolName: "k.square.fill", accessibilityDescription: "Keyly")
             button.action = #selector(statusBarClicked)
             button.target = self
         }

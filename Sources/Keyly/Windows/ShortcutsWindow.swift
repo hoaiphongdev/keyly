@@ -307,9 +307,10 @@ final class ShortcutsWindow: NSWindowController {
         accessibilityItem.target = self
         menu.addItem(accessibilityItem)
         
-        let checkUpdatesItem = NSMenuItem(title: "Check for Updates...", action: #selector(checkForUpdates), keyEquivalent: "")
-        checkUpdatesItem.target = self
-        menu.addItem(checkUpdatesItem)
+        // MARK: - Update feature temporarily disabled
+        // let checkUpdatesItem = NSMenuItem(title: "Check for Updates...", action: #selector(checkForUpdates), keyEquivalent: "")
+        // checkUpdatesItem.target = self
+        // menu.addItem(checkUpdatesItem)
         
         menu.addItem(NSMenuItem.separator())
         

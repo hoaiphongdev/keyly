@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.0] - 2025-01-03
+
+### Added
+- Category descriptions in templates (use `> description` after `[Category]`)
+- Sub-description displayed below category title in shortcuts window
+- `-f` flag for force replace in template installer script
+
+### Templates
+- Updated cursor.keyly with contextual hints for each category
+- Example: `> Focus on chat panel first.` under `[Chat]`
+
 ## [1.3.0] - 2025-01-03
 
 ### Changed

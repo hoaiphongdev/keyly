@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.0] - 2025-01-04
+
+### Changed
+- Improved shortcuts window visibility on both light and dark app backgrounds
+- Added subtle diagonal gradient overlay for consistent contrast
+- Updated text colors: white headers, cyan key labels, improved opacity hierarchy
+
+### Fixed
+- Shortcuts window was too transparent/hard to read on light-themed apps
+
 ## [1.4.1] - 2025-01-03
 
 ### Fixed

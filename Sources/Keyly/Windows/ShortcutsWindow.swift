@@ -126,7 +126,7 @@ final class ShortcutsWindow: NSWindowController {
         let label = NSTextField(labelWithString: labelText)
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = NSFont.systemFont(ofSize: 12, weight: .medium)
-        label.textColor = .labelColor
+        label.textColor = .white
         
         banner.addSubview(icon)
         banner.addSubview(label)
@@ -242,6 +242,11 @@ final class ShortcutsWindow: NSWindowController {
         visualEffect.layer?.cornerRadius = 12
         visualEffect.layer?.masksToBounds = true
         visualEffect.autoresizingMask = [.width, .height]
+        
+        let overlay = GradientOverlayView(frame: visualEffect.bounds)
+        overlay.autoresizingMask = [.width, .height]
+        visualEffect.addSubview(overlay)
+        
         containerView = visualEffect
         window.contentView?.addSubview(containerView)
         
@@ -276,7 +281,7 @@ final class ShortcutsWindow: NSWindowController {
         settingsButton.bezelStyle = .inline
         settingsButton.isBordered = false
         settingsButton.image = NSImage(systemSymbolName: "gearshape.fill", accessibilityDescription: "Settings")
-        settingsButton.contentTintColor = .tertiaryLabelColor
+        settingsButton.contentTintColor = NSColor.white.withAlphaComponent(0.6)
         settingsButton.target = self
         settingsButton.action = #selector(showSettingsMenu)
         
@@ -412,13 +417,13 @@ final class ShortcutsWindow: NSWindowController {
         
         let header = NSTextField(labelWithString: title)
         header.font = NSFont.systemFont(ofSize: 12, weight: .bold)
-        header.textColor = .labelColor
+        header.textColor = .white
         column.addArrangedSubview(header)
         
         if let desc = description, !desc.isEmpty {
             let descLabel = NSTextField(labelWithString: desc)
             descLabel.font = NSFont.systemFont(ofSize: 10)
-            descLabel.textColor = .tertiaryLabelColor
+            descLabel.textColor = NSColor.white.withAlphaComponent(0.5)
             column.addArrangedSubview(descLabel)
         }
         
@@ -442,18 +447,18 @@ final class ShortcutsWindow: NSWindowController {
         
         let modifiersLabel = NSTextField(labelWithString: modifiers)
         modifiersLabel.font = NSFont.systemFont(ofSize: 11, weight: .regular)
-        modifiersLabel.textColor = .tertiaryLabelColor
+        modifiersLabel.textColor = NSColor.white.withAlphaComponent(0.55)
         modifiersLabel.alignment = .right
         modifiersLabel.translatesAutoresizingMaskIntoConstraints = false
         
         let keyLabel = NSTextField(labelWithString: key)
         keyLabel.font = NSFont.systemFont(ofSize: 11, weight: .semibold)
-        keyLabel.textColor = NSColor(calibratedRed: 0.45, green: 0.55, blue: 0.95, alpha: 1.0)
+        keyLabel.textColor = NSColor(calibratedRed: 0.4, green: 0.85, blue: 1.0, alpha: 1.0)
         keyLabel.translatesAutoresizingMaskIntoConstraints = false
         
         let actionLabel = NSTextField(wrappingLabelWithString: item.action)
         actionLabel.font = NSFont.systemFont(ofSize: 11)
-        actionLabel.textColor = .secondaryLabelColor
+        actionLabel.textColor = NSColor.white.withAlphaComponent(0.85)
         actionLabel.translatesAutoresizingMaskIntoConstraints = false
         actionLabel.maximumNumberOfLines = 2
         actionLabel.preferredMaxLayoutWidth = columnWidth - 95
@@ -505,4 +510,36 @@ final class ShortcutsWindow: NSWindowController {
 
 final class FlippedView: NSView {
     override var isFlipped: Bool { true }
+}
+
+final class GradientOverlayView: NSView {
+    private var gradientLayer: CAGradientLayer?
+    
+    override init(frame: NSRect) {
+        super.init(frame: frame)
+        setupGradient()
+    }
+    
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        setupGradient()
+    }
+    
+    private func setupGradient() {
+        wantsLayer = true
+        let gradient = CAGradientLayer()
+        gradient.colors = [
+            NSColor.black.withAlphaComponent(0.4).cgColor,
+            NSColor.black.withAlphaComponent(0.3).cgColor
+        ]
+        gradient.startPoint = CGPoint(x: 0, y: 0)
+        gradient.endPoint = CGPoint(x: 1, y: 1)
+        layer?.addSublayer(gradient)
+        gradientLayer = gradient
+    }
+    
+    override func layout() {
+        super.layout()
+        gradientLayer?.frame = bounds
+    }
 }

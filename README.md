@@ -18,6 +18,14 @@ curl -fsSL https://raw.githubusercontent.com/hoaiphongdev/keyly/main/scripts/ins
 >
 > **4.** Done! Hold `⌘ Command` for 2 seconds to show shortcuts
 
+## Screenshots
+
+<p align="center">
+  <img src="docs/images/example-1.png" alt="Screenshot 1" width="600">
+  <br><br>
+  <img src="docs/images/example-2.png" alt="Screenshot 2" width="600">
+</p>
+
 ## Features
 
 - Hold ⌘ for 2 seconds to show shortcuts

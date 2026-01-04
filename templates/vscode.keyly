@@ -1,0 +1,151 @@
+# Sheet Name: VS Code Shortcuts
+# App: /Applications/Visual Studio Code.app
+
+[General]
+⇧⌘P             Show Command Palette
+F1              Show Command Palette
+⌘P              Quick Open, Go to File
+⇧⌘N             New window/instance
+⌘W              Close window/instance
+⌘,              User Settings
+⌘K⌘S            Keyboard Shortcuts
+
+[Basic Editing]
+⌘X              Cut line (empty selection)
+⌘C              Copy line (empty selection)
+⌥↓              Move line down
+⌥↑              Move line up
+⇧⌥↓             Copy line down
+⇧⌥↑             Copy line up
+⇧⌘K             Delete line
+⌘⏎              Insert line below
+⇧⌘⏎             Insert line above
+⇧⌘\             Jump to matching bracket
+⌘]              Indent line
+⌘[              Outdent line
+⌘↑              Go to beginning of file
+⌘↓              Go to end of file
+⌥⌘[             Fold region
+⌥⌘]             Unfold region
+⌘K⌘[            Fold all subregions
+⌘K⌘]            Unfold all subregions
+⌘K⌘0            Fold all regions
+⌘K⌘J            Unfold all regions
+⌘K⌘C            Add line comment
+⌘K⌘U            Remove line comment
+⌘/              Toggle line comment
+⇧⌥A             Toggle block comment
+⌥Z              Toggle word wrap
+
+[Multi-cursor & Selection]
+⌥+click         Insert cursor
+⌥⌘↑             Insert cursor above
+⌥⌘↓             Insert cursor below
+⌘U              Undo last cursor operation
+⇧⌥I             Insert cursor at end of each line
+⌘L              Select current line
+⇧⌘L             Select all occurrences of selection
+⌘F2             Select all occurrences of word
+⌃⇧⌘→            Expand selection
+⌃⇧⌘←            Shrink selection
+
+[Search & Replace]
+⌘F              Find
+⌥⌘F             Replace
+⌘G              Find next
+⇧⌘G             Find previous
+⌥⏎              Select all Find matches
+⌘D              Add selection to next Find match
+⌘K⌘D            Move last selection to next Find match
+
+[Code Intelligence]
+> Works in supported languages.
+⌃Space          Trigger suggestion
+⌘I              Trigger suggestion
+⇧⌘Space         Trigger parameter hints
+⇧⌥F             Format document
+⌘K⌘F            Format selection
+F12             Go to Definition
+⌥F12            Peek Definition
+⌘KF12           Open Definition to the side
+⌘.              Quick Fix
+⇧F12            Show References
+F2              Rename Symbol
+⌘K⌘X            Trim trailing whitespace
+⌘KM             Change file language
+
+[Navigation]
+⌘T              Show all Symbols
+⌃G              Go to Line
+⌘P              Go to File
+⇧⌘O             Go to Symbol
+⇧⌘M             Show Problems panel
+F8              Go to next error/warning
+⇧F8             Go to previous error/warning
+⌃-              Go back
+⌃⇧-             Go forward
+
+[Editor Management]
+⌘W              Close editor
+⌘KF             Close folder
+⌘\              Split editor
+⌘1              Focus 1st editor group
+⌘2              Focus 2nd editor group
+⌘3              Focus 3rd editor group
+⌘K⌘←            Focus previous editor group
+⌘K⌘→            Focus next editor group
+⌘K⇧⌘←           Move editor left
+⌘K⇧⌘→           Move editor right
+
+[File Management]
+⌘N              New File
+⌘O              Open File
+⌘S              Save
+⇧⌘S             Save As
+⌥⌘S             Save All
+⌘W              Close
+⌘K⌘W            Close All
+⇧⌘T             Reopen closed editor
+⌘K⏎             Keep preview mode editor open
+⌃⇥              Open next
+⌃⇧⇥             Open previous
+⌘KP             Copy path of active file
+⌘KR             Reveal active file in Finder
+⌘KO             Show active file in new window
+
+[Display]
+⌃⌘F             Toggle full screen
+⌥⌘0             Toggle editor layout
+⌘=              Zoom in
+⇧⌘-             Zoom out
+⌘B              Toggle Sidebar visibility
+⇧⌘E             Show Explorer / Toggle focus
+⇧⌘F             Show Search
+⌃⇧G             Show Source Control
+⇧⌘D             Show Debug
+⇧⌘X             Show Extensions
+⇧⌘H             Replace in files
+⇧⌘J             Toggle Search details
+⇧⌘U             Show Output panel
+⇧⌘V             Open Markdown preview
+⌘KV             Open Markdown preview to the side
+⌘KZ             Zen Mode (Esc Esc to exit)
+
+[Debug]
+> Use with debugger attached.
+F9              Toggle breakpoint
+F5              Start/Continue
+F11             Step into
+⇧F11            Step out
+F10             Step over
+⇧F5             Stop
+⌘K⌘I            Show hover
+
+[Terminal]
+> Integrated terminal shortcuts.
+⌃`              Show integrated terminal
+⌃⇧`             Create new terminal
+⌘C              Copy selection
+⌘↑              Scroll up
+⌘↓              Scroll down
+

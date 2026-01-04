@@ -1,0 +1,103 @@
+# Sheet Name: Figma Shortcuts
+# App: /Applications/Figma.app
+
+[File]
+⇧⌘N             New window
+⌘N              New file
+⌘O              Open file browser
+⇧⌘W             Close window
+⌘W              Close tab
+⇧⌘E             Export
+⇧⌘S             Save as .fig file
+⌥⌘S             Save to version history
+⇧⌘K             Place
+
+[Edit]
+⌘Z              Undo
+⇧⌘Z             Redo
+⌘X              Cut
+⌘C              Copy
+⌘V              Paste
+⇧⌘V             Paste over selection
+⌘D              Duplicate
+⌫               Delete
+⌥⌘C             Copy properties
+⌥⌘V             Paste properties
+⌘A              Select all
+⇧⌘A             Select inverse
+⌃⌘Space         Emoji & symbols
+
+[View]
++               Zoom in
+-               Zoom out
+!               Zoom to fit
+@               Zoom to selection
+)               Zoom to 100%
+⌘R              Rename layer
+⇧R              Rulers
+⌃P              Pixel preview
+⌃G              Layout grids
+⌘Y              Outlines
+
+[Tools]
+> Press key to activate tool.
+V               Move tool
+P               Pen tool
+R               Rectangle tool
+O               Ellipse tool
+L               Line tool
+F               Frame tool
+S               Slice tool
+⌃C              Pick color
+
+[Object]
+⌘G              Group selection
+⌥⌘G             Frame selection
+⌘⇧G             Ungroup selection
+⌥⌘K             Create component
+⌥⌘B             Detach instance
+⌃⌘M             Toggle mask
+⌥⌘]             Bring to front
+⌘]              Bring forward
+⌘[              Send backward
+⌥⌘[             Send to back
+⇧H              Flip horizontal
+⇧V              Flip vertical
+⌘E              Flatten selection
+⌘⇧O             Outline stroke
+⌘⇧H             Show/hide selection
+⌘⇧L             Lock/unlock selection
+⌥L              Collapse layers
+
+[Vector]
+⌘J              Join selection
+⇧⌘J             Smooth join selection
+⇧⌫              Delete & heal selection
+
+[Text]
+⌘B              Bold
+⌘I              Italic
+⌘U              Underline
+⌘<              Increase font size
+⌘>              Decrease font size
+⌥,              Increase line height
+⌥.              Decrease line height
+⌥<              Increase letter space
+⌥>              Decrease letter space
+⌥⌘L             Text align left
+⌥⌘R             Text align right
+⌥⌘T             Text align center
+⌥⌘J             Text align justified
+
+[Arrange]
+> Alignment shortcuts.
+⌥A              Align left
+⌥H              Align h. centers
+⌥D              Align right
+⌥W              Align top
+⌥V              Align v. centers
+⌥S              Align bottom
+⌃⌥T             Tidy up
+⌃⌥H             Distribute h. spacing
+⌃⌥V             Distribute v. spacing
+

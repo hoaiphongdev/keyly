@@ -1,0 +1,202 @@
+# Sheet Name: JetBrains Rider Shortcuts
+# App: /Applications/Rider.app
+# Keymap: IntelliJ (default)
+
+[Search & Navigation]
+> ⇧⇧ and ⌃⌃ mean double-tap the key.
+⇧⇧              Search Everywhere
+⌘⇧A             Find Action
+⌃⌃              Run Anything
+⌘E              Recent Files
+⌘⇧O             Go to File
+⌘⌥O             Go to Symbol
+⌘L              Go to Line/Column
+⌘B              Go to Declaration or Usages
+⌘⌥B             Go to Implementation(s)
+⌘⇧B             Go to Type Declaration
+⌘U              Go to Super Method
+⌘[              Navigate Back
+⌘]              Navigate Forward
+⌥F1             Select In...
+⌃⇧↓             Next Method
+⌃⇧↑             Previous Method
+
+[Basic Editing]
+⌘X              Cut
+⌘C              Copy
+⌘V              Paste
+⌘⌥⇧V            Paste as Plain Text
+⌘⇧V             Paste from History
+⌘⇧C             Copy Paths
+⌘S              Save All
+⌘Z              Undo
+⌘⇧Z             Redo
+⇥               Indent Selection
+⇧⇥              Unindent Selection
+⌃⌥I             Auto-Indent Lines
+⇧⏎              Start New Line
+⌘⌥⏎             Start New Line Before Current
+⌘⌫              Delete Line
+⌃⇧J             Join Lines
+⌘D              Duplicate Line or Selection
+⌘⇧U             Toggle Case
+⌘⇧N             Scratch File
+
+[Caret & Selection]
+⌥←              Move Caret to Previous Word
+⌥→              Move Caret to Next Word
+⌘←              Move Caret to Line Start
+⌘→              Move Caret to Line End
+⌃[              Containing Declaration
+⌃M              Move Caret to Matching Brace
+⌘⌥[             Move Caret to Code Block Start
+⌘⌥]             Move Caret to Code Block End
+⌘Home           Move Caret to Text Start
+⌘End            Move Caret to Text End
+⌘A              Select All
+⌥↑              Extend Selection
+⌥↓              Shrink Selection
+⌥⇧←             Select Previous Word
+⌥⇧→             Select Next Word
+⌘⇧←             Select to Line Start
+⌘⇧→             Select to Line End
+
+[Multiple Carets]
+> Double ⌥ + arrow for clone caret.
+⌥⇧+click        Add/Remove Caret
+⌘⇧8             Toggle Column Selection Mode
+⌥⌥↑             Clone Caret Above
+⌥⌥↓             Clone Caret Below
+⌥⇧G             Add Caret to Each Line in Selection
+⌃G              Add Selection for Next Occurrence
+⌘⌃G             Select All Occurrences
+⌃⇧G             Deselect Last Occurrence
+
+[Code Folding]
+⌘+              Expand
+⌘-              Collapse
+⌘⌥+             Expand Recursively
+⌘⌥-             Collapse Recursively
+⌘⇧+             Expand All
+⌘⇧-             Collapse All
+⌘.              Fold Selection
+
+[Coding Assistance]
+⌥⏎              Show Intention Actions
+⌃Space          Basic Completion
+⌃⇧Space         Type-Matching Completion
+⌥⇧\             Complete Code with AI Assistant
+⌘\              Generate Code with AI Assistant
+⌘⇧⏎             Complete Current Statement
+⌘⌥L             Reformat Code
+⌘P              Parameter Info
+F1              Quick Documentation
+⌘⇧↑             Move Statement Up
+⌘⇧↓             Move Statement Down
+⌥⇧↑             Move Line Up
+⌥⇧↓             Move Line Down
+⌘/              Comment with Line Comment
+⌘⌥/             Comment with Block Comment
+⌘⌥T             Surround With...
+⌘N              Generate...
+
+[Find & Replace]
+⌘F              Find
+⌘G              Find Next
+⌘⇧G             Find Previous
+⌘R              Replace
+⌘⇧F             Find in Files
+⌘⇧R             Replace in Files
+
+[Code Analysis]
+F2              Next Code Issue
+⇧F2             Previous Code Issue
+⌥F2             Next Error
+⌥⇧F2            Previous Error
+⌘F1             Error Description
+⌘⌥⇧I            Run Inspection by Name
+
+[Usages & References]
+⌥F7             Find Usages
+⌘⌥F7            Show Usages
+⌘⇧F7            Highlight Usages in File
+
+[Refactoring]
+> Select code or place cursor on symbol first.
+⌃T              Refactor This
+⇧F6             Rename
+⌘F6             Change Signature
+⌘⌥N             Inline
+F6              Move
+⌘⌥M             Extract Method
+⌘⌥F             Introduce Field
+⌘⌥P             Introduce Parameter
+⌘⌥V             Introduce Variable
+⌘⌦              Safe Delete
+
+[Run & Debug]
+> Use with debugger attached for stepping.
+⌃R              Run context configuration
+⌃⌥R             Run...
+⌃D              Debug context configuration
+⌃⌥D             Debug...
+⌥⇧F5            Attach to Process
+⌘F2             Stop
+⌘⌥R             Resume Program
+F8              Step Over
+F7              Step Into
+⇧F7             Smart Step Into
+⇧F8             Step Out
+⌥F9             Run To Cursor
+⌘F8             Toggle Line Breakpoint
+⌘⇧F8            View Breakpoints
+⌥F8             Evaluate Expression
+
+[VCS/Git]
+⌃V              VCS Operations Popup
+⌘K              Commit
+⌘T              Update Project
+⌘⌥Z             Rollback
+⌘⇧K             Push
+⌃⌥⇧↓            Next Change
+⌃⌥⇧↑            Previous Change
+
+[Unit Testing]
+⌥⇧U             Unit Testing Quick List
+⌘;R             Run Unit Tests
+⌘;D             Debug Unit Tests
+⌘;T             Repeat Previous Run
+⌘;F             Rerun Failed Tests
+⌘;L             Run All Tests from Solution
+
+[Tool Windows]
+⌘1              Solution/Project
+⌘2              Bookmarks
+⌘3              Find
+⌘4              Run
+⌘5              Debug
+⌘6              Problems
+⌘7              Structure
+⌘9              Version Control
+⌘0              Commit
+⌥F12            Terminal
+⇧⎋              Hide Active Tool Window
+⌘⇧F12           Hide All Tool Windows
+⌃⌥←             Stretch to Left
+⌃⌥→             Stretch to Right
+⌃⌥↑             Stretch to Top
+⌃⌥↓             Stretch to Bottom
+
+[Diff Viewer]
+⌘D              Show Diff
+F7              Next Difference
+⇧F7             Previous Difference
+⌘⌃→             Accept Left Side
+⌘⌃←             Accept Right Side
+
+[Solution & Build]
+⌃⇧O             Open Solution or Project
+⌘F9             Build Solution
+⌃⌥N             New in This Directory
+⌘⌥7             Show NuGet window
+

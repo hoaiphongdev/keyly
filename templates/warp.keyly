@@ -1,0 +1,132 @@
+# Sheet Name: Warp Terminal Shortcuts
+# App: /Applications/Warp.app
+
+[Warp Essentials]
+⌘D              Split Pane Right
+⌃⌘L             Launch Configuration Palette
+⌃⌘T             Open Theme Picker
+⌃R              Command Search
+⌃⇧R             Workflows
+⌃`              Generate
+⌘L              Focus Terminal Input
+⌃I              Warpify Subshell
+⌘\              Warp Drive
+⌘O              File Search
+⌘P              Open Command Palette
+
+[Blocks]
+> Warp's unique block-based output system.
+⌥↓              Select the Closest Bookmark Down
+⌥⇧⌘C            Copy Command Output
+⌥↑              Select the Closest Bookmark Up
+⌘A              Select All Blocks
+⌘K              Clear Blocks
+⌘B              Bookmark Selected Block
+⌘↓              Select Next Block
+⌘I              Reinput Selected Commands
+⌘↑              Select Previous Block
+⌃M              Open Block Context Menu
+⇧⌘C             Copy Command
+⇧⌘I             Reinput Selected Commands as Root
+⇧⌘S             Share Selected Block
+⇧↓              Expand Selected Blocks Below
+⇧↑              Expand Selected Blocks Above
+
+[Input Editor]
+> When typing in the command input area.
+⌥⌫              Delete Word Left
+⌥⌘F             Fold Selected Ranges
+⌥⌘[             Fold
+⌥⌘]             Unfold
+⌥⌦              Delete Word Right
+⌘A              Select All
+⌘⌫              Delete All Left
+⌘⌦              Delete All Right
+⌘↓              Move Cursor to the Bottom
+⌘I              Inspect Command
+⌘←              Home
+⌘→              End
+⌃A              Move to Start of Line
+⌃B              Move Cursor Left
+⌃C              Clear Command Editor
+⌃D              Delete
+⌃E              Move to End of Line
+⌃F              Move Cursor Right / Accept Autosuggestion
+⌃G              Add Selection for Next Occurrence
+⌃H              Remove the Previous Character
+⌃J              Insert Newline
+⌃K              Cut All Right
+⌃L              Clear Screen
+⌃N              Move Cursor Down
+⌃P              Move Cursor Up
+⌃⇧A             Select to Start of Line
+⌃⇧B             Select One Character to the Left
+⌃⇧↓             Add Cursor Below
+⌃⇧E             Select to End of Line
+⌘Z              Undo
+⇧⌘Z             Redo
+⌃⇧F             Select One Character to the Right
+⌃⇧N             Select Down
+⌃⇧P             Select Up
+⌃⇧↑             Add Cursor Above
+⌃U              Copy and Clear Selected Lines
+⌃W              Cut Word Left
+⌥.              Insert Last Word of Previous Command
+⌥A              Move to the Start of the Paragraph
+⌥B              Move Backward One Word
+⌥D              Cut Word Right
+⌥E              Move to the End of the Paragraph
+⌥F              Move Forward One Word
+⌃⌥←             Move Backward One Subword
+⌃⌥→             Move Forward One Subword
+⇧⌘K             Clear Selected Lines
+⇧⌥<             Move to the Start of the Buffer
+⇧⌥>             Move to the End of the Buffer
+⇧⌥B             Select One Word to the Left
+⇧⌥F             Select One Word to the Right
+
+[Terminal]
+> Pane and window management.
+⌥⌘↓             Switch Panes Down
+⌥⌘←             Switch Panes Left
+⌥⌘→             Switch Panes Right
+⌥⌘↑             Switch Panes Up
+⌘,              Open Settings
+⌘G              Find the Next Occurrence
+⌘P              Toggle Command Palette
+⌘[              Activate Previous Pane
+⌘]              Activate Next Pane
+⌃⌘↓             Resize Pane Down
+⌃⌘K             Open Keybindings Editor
+⌃⌘←             Resize Pane Left
+⌃⌘→             Resize Pane Right
+⌃⌘↑             Resize Pane Up
+⌃⇧?             Open Resource Center
+⇧⌘D             Split Pane Down
+⇧⌘⏎             Toggle Maximize Active Pane
+⇧⌘G             Find the Previous Occurrence
+⇧⌘P             Toggle Navigation Palette
+
+[Fundamentals]
+⌘-              Decrease Font Size
+⌘0              Reset Font Size to Default
+⌘1              Switch to 1st Tab
+⌘2              Switch to 2nd Tab
+⌘3              Switch to 3rd Tab
+⌘4              Switch to 4th Tab
+⌘5              Switch to 5th Tab
+⌘6              Switch to 6th Tab
+⌘7              Switch to 7th Tab
+⌘8              Switch to 8th Tab
+⌘9              Switch to Last Tab
+⌘=              Increase Font Size
+⌘C              Copy
+⌘F              Find
+⌘V              Paste
+⌘T              Open New Tab
+⇧⌘T             Reopen Closed Tab
+⌃⇧←             Move Tab Left
+⌃⇧→             Move Tab Right
+⇧⌘{             Activate Previous Tab
+⇧⌘}             Activate Next Tab
+

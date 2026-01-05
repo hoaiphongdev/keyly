@@ -1,0 +1,34 @@
+# Sheet Name: Postman Shortcuts
+# App: /Applications/Postman.app
+
+[Navigation]
+> Use arrow keys to navigate collections.
+⌘⌥1             Focus Sidebar
+⌘⌥2             Focus Builder
+⌘1-9            Focus on #th Tab
+⌘⇧/             Switch Between Tabs
+↓               Move to Next Item
+↑               Move to Previous Item
+→               Expand Collection/Folder
+←               Collapse Collection/Folder
+⇧↓              Select Current AND Next Item
+⇧↑              Select Current AND Previous Item
+⌘F              Search Sidebar
+⏎               Open Request in a Tab
+
+[Manipulation]
+> Select item in sidebar first.
+⌘C              Copy
+⌘V              Paste
+⌦               Delete
+⌘D              Duplicate
+⌘E              Edit/Rename
+
+[Global]
+⌘S              Save
+⇧⌘S             Save As
+⌘⏎              Send Request
+⌘\              Toggle Sidebar
+⌘L              Jump to URL
+⌘⌥C             Open Console
+

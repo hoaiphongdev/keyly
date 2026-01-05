@@ -1,0 +1,129 @@
+# Sheet Name: RubyMine Shortcuts
+# App: /Applications/RubyMine.app
+
+[Search & Navigation]
+> ⇧⇧ and ⌃⌃ mean double-tap the key.
+⇧⇧              Search Everywhere
+⌘⇧A             Find Action
+⌃⌃              Run Anything
+⌘E              View Recent Files
+⇧⌘E             View Recent Locations
+⌘O              Go to Class
+⌘⇧O             Go to File
+⌘⌥O             Go to Symbol
+⌘L              Go to Line
+⌘B              Go to Declaration
+⌘⌥B             Go to Implementation
+⌃⇧B             Go to Type Declaration
+⌘U              Go to Super Method
+⌘[              Navigate Back
+⌘]              Navigate Forward
+F2              Next Highlighted Error
+⇧F2             Previous Highlighted Error
+
+[Editing]
+⌘/              Toggle Line Comment
+⌘⌥/             Toggle Block Comment
+⌘D              Duplicate Line
+⌘⌫              Delete Line
+⌥↑              Extend Selection
+⌥↓              Shrink Selection
+⌘⇧↑             Move Statement Up
+⌘⇧↓             Move Statement Down
+⌥⇧↑             Move Line Up
+⌥⇧↓             Move Line Down
+⌘⇧U             Toggle Case
+⌘⇧⏎             Complete Statement
+⌥⏎              Show Context Actions
+⌘⇧V             Paste from History
+⌘J              Insert Live Template
+
+[Code Intelligence]
+> Press ⌃Space multiple times for more suggestions.
+⌃Space          Basic Completion
+⌃⇧Space         Smart Completion
+⌘P              Parameter Info
+⌃J              Quick Documentation
+⌘F12            File Structure
+⌥F7             Find Usages
+⌘⌥F7            Show Usages
+⇧⌘F7            Highlight Usages in File
+
+[Refactoring]
+> Select code or place cursor on symbol first.
+⌃T              Refactor This
+⇧F6             Rename
+⌘⌥V             Extract Variable
+⌘⌥M             Extract Method
+⌘⌥C             Extract Constant
+⌘⌥F             Extract Field
+⌘⌥P             Extract Parameter
+F6              Move
+F5              Copy
+⌘⌥N             Inline
+
+[Find & Replace]
+⌘F              Find
+⌘R              Replace
+⌘G              Find Next
+⇧⌘G             Find Previous
+⇧⌘F             Find in Files
+⇧⌘R             Replace in Files
+⌘⌥L             Reformat Code
+⌃⌥O             Optimize Imports
+
+[Run & Debug]
+> Use with debugger attached for stepping.
+⌃R              Run
+⌃D              Debug
+⌃⇧R             Run Context Configuration
+⌃⇧D             Debug Context Configuration
+⌘F2             Stop
+F8              Step Over
+F7              Step Into
+⇧F7             Smart Step Into
+⇧F8             Step Out
+⌥F9             Run to Cursor
+⌘F8             Toggle Breakpoint
+⇧⌘F8            View Breakpoints
+⌥F8             Evaluate Expression
+
+[Ruby & Rails]
+> Ruby and Rails specific features.
+⌃⌃              Run Rake/Rails/Scripts
+⌘⌥T             Surround With
+⌘⌥⏎             Show Quick Fixes
+⌘⇧⏎             Complete Statement
+
+[VCS/Git]
+⌃V              VCS Operations Popup
+⌘K              Commit
+⇧⌘K             Push
+⌘T              Update Project
+⌥⇧C             Recent Changes
+⌘D              Show Diff
+
+[Tool Windows]
+⌘1              Project
+⌘2              Favorites/Bookmarks
+⌘3              Find
+⌘4              Run
+⌘5              Debug
+⌘6              Problems
+⌘7              Structure
+⌘9              Git
+⇧⎋              Hide Active Tool Window
+⌘⇧F12           Hide All Tool Windows
+⌥F12            Terminal
+
+[General]
+⌘,              Settings
+⌘;              Project Structure
+⌘S              Save All
+⌘⌥Y             Synchronize
+⌃⌥←             Resize Tool Window Left
+⌃⌥→             Resize Tool Window Right
+⌃⌥↑             Resize Tool Window Up
+⌃⌥↓             Resize Tool Window Down
+
+

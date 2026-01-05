@@ -1,24 +1,19 @@
-# Sheet Name: JetBrains Rider Shortcuts
-# App: /Applications/Rider.app
+# Sheet Name: DataGrip Shortcuts
+# App: /Applications/DataGrip.app
 
-[Search & Navigation]
+[Essentials]
 > ⇧⇧ and ⌃⌃ mean double-tap the key.
 ⇧⇧              Search Everywhere
 ⌘⇧A             Find Action
 ⌃⌃              Run Anything
 ⌘E              Recent Files
-⌘⇧O             Go to File
-⌘⌥O             Go to Symbol
-⌘L              Go to Line/Column
-⌘B              Go to Declaration or Usages
-⌘⌥B             Go to Implementation(s)
-⌘⇧B             Go to Type Declaration
-⌘U              Go to Super Method
-⌘[              Navigate Back
-⌘]              Navigate Forward
+⌥⏎              Show Intention Actions
 ⌥F1             Select In...
-⌃⇧↓             Next Method
-⌃⇧↑             Previous Method
+⌘,              Settings
+⌘N              Generate...
+⌃V              VCS Operations Popup
+⌃T              Refactor This
+⌘⌥L             Reformat Code
 
 [Basic Editing]
 ⌘X              Cut
@@ -27,6 +22,7 @@
 ⌘⌥⇧V            Paste as Plain Text
 ⌘⇧V             Paste from History
 ⌘⇧C             Copy Paths
+⌘⌥⇧C            Copy Reference
 ⌘S              Save All
 ⌘Z              Undo
 ⌘⇧Z             Redo
@@ -40,18 +36,24 @@
 ⌘D              Duplicate Line or Selection
 ⌘⇧U             Toggle Case
 ⌘⇧N             Scratch File
+⇧F4             Open Source in New Window
+⌃⇧.             Increase Font Size
+⌃⇧,             Decrease Font Size
 
-[Caret & Selection]
+[Caret Navigation]
 ⌥←              Move Caret to Previous Word
 ⌥→              Move Caret to Next Word
 ⌘←              Move Caret to Line Start
 ⌘→              Move Caret to Line End
-⌃[              Containing Declaration
 ⌃M              Move Caret to Matching Brace
 ⌘⌥[             Move Caret to Code Block Start
 ⌘⌥]             Move Caret to Code Block End
+⌃⇧↓             Next Method
+⌃⇧↑             Previous Method
 ⌘Home           Move Caret to Text Start
 ⌘End            Move Caret to Text End
+
+[Selection]
 ⌘A              Select All
 ⌥↑              Extend Selection
 ⌥↓              Shrink Selection
@@ -59,6 +61,19 @@
 ⌥⇧→             Select Next Word
 ⌘⇧←             Select to Line Start
 ⌘⇧→             Select to Line End
+⌘⌥⇧[            Select to Code Block Start
+⌘⌥⇧]            Select to Code Block End
+⌘⇧Home          Select to Text Start
+⌘⇧End           Select to Text End
+
+[Code Folding]
+⌘+              Expand
+⌘-              Collapse
+⌘⌥+             Expand Recursively
+⌘⌥-             Collapse Recursively
+⌘⇧+             Expand All
+⌘⇧-             Collapse All
+⌘.              Fold Selection
 
 [Multiple Carets]
 > Double ⌥ + arrow for clone caret.
@@ -71,21 +86,11 @@
 ⌘⌃G             Select All Occurrences
 ⌃⇧G             Deselect Last Occurrence
 
-[Code Folding]
-⌘+              Expand
-⌘-              Collapse
-⌘⌥+             Expand Recursively
-⌘⌥-             Collapse Recursively
-⌘⇧+             Expand All
-⌘⇧-             Collapse All
-⌘.              Fold Selection
-
 [Coding Assistance]
 ⌥⏎              Show Intention Actions
 ⌃Space          Basic Completion
 ⌃⇧Space         Type-Matching Completion
-⌥⇧\             Complete Code with AI Assistant
-⌘\              Generate Code with AI Assistant
+⌃⌥Space         Second Basic Completion
 ⌘⇧⏎             Complete Current Statement
 ⌘⌥L             Reformat Code
 ⌘P              Parameter Info
@@ -96,8 +101,8 @@ F1              Quick Documentation
 ⌥⇧↓             Move Line Down
 ⌘/              Comment with Line Comment
 ⌘⌥/             Comment with Block Comment
-⌘⌥T             Surround With...
-⌘N              Generate...
+⌘⌥T             Surround With
+⌘N              Generate
 
 [Find & Replace]
 ⌘F              Find
@@ -106,32 +111,36 @@ F1              Quick Documentation
 ⌘R              Replace
 ⌘⇧F             Find in Files
 ⌘⇧R             Replace in Files
+⌘⇧O             Go to File
+⌘F12            File Structure
+⌘⌥O             Go to Symbol
 
-[Code Analysis]
-F2              Next Code Issue
-⇧F2             Previous Code Issue
-⌥F2             Next Error
-⌥⇧F2            Previous Error
-⌘F1             Error Description
-⌘⌥⇧I            Run Inspection by Name
+[Navigation]
+⌘L              Go to Line/Column
+⌃⇥              Switcher
+⌥F1             Select In
+⌘⇧⌫             Last Edit Location
+⌘[              Navigate Back
+⌘]              Navigate Forward
+⌘⇧]             Select Next Tab
+⌘⇧[             Select Previous Tab
+F3              Toggle Anonymous Bookmark
+⌥F3             Toggle Bookmark with Mnemonic
+⌘F3             Show All Bookmarks
+⌘⌥↓             Next Occurrence
+⌘⌥↑             Previous Occurrence
 
-[Usages & References]
+[Usages & Symbols]
 ⌥F7             Find Usages
+⌘B              Go to Declaration
 ⌘⌥F7            Show Usages
 ⌘⇧F7            Highlight Usages in File
 
-[Refactoring]
-> Select code or place cursor on symbol first.
-⌃T              Refactor This
-⇧F6             Rename
-⌘F6             Change Signature
-⌘⌥N             Inline
-F6              Move
-⌘⌥M             Extract Method
-⌘⌥F             Introduce Field
-⌘⌥P             Introduce Parameter
-⌘⌥V             Introduce Variable
-⌘⌦              Safe Delete
+[Code Analysis]
+⌘F1             Error Description
+F2              Next Highlighted Error
+⇧F2             Previous Highlighted Error
+⌘⌥⇧I            Run Inspection by Name
 
 [Run & Debug]
 > Use with debugger attached for stepping.
@@ -142,14 +151,29 @@ F6              Move
 ⌥⇧F5            Attach to Process
 ⌘F2             Stop
 ⌘⌥R             Resume Program
+⌘⇧F2            Stop Background Processes
 F8              Step Over
+⌥⇧F8            Force Step Over
 F7              Step Into
 ⇧F7             Smart Step Into
+⌥⇧F7            Force Step Into
 ⇧F8             Step Out
 ⌥F9             Run To Cursor
-⌘F8             Toggle Line Breakpoint
-⌘⇧F8            View Breakpoints
+⌘⌥F9            Force Run To Cursor
+⌥F10            Show Execution Point
 ⌥F8             Evaluate Expression
+⌘⌥F8            Quick Evaluate Expression
+⌘F8             Toggle Line Breakpoint
+⌘⌥⇧F8           Toggle Temporary Line Breakpoint
+⌘⇧F8            View/Edit Breakpoints
+
+[Refactoring]
+⌃T              Refactor This
+⇧F6             Rename
+⌘F6             Change Signature
+F6              Move
+⌘⌥P             Introduce Parameter
+⌘⌥V             Introduce Variable
 
 [VCS/Git]
 ⌃V              VCS Operations Popup
@@ -160,42 +184,32 @@ F7              Step Into
 ⌃⌥⇧↓            Next Change
 ⌃⌥⇧↑            Previous Change
 
-[Unit Testing]
-⌥⇧U             Unit Testing Quick List
-⌘;R             Run Unit Tests
-⌘;D             Debug Unit Tests
-⌘;T             Repeat Previous Run
-⌘;F             Rerun Failed Tests
-⌘;L             Run All Tests from Solution
+[Diff Viewer]
+⌘D              Show Diff / Compare Files
+F7              Next Difference
+⇧F7             Previous Difference
+⌘⌃→             Accept Left Side
+⌘⌃←             Accept Right Side
+⌘⇧D             Show Diff Settings Popup
 
 [Tool Windows]
-⌘1              Solution/Project
-⌘2              Bookmarks
+⌘1              Database Explorer
+⌘2              Files
 ⌘3              Find
 ⌘4              Run
 ⌘5              Debug
 ⌘6              Problems
 ⌘7              Structure
+⌘8              Services
 ⌘9              Version Control
 ⌘0              Commit
 ⌥F12            Terminal
 ⇧⎋              Hide Active Tool Window
 ⌘⇧F12           Hide All Tool Windows
+F12             Jump to Last Tool Window
 ⌃⌥←             Stretch to Left
 ⌃⌥→             Stretch to Right
 ⌃⌥↑             Stretch to Top
 ⌃⌥↓             Stretch to Bottom
 
-[Diff Viewer]
-⌘D              Show Diff
-F7              Next Difference
-⇧F7             Previous Difference
-⌘⌃→             Accept Left Side
-⌘⌃←             Accept Right Side
-
-[Solution & Build]
-⌃⇧O             Open Solution or Project
-⌘F9             Build Solution
-⌃⌥N             New in This Directory
-⌘⌥7             Show NuGet window
 

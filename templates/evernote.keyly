@@ -1,0 +1,139 @@
+# Sheet Name: Evernote Shortcuts
+# App: /Applications/Evernote.app
+
+[Global]
+> Works system-wide when Evernote is running.
+⌃⌥⌘N            New note window
+⌃⌘V             Paste to Evernote
+⇧⌘K             Search in Evernote
+⌃⌘E             Search in Evernote (alt)
+⌃⌘N             Open Evernote Helper
+⌃⌘⌫             Capture screen
+
+[General]
+⌘N              New note
+⇧⌘N             New notebook
+⌘T              New task
+⌃⌘T             New tag
+⌘E              New event
+⌘K              Search
+⌥⌘N             Convert Scratch Pad to Note
+⌘⌫              Delete / Move to Trash
+⌘A              Select all (note list)
+⌘M              Minimize window
+⌘W              Close window
+⌘H              Hide Evernote
+⌘Q              Quit Evernote
+⌘/              Keyboard shortcuts
+⌘,              Settings
+
+[Navigation]
+⌘J              Switch to...
+⌘1-9            Open shortcut 1-9
+⌥⌘1             Open Home
+⌥⌘2             Open Notes
+⌥⌘3             Open Tasks
+⌥⌘4             Open Files
+⌥⌘5             Open Calendar
+⌥⌘6             Open Notebooks
+⌥⌘7             Open Tags
+⌥⌘8             Open Shared with Me
+⌥⌘9             Open Templates
+⇧F5             Switch to snippet view
+⇧F6             Switch to card view
+⇧F7             Switch to top list view
+⇧F8             Switch to side list view
+F5              Switch note list view
+⇧⌘J             Open Tag filter
+⌘[              Move back
+⌘]              Move forward
+⌘|              Focus on note list
+⌥F10            Focus on formatting bar
+⌥⌘←             Collapse note list
+⌥⌘→             Expand note list
+
+[View]
+⌘=              Zoom in
+⌘-              Zoom out
+⌘0              Zoom to 100%
+⌥⌘S             Expand/collapse sidebar
+⌃⌘F             Full screen
+
+[Note Actions]
+⌘O              Open Note in new window
+⌥⌘O             Open Note in Lite editor
+⌘S              Share
+⌃⌘M             Move
+⌘'              Add tag
+⌃⌥⌘T            Edit tags
+⌘L              Copy note link
+⌃⌥⌘C            Copy internal link
+⇧⌘I             Note info
+⌘P              Print
+F2              Rename
+
+[Editing]
+⌘Z              Undo
+⇧⌘Z             Redo
+⌘C              Copy
+⌘X              Cut
+⌘V              Paste
+⇧⌘V             Paste and match style
+⌘A              Select all
+⌘F              Find within note
+⇧⌘F             Find and replace
+⌘K              Add/edit link
+⌘⌥K             Add note link
+⇧⌘H             Insert divider
+⌃⌘B             Insert code block
+⇧⌘D             Insert date
+⇧⌥⌘D            Insert time
+⇧⌘M             Add comment
+
+[Text Formatting]
+⌘B              Bold
+⌘I              Italic
+⌘U              Underline
+⌃⌘H             Highlight
+⌃⌘K             Strikethrough
+⇧⌘>             Increase font size
+⇧⌘<             Decrease font size
+⇧⌘U             Bulleted list
+⇧⌘O             Numbered list
+⇧⌘C             Checklist
+⌥⌘{             Align left
+⌥⌘+             Align center
+⌥⌘}             Align right
+⌥⌘-             Justify
+⇧⌘]             Indent
+⇧⌘[             Outdent
+⇥               Indent / Forward
+⇧⇥              Outdent / Previous
+⌃⌘+             Superscript
+⌃⌘-             Subscript
+⇧Space          Simplify formatting
+⇧⌘Space         Remove formatting
+⇧⌘X             Encrypt selected text
+
+[Auto Formatting]
+> Type these at start of line.
+#               Large header
+##              Medium header
+###             Small header
+()              Task
+(x)             Task (checked)
+[]              Checklist
+[x]             Checklist (checked)
+1.              Numbered list
+*               Bulleted list
+-               Bulleted list
+---             Divider
+```             Code block
+>               Quote block
+
+[AI Assistant]
+⌥A              Toggle AI Assistant
+⌥⇧A             Expand/collapse AI Assistant
+⌥C              Create a new chat
+
+

@@ -1,0 +1,122 @@
+# Sheet Name: Craft Shortcuts
+# App: /Applications/Craft.app
+
+[General]
+⎋               Cancel
+⌘,              Open Settings
+⌥⌘,             See All Keyboard Shortcuts
+
+[Navigation]
+⌘←              Navigate Back
+⌘[              Navigate Back (alt)
+⌘→              Navigate Forward
+⌥⌘→             Navigate Into
+⌥⌘]             Navigate Into (alt)
+⌘O              Quick Open
+⌥⌘N             Go to Daily Note
+⌥⌘⏎             Open Link
+
+[View]
+⌘.              Toggle Focus Mode
+⌘\              Toggle Left Sidebar
+⌘+              Zoom In
+⌘-              Zoom Out
+⌘0              Actual Size
+
+[Documents]
+⌘N              New Document
+⌥⌘N             New Quick Note
+⌫               Delete Document
+⌘F              Search in Space
+⌥⌘L             Copy Deeplink to Current View
+⌥⇧⌘L            Copy Deeplink to Selection
+
+[Tasks]
+⌥⌘T             Mark Task as Done
+⌥⇧⌘T            Mark Task as Cancelled
+Space           Create New Task (in Tasks view)
+
+[Editing]
+⌘F              Search
+⌘E              Use Selection to Search
+⌘P              Print
+Space           Insert Block Below
+⇧Space          Insert Block Above
+⌘⇧⏎             Open Insert Panel
+⏎               Edit Text Block
+⇧⏎              Edit Page Block
+⎋               End Editing
+⌘D              Duplicate Block
+⌫               Delete Block
+⌘⏎              Assistant
+⌘⇧M             Add or View Comments
+⌘Z              Undo
+⌘⇧Z             Redo
+
+[Text Style]
+⌃+              Increase Text Size
+⌃-              Decrease Text Size
+⌃1              Title
+⌃2              Subtitle
+⌃3              Heading
+⌃4              Strong
+⌃5              Body
+⌃6              Caption
+⌘⇧P             Page
+⌘⇧L             Card
+
+[Lists]
+⌥⌘6             To-Do List
+⌥⌘T             Mark Task Completed
+⌥⇧⌘T            Mark Task Cancelled
+⌥⌘7             Toggle List
+⌥⌘8             Bullet List
+⌥⌘9             Numbered List
+⌥⌘0             No List
+
+[Text Format]
+⌘B              Bold
+⌘I              Italic
+⌘⇧C             Code
+⌘⇧-             Strikethrough
+⌘K              Link
+⌘⇧E             Type Equation
+⌘⇧K             Block Link
+⌘⇧B             Highlight
+⌥⌘C             Copy Format
+⌥⌘V             Paste Format
+
+[Decorations]
+⌘⇧I             Focus
+⌘⇧'             Block
+
+[Indentation]
+⇥               Increase Indent
+⇧⇥              Decrease Indent
+
+[Organize]
+⌥⌘↑             Move Block Up
+⌥⌘↓             Move Block Down
+⌘⇧↑             Move to Top
+⌘⇧↓             Move to Bottom
+⌃⌘N             Move to New Document
+⌘G              Group
+⌘⇧G             Ungroup
+⌘X              Cut
+⌘C              Copy
+⌘V              Paste
+⌘⇧V             Paste Without Formatting
+
+[Window]
+⌘⇧N             New Window
+⌘W              Close Tab or Window
+fnF             Full Screen
+⌘T              New Tab
+⌘1-9            Switch to Tab 1-9
+⌃⇥              Switch to Next Tab
+⌘⇧]             Switch to Next Tab (alt)
+⌃⇧⇥             Switch to Previous Tab
+⌘⇧[             Switch to Previous Tab (alt)
+⌘⇧T             Reopen Last Closed Tab
+
+

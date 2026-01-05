@@ -1,0 +1,93 @@
+# Sheet Name: Obsidian Shortcuts
+# App: /Applications/Obsidian.app
+
+[Common Actions]
+⌘C              Copy
+⌘X              Cut
+⌘V              Paste
+⌘⇧V             Paste without formatting
+⌘Z              Undo
+⌘⇧Z             Redo
+
+[Text Formatting]
+⌘B              Bold
+⌘I              Italic
+⌘K              Insert link
+⌘⇧K             Delete line (no selection)
+
+[Text Navigation]
+⌥←              Beginning of previous word
+⌥→              End of next word
+⌘←              Beginning of line
+⌘→              End of line
+⌘↑              Beginning of note
+⌘↓              End of note
+fn↑             Page up
+fn↓             Page down
+
+[Text Selection]
+⎋               Simplify selection
+⌘A              Select all
+⌥⇧←             Select to previous word
+⌥⇧→             Select to next word
+⌘⇧←             Select to line start
+⌘⇧→             Select to line end
+⌘⇧↑             Select to note start
+⌘⇧↓             Select to note end
+
+[Text Editing]
+⌥⌫              Delete previous word
+⌥⌦              Delete next word
+⌘⌫              Delete to line start
+⌘⌦              Delete to line end
+
+[Files & Navigation]
+⌘O              Open Quick Switcher
+⌘P              Open Command Palette
+⌘N              Create new note
+⌘⇧N             Create note in new pane
+⌘W              Close active pane
+⌘E              Toggle edit/preview mode
+⌘,              Open settings
+⌘⌥←             Navigate back
+⌘⌥→             Navigate forward
+⌘F              Find in current file
+⌘⇧F             Search in all files
+⌘G              Open graph view
+⌘⇧G             Open local graph
+
+[Panes & Workspace]
+⌘\              Split vertically
+⌘⇧\             Split horizontally
+⌘⌥↑             Focus pane above
+⌘⌥↓             Focus pane below
+⌘⌥←             Focus pane left
+⌘⌥→             Focus pane right
+
+[Editor]
+⌘]              Indent
+⌘[              Outdent
+⌘⏎              Follow link under cursor
+⌘⌥⏎             Open link in new pane
+⌘D              Delete paragraph
+⌘/              Toggle comment
+⌘L              Toggle checkbox
+
+[Headings]
+⌘1              Toggle heading 1
+⌘2              Toggle heading 2
+⌘3              Toggle heading 3
+⌘4              Toggle heading 4
+⌘5              Toggle heading 5
+⌘6              Toggle heading 6
+
+[View]
+⌘=              Zoom in
+⌘-              Zoom out
+⌘0              Reset zoom
+
+[Sidebar]
+⌘⇧L             Toggle left sidebar
+⌘⇧R             Toggle right sidebar
+
+

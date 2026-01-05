@@ -1,0 +1,128 @@
+# Sheet Name: Notion Shortcuts
+# App: /Applications/Notion.app
+
+[Navigation]
+⌘P              Open search / Quick Find
+⌘K              Open search / Quick Find
+⌘F              Search in page
+⌘L              Copy page URL
+⌘[              Go back
+⌘]              Go forward
+⌃⇧K             Previous database page (peek view)
+⌃⇧J             Next database page (peek view)
+⌘⇧U             Go up one level in hierarchy
+
+[Desktop]
+⌘N              New page
+⌘⇧N             New Notion window
+⌥⇧+click        Open page as new window
+⌘+click         Open link as new tab
+⌘T              New Notion tab
+⌘⇧L             Toggle dark/light mode
+⌘+              Zoom in
+⌘-              Zoom out
+
+[Text Formatting]
+⌘B              Bold
+⌘I              Italic
+⌘U              Underline
+⌘⇧S             Strikethrough
+⌘K              Add link
+⌘E              Inline code
+⌘⇧M             Create comment
+⌘⇧H             Apply last color/highlight
+
+[Block Types]
+⌘⌥0             Text block
+⌘⌥1             Heading 1
+⌘⌥2             Heading 2
+⌘⌥3             Heading 3
+⌘⌥4             To-do checkbox
+⌘⌥5             Bulleted list
+⌘⌥6             Numbered list
+⌘⌥7             Toggle list
+⌘⌥8             Code block
+⌘⌥9             New page block
+
+[Editing]
+⏎               Insert line of text
+⇧⏎              Line break within block
+⇥               Indent / nest content
+⇧⇥              Un-nest content
+
+[Block Selection]
+⎋               Select current block / Clear selection
+⌘A              Select block cursor is in
+↑↓              Select different block
+⇧↑↓             Expand selection up/down
+⌘⇧+click        Select/deselect entire block
+⇧+click         Select block and all between
+
+[Block Actions]
+⌫               Delete selected blocks
+⌘D              Duplicate blocks
+⏎               Edit text in selected block
+⌘/              Edit or change selected blocks
+⌘⇧↑↓←→          Move selected block
+⌘⌥T             Expand/close all toggles
+⌘⏎              Modify block (open/check/toggle)
+⌥+drag          Duplicate content while dragging
+
+[Database]
+⌘R              Fill cells right (table)
+⌘D              Fill cells down (table)
+
+[Markdown Syntax]
+> Type these followed by space:
+# + space       Heading 1
+## + space      Heading 2
+### + space     Heading 3
+* + space       Bulleted list
+- + space       Bulleted list
+1. + space      Numbered list
+[] + space      To-do checkbox
+> + space       Toggle list
+" + space       Quote block
+---             Divider
+
+[Inline Markdown]
+**text**        Bold
+*text*          Italic
+`text`          Inline code
+~text~          Strikethrough
+
+[Slash Commands]
+> Type / then command name.
+/text           Text block
+/page           New page
+/bullet         Bulleted list
+/num            Numbered list
+/todo           To-do list
+/toggle         Toggle list
+/h1             Heading 1
+/h2             Heading 2
+/h3             Heading 3
+/quote          Quote block
+/div            Divider
+/code           Code block
+/image          Image
+/video          Video
+/embed          Embed
+/duplicate      Duplicate block
+/delete         Delete block
+/toc            Table of contents
+/equation       Math equation
+
+[@ Commands]
+> Type @ then:
+@name           Mention person
+@pagename       Link to page
+@date           Add date
+@remind         Add reminder
+
+[Link Commands]
+> Type [[ or + then page name.
+[[pagename      Link to page
++pagename       Create sub-page
+
+

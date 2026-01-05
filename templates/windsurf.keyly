@@ -1,0 +1,95 @@
+# Sheet Name: Windsurf Shortcuts
+# App: /Applications/Windsurf.app
+
+[AI Autocomplete]
+> Windsurf AI completion shortcuts.
+⇥               Accept suggestion
+⎋               Cancel suggestion
+⌘→              Accept suggestion word-by-word
+⌥]              Next suggestion
+⌥[              Previous suggestion
+⌥\              Trigger suggestion
+
+[General]
+> Inherits most VS Code shortcuts.
+⇧⌘P             Show Command Palette
+⌘P              Quick Open, Go to File
+⇧⌘N             New window
+⌘W              Close window
+⌘,              User Settings
+⌘K⌘S            Keyboard Shortcuts
+
+[Basic Editing]
+⌘X              Cut line (empty selection)
+⌘C              Copy line (empty selection)
+⌥↓              Move line down
+⌥↑              Move line up
+⇧⌥↓             Copy line down
+⇧⌥↑             Copy line up
+⇧⌘K             Delete line
+⌘⏎              Insert line below
+⇧⌘⏎             Insert line above
+⌘]              Indent line
+⌘[              Outdent line
+⌘/              Toggle line comment
+⇧⌥A             Toggle block comment
+
+[Multi-cursor & Selection]
+⌥+click         Insert cursor
+⌥⌘↑             Insert cursor above
+⌥⌘↓             Insert cursor below
+⌘U              Undo last cursor operation
+⌘L              Select current line
+⇧⌘L             Select all occurrences of selection
+⌘D              Add selection to next Find match
+
+[Search & Replace]
+⌘F              Find
+⌥⌘F             Replace
+⌘G              Find next
+⇧⌘G             Find previous
+⇧⌘F             Find in files
+⇧⌘H             Replace in files
+
+[Navigation]
+⌘T              Show all Symbols
+⌃G              Go to Line
+⌘P              Go to File
+⇧⌘O             Go to Symbol
+⇧⌘M             Show Problems panel
+F8              Go to next error/warning
+⇧F8             Go to previous error/warning
+⌃-              Go back
+⌃⇧-             Go forward
+
+[Editor Management]
+⌘W              Close editor
+⌘\              Split editor
+⌘1              Focus 1st editor group
+⌘2              Focus 2nd editor group
+⌘3              Focus 3rd editor group
+
+[File Management]
+⌘N              New File
+⌘O              Open File
+⌘S              Save
+⇧⌘S             Save As
+⌥⌘S             Save All
+⇧⌘T             Reopen closed editor
+
+[Display]
+⌃⌘F             Toggle full screen
+⌘=              Zoom in
+⇧⌘-             Zoom out
+⌘B              Toggle Sidebar visibility
+⇧⌘E             Show Explorer
+⇧⌘F             Show Search
+⌃⇧G             Show Source Control
+⇧⌘D             Show Debug
+⇧⌘X             Show Extensions
+
+[Terminal]
+⌃`              Show integrated terminal
+⌃⇧`             Create new terminal
+
+

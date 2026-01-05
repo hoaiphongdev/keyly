@@ -1,0 +1,93 @@
+# Sheet Name: Sublime Text Shortcuts
+# App: /Applications/Sublime Text.app
+
+[Editing]
+⌘X              Cut line
+⌘⏎              Insert line after
+⇧⌘⏎             Insert line before
+⌃⌘↑             Move line/selection up
+⌃⌘↓             Move line/selection down
+⌘L              Select line (repeat for next lines)
+⌘D              Select word (repeat for next occurrence)
+⌃⌘G             Select all occurrences of selection
+⌃⇧↑             Extra cursor on line above
+⌃⇧↓             Extra cursor on line below
+⌃M              Jump to closing/opening parentheses
+⌃⇧M             Select all contents in parentheses
+⌃A              Move to beginning of line
+⌘←              Move to beginning of text on line
+⌃E              Move to end of line
+⌘→              Move to end of line
+⌘K⌘K            Delete from cursor to end of line
+⌘K⌘⌫            Delete from cursor to start of line
+⌘]              Indent current line(s)
+⌘[              Un-indent current line(s)
+⇧⌘D             Duplicate line(s)
+⌘J              Join line below to current line
+⌘/              Comment/un-comment current line
+⌥⌘/             Block comment current selection
+⌘Y              Redo or repeat last shortcut
+⇧⌘V             Paste and indent correctly
+⌃Space          Select next auto-complete suggestion
+⌘U              Soft undo
+⌃⇧W             Wrap selection in HTML tag
+⌃⇧K             Delete current line
+
+[Navigation]
+> Goto Anywhere features.
+⌘P              Quick-open files by name
+⌘T              Quick-open files by name
+⌘R              Goto symbol
+⌃G              Goto line in current file
+
+[General]
+⇧⌘P             Command Palette
+⌃`              Python Console
+⌃⌘F             Toggle fullscreen mode
+⌃⇧⌘F            Toggle distraction-free mode
+⌘K⌘B            Toggle side bar
+⌃⇧P             Show scope in status bar
+
+[Find & Replace]
+⌘F              Find
+⌥⌘F             Replace
+⇧⌘F             Find in files
+⌘I              Incremental Find
+
+[Scrolling]
+⌃V              Scroll down one page
+⌃L              Center current line vertically
+⌘↓              Scroll to end of file
+⌘↑              Scroll to start of file
+
+[Tabs]
+⇧⌘T             Open last closed tab
+⌘1-9            Jump to tab in current group
+⌘0              Jump to 10th tab
+⇧⌘[             Cycle left through tabs
+⇧⌘]             Cycle right through tabs
+⌃⇥              Cycle up through recent tabs
+⌃⇧⇥             Cycle down through recent tabs
+
+[Split Window]
+⌥⌘1             Revert to single column
+⌥⌘2             Split into two columns
+⌥⌘3             Split into three columns
+⌥⌘4             Split into four columns
+⌥⌘5             Set view to grid (4 groups)
+⌃1-4            Jump to group
+⌃⇧1-4           Move file to specified group
+
+[Bookmarks]
+⌘F2             Toggle bookmark
+F2              Next bookmark
+⇧F2             Previous bookmark
+⇧⌘F2            Clear bookmarks
+
+[Text Manipulation]
+⌘K⌘U            Transform to Uppercase
+⌘K⌘L            Transform to Lowercase
+⌃⌘↑             Clip text upwards
+⌃⌘↓             Clip text downwards
+
+

@@ -1,0 +1,74 @@
+# Sheet Name: Kitty Terminal Shortcuts
+# App: /Applications/kitty.app
+
+[Scrolling]
+⌘↑              Scroll line up
+⌘↓              Scroll line down
+⌥⌘⇞             Scroll line up (alt)
+⌥⌘⇟             Scroll line down (alt)
+⌘⇞              Scroll page up
+⌘⇟              Scroll page down
+⌘↖              Scroll to top
+⌘↘              Scroll to bottom
+
+[Tabs]
+⌘T              New tab
+⌘W              Close tab
+⌃⇥              Next tab
+⇧⌘]             Next tab (alt)
+⌃⇧⇥             Previous tab
+⇧⌘[             Previous tab (alt)
+⌃⇧.             Move tab forward
+⌃⇧,             Move tab backward
+⇧⌘I             Set tab title
+
+[Windows]
+⌘⏎              New window
+⌘N              New OS window
+⇧⌘D             Close window
+⌃⇧]             Next window
+⌃⇧[             Previous window
+⌃⇧F             Move window forward
+⌃⇧B             Move window backward
+⌃⇧`             Move window to top
+⌘1-9            Focus specific window
+⌃⇧L             Switch to next layout
+
+[Clipboard]
+⌘C              Copy to clipboard
+⌘V              Paste from clipboard
+⌃⇧S             Paste from selection
+
+[Font Size]
+⌘+              Increase font size
+⌘-              Decrease font size
+⌘0              Restore font size
+
+[Display]
+⌃⌘F             Toggle fullscreen
+⌃⇧F10           Toggle maximized
+
+[Shell Integration]
+> Requires shell integration enabled.
+⌃⇧G             View output of last command
+⌃⇧Z             Previous prompt in scrollback
+⌃⇧X             Next prompt in scrollback
+
+[Background Opacity]
+⌃⇧A M           Increase background opacity
+⌃⇧A L           Decrease background opacity
+⌃⇧A 1           Full background opacity
+⌃⇧A D           Reset background opacity
+
+[Other]
+⌃⌘Space         Input unicode character
+⌃⇧E             Click URL with keyboard
+⌃⇧⌫             Reset the terminal
+⌃⌘F5            Reload kitty.conf
+⌘⌥F6            Debug kitty.conf
+⌃⇧O             Pass selection to program
+⌃⇧F2            Edit kitty config file
+⌃⇧F1            View kitty docs in browser
+⌃⇧⎋             Open a kitty shell
+
+

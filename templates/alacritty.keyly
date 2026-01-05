@@ -1,0 +1,90 @@
+# Sheet Name: Alacritty Terminal Shortcuts
+# App: /Applications/Alacritty.app
+
+[General]
+⌘C              Copy
+⌘V              Paste
+⌘K              Clear history
+⌘H              Hide
+⌘⌥H             Hide other applications
+⌘M              Minimize
+⌘Q              Quit
+⌘W              Quit
+⌘N              Create new window
+
+[Tabs]
+⌘T              Create new tab
+⇧⌘]             Select next tab
+⇧⌘[             Select previous tab
+⌘⇥              Select next tab
+⇧⌘⇥             Select previous tab
+⌘1-8            Select tab 1-8
+⌘9              Select last tab
+
+[Font Size]
+⌘0              Reset font size
+⌘=              Increase font size
+⌘+              Increase font size
+⌘-              Decrease font size
+
+[Display]
+⌃⌘F             Toggle fullscreen
+
+[Search]
+⌘F              Search forward
+⌘B              Search backward
+
+[Scrolling]
+⇧⇞              Scroll page up
+⇧⇟              Scroll page down
+⇧Home           Scroll to top
+⇧End            Scroll to bottom
+
+[Vi Mode]
+> Press ⌃⇧Space to toggle Vi mode.
+⌃⇧Space         Toggle Vi mode
+⎋               Clear selection (Vi)
+I               Exit Vi mode
+⌃Y              Scroll line up
+⌃E              Scroll line down
+G               Scroll to top
+⇧G              Scroll to bottom
+⌃B              Scroll page up
+⌃F              Scroll page down
+⌃U              Scroll half page up
+⌃D              Scroll half page down
+Y               Copy and clear selection
+V               Toggle normal selection
+⇧V              Toggle line selection
+⌃V              Toggle block selection
+⌥V              Toggle semantic selection
+⏎               Open
+Z               Center around Vi cursor
+H/J/K/L         Left/Down/Up/Right
+0               First column
+$               Last column
+^               First occupied
+⇧H              High
+⇧M              Middle
+⇧L              Low
+B               Semantic left
+W               Semantic right
+E               Semantic right end
+/               Search forward
+?               Search backward
+N               Search next
+⇧N              Search previous
+
+[Search Mode]
+> When search is active.
+⏎               Confirm search
+⎋               Cancel search
+⌃C              Cancel search
+⌃U              Clear search
+⌃W              Delete word
+⌃P              Previous search history
+⌃N              Next search history
+↑               Previous search history
+↓               Next search history
+
+

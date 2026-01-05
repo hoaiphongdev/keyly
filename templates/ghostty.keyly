@@ -1,0 +1,66 @@
+# Sheet Name: Ghostty Terminal Shortcuts
+# App: /Applications/Ghostty.app
+
+[Window Management]
+⌘N              New window
+⇧⌘W             Close window
+⇧⌥⌘W            Close all windows
+⌘⏎              Toggle fullscreen
+⌃⌘F             Toggle fullscreen (alt)
+⌘Q              Quit application
+
+[Tab Management]
+⌘T              New tab
+⌘W              Close tab/surface
+⇧⌘[             Previous tab
+⇧⌘]             Next tab
+⌘1-8            Go to tab 1-8
+⌘9              Go to last tab
+
+[Split Management]
+⌘D              New split (right)
+⇧⌘D             New split (down)
+⌘[              Focus previous split
+⌘]              Focus next split
+⌥⌘↑             Focus split up
+⌥⌘↓             Focus split down
+⌥⌘←             Focus split left
+⌥⌘→             Focus split right
+⇧⌘⏎             Toggle split zoom
+⌃⌘↑             Resize split up
+⌃⌘↓             Resize split down
+⌃⌘←             Resize split left
+⌃⌘→             Resize split right
+⌃⌘=             Equalize splits
+
+[Copy & Paste]
+⌘C              Copy
+⌘V              Paste
+
+[Text Navigation]
+⌘Home           Scroll to top
+⌘End            Scroll to bottom
+⌘⇞              Scroll page up
+⌘⇟              Scroll page down
+⌘↑              Jump to previous prompt
+⌘↓              Jump to next prompt
+⌘K              Clear screen
+
+[Font Size]
+⌘+              Increase font size
+⌘=              Increase font size
+⌘-              Decrease font size
+⌘0              Reset font size
+
+[Configuration]
+⌘,              Open config
+⇧⌘,             Reload config
+
+[Inspector]
+⌥⌘I             Toggle inspector
+
+[Scrollback]
+⇧⌘J             Write scrollback to file (paste)
+⇧⌥⌘J            Write scrollback to file (open)
+
+

@@ -1,0 +1,59 @@
+# Sheet Name: TablePlus Shortcuts
+# App: /Applications/TablePlus.app
+
+[Global]
+⌘N              Open a new connection
+⌘,              Open Preference
+⌘Q              Quit app
+⌘⇧O             New SQL Viewer
+
+[Workspace]
+⌘W              Close tab/window
+⌘S              Commit the changes
+⌘⇧P             Preview the changes
+⌘⇧⌫             Discard the changes
+⌘T              Open a new tab
+⌘L              Open plugin manager
+⌘⇧C             Toggle console log
+⌘.              Run custom script
+⌘R              Reload workspace
+⌘[              Navigate to left tab
+⌘]              Navigate to right tab
+⇧⌘[             Navigate to left Pane
+⇧⌘]             Navigate to right Pane
+⌘⇧D             Split Pane Horizontally
+⌘1-9            Navigate to number tab
+⌘K              Switch database
+⌘⇧K             Switch Connection
+⌘Z              Undo
+⌘⇧Z             Redo
+⌘P              Open anything
+⌘E              Open SQL Query
+
+[SQL Tab]
+> In SQL editor tab.
+⌘⏎              Execute SQL Code
+⌘O              Open file SQL
+⌘I              Beautify selected SQL statements
+⇧⌘I             Uglify selected SQL statements
+⇧⌘S             Save selected SQL as
+⌘/              Comment/Uncomment lines of SQL
+⌘+click         Add cursors at arbitrary positions
+⌃⇧↑             Add cursor above current line
+⌃⇧↓             Add cursor below current line
+⌘D              Select next instance of highlight
+⌘⌃G             Select all instances of highlight
+
+[Table Data]
+> When viewing table data.
+Space           Toggle row detail (row selected)
+⌘C              Copy rows
+⌘V              Paste rows
+⌘D              Duplicate row
+⌘I              Insert a new row
+⌘F              Open Row Filter
+⌘⌥F             Open Column Filter
+⌥+click         Open Quick edit Menu
+⇥               Move focus while editing
+
+

@@ -1,0 +1,63 @@
+# Sheet Name: iTerm2 Shortcuts
+# App: /Applications/iTerm.app
+
+[Tabs & Windows]
+⌘T              New Tab
+⌘W              Close Tab or Window
+⌘1-9            Go to Tab by number
+⌥⌘←→↑↓          Go to Split Pane by Direction
+⌘`              Cycle iTerm Windows
+
+[Splitting]
+⌘D              Split Window Vertically
+⇧⌘D             Split Window Horizontally
+⌥⌘H             Split Horizontally (new profile)
+⌥⌘V             Split Vertically (new profile)
+
+[Pane Navigation]
+⌘]              Next Split Pane
+⌘[              Previous Split Pane
+⌥⌘↑             Focus Pane Up
+⌥⌘↓             Focus Pane Down
+⌥⌘←             Focus Pane Left
+⌥⌘→             Focus Pane Right
+
+[Fullscreen & Resize]
+⌘⏎              Toggle Fullscreen
+⇧⌘⏎             Maximize Pane
+⌃⌘↑↓←→          Resize Pane
+
+[Tab Navigation]
+⌘←              Previous Tab
+⌘→              Next Tab
+⌥⌘1-9           Go to Window by number
+
+[Copy & Paste]
+> Enable "Copy to pasteboard on selection" for auto-copy.
+⇧⌘C             Enter Copy Mode
+⌃V              Enter Character Selection (in Copy Mode)
+HJKL            Move cursor (in Copy Mode)
+⌃K              Copy text (in Copy Mode)
+
+[Shell Shortcuts]
+> These work in bash/zsh/fish.
+⌃U              Delete to start of line
+⌃K              Delete to end of line
+⌃W              Delete previous word
+⌃A              Move to start of line
+⌃E              Move to end of line
+⌥←              Move back one word
+⌥→              Move forward one word
+⌃L              Clear screen
+⌃D              Exit shell (EOF)
+⌃R              Search command history
+⌃G              Cancel search
+⌃Y              End search at current entry
+
+[Misc]
+⌘K              Clear screen/pane
+⌥⌘I             Broadcast to all panes (toggle)
+⌘/              Find Cursor
+⌥+click         Cursor jump with mouse
+
+

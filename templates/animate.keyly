@@ -1,0 +1,109 @@
+# Sheet Name: Adobe Animate Shortcuts
+# App: /Applications/Adobe Animate 2024/Adobe Animate 2024.app
+
+[File]
+⌘R              Import Image/Sound/etc
+⌥⇧⌘S            Export Movie
+⌥⇧O             Open as Library
+⌘N              New document
+⌘O              Open
+⌘S              Save
+⇧⌘S             Save As
+⌘W              Close
+⌘Q              Quit
+
+[View]
+⌘1              View at 100%
+⌘2              Show Frame
+⌘3              Show All
+⌘=              Zoom in
+⌘-              Zoom out
+⌘⌥R             Show/Hide rulers
+⌘'              Show/Hide grid
+⌘;              Show/Hide guides
+
+[Edit]
+⌘Z              Undo
+⇧⌘Z             Redo
+⌘X              Cut
+⌘C              Copy
+⌘V              Paste
+⇧⌘V             Paste in Place
+⌘D              Duplicate
+⌘A              Select All
+⇧⌘A             Deselect All
+⌘G              Group
+⇧⌘G             Ungroup
+⌘B              Break Apart
+
+[Arrange]
+⌘↑              Move Ahead
+⌘↓              Move Behind
+⇧⌘↑             Bring to Front
+⇧⌘↓             Send to Back
+
+[Transform]
+⇧⌘Z             Remove Transform
+⌥⇧⌘S            Scale and Rotate
+⇧⌘9             Rotate 90° left
+⇧⌘7             Rotate 90° right
+
+[Text]
+⌥←              Narrower letterspacing
+⌥→              Wider letterspacing
+
+[Panels]
+⌘L              Show/Hide Library
+⌘K              Align Window
+⌘T              Show/Hide Transform Panel
+⌥⌘T             Show/Hide Timeline
+⌘F2             Show/Hide Tools
+⌘F3             Show/Hide Property Inspector
+⌘F9             Show/Hide Actions
+⌘F10            Show/Hide History
+⌘F11            Show/Hide Color panel
+
+[Timeline]
+⌘E              Toggle Edit Movie/Symbol Mode
+F5              Insert Frame
+F6              Insert Keyframe
+F7              Insert Blank Keyframe
+⇧F5             Remove Frames
+⇧F6             Clear Keyframe
+F8              Convert to Symbol
+
+[Playback]
+⏎               Play/Stop
+⌘⏎              Test Movie
+⌘⌥⏎             Test Scene
+,               Previous Frame
+.               Next Frame
+Home            First Frame
+End             Last Frame
+
+[Drawing]
+V               Selection Tool
+A               Subselection Tool
+Q               Free Transform Tool
+F               Gradient Transform Tool
+L               Lasso Tool
+P               Pen Tool
+T               Text Tool
+O               Oval Tool
+R               Rectangle Tool
+Y               Pencil Tool
+B               Brush Tool
+S               Ink Bottle Tool
+K               Paint Bucket Tool
+I               Eyedropper Tool
+E               Eraser Tool
+H               Hand Tool
+Z               Zoom Tool
+
+[Actions Panel]
+⌥⌘F             Auto format code
+⌃⇧8             Show hidden characters
+⌥⌘J             Show Frame Script Navigator
+⌃⌥H             Show tweening shape hints
+
+

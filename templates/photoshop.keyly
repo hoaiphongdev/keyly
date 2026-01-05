@@ -1,0 +1,87 @@
+# Sheet Name: Adobe Photoshop Shortcuts
+# App: /Applications/Adobe Photoshop 2024/Adobe Photoshop 2024.app
+
+[File Handling]
+⌘N              New blank file
+⌘O              Open file
+⌘S              Save
+⇧⌘S             Save As
+⌘W              Close file
+⇧⌘W             Close and open Bridge
+
+[Navigation]
+⌘0              Fit image on screen
+⌘+              Zoom in
+⌘-              Zoom out
+⌘H              View/Hide extras
+Space+drag      Drag image with Hand Tool
+F               Toggle screen modes forward
+⇧F              Toggle screen modes reverse
+
+[Image Adjustments]
+⌘L              Levels
+⌘M              Curves
+⌘U              Hue/Saturation
+⌘B              Color Balance
+⌘I              Invert
+⏎               Accept adjustment
+⎋               Cancel adjustment
+
+[Layers]
+⇧⌘N             New Layer with options
+⌘G              Group layers
+⇧⌘G             Ungroup layers
+⌘E              Merge selected layer down
+⌥⌘G             Create/Remove Clipping Mask
+⌘I              Invert Layer Mask
+⌘J              New Layer via Copy
+⇧⌘J             New Layer via Cut
+⌘T              Transform layer
+⏎               Accept Transformation
+⎋               Cancel Transformation
+
+[Selections]
+⌘A              Select All
+⌘D              Deselect
+⇧⌘D             Reselect
+⇧⌘I             Select Inverse
+⇧⌘A             Select All Layers
+⇧+drag          Constrain to square/circle
+⌥+drag          Draw from center
+⇧⌥+drag         Constrain and draw from center
+⇧+click         Add to selection
+⌥+draw          Remove from selection
+↑↓←→            Nudge selection by pixels
+
+[Brushes]
+⇧+click         Constrain to straight line
+]               Increase Brush Size
+[               Decrease Brush Size
+1-0             Brush Opacity (1=10%, 0=100%)
+⌘Z              Undo
+
+[Tools]
+> Press key to activate tool.
+V               Move Tool
+M               Marquee Tool
+L               Lasso Tool
+W               Quick Selection Tool
+C               Crop and Slice Tool
+I               Eyedropper/Sampler/Ruler Tool
+J               Healing Brush Tool
+B               Brush Tool
+S               Clone Stamp Tool
+Y               History Brush Tool
+E               Eraser Tool
+G               Gradient/Fill Tool
+O               Dodge/Burn Tool
+P               Pen Tool
+T               Text Tool
+A               Path Selection Tool
+U               Shapes Tool
+H               Hand Tool
+R               Rotate Tool
+D               Default colors (black/white)
+X               Swap foreground/background colors
+
+

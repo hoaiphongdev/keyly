@@ -1,0 +1,155 @@
+# Sheet Name: Adobe Premiere Pro Shortcuts
+# App: /Applications/Adobe Premiere Pro 2024/Adobe Premiere Pro 2024.app
+
+[File]
+⌥⌘N             New Project
+⌘N              New Sequence
+⌘O              Open Project
+⌘W              Close
+⇧⌘W             Close Project
+⌘S              Save
+⇧⌘S             Save As
+⌥⌘S             Save a Copy
+⌥⌘I             Import from Media Browser
+⌘I              Import
+⌘M              Export Media
+⌥⇧M             Send to Media Encoder
+⇧⌘H             Get Media File Properties
+⌘Q              Exit
+
+[Edit]
+⌘Z              Undo
+⇧⌘Z             Redo
+⌘X              Cut
+⌘C              Copy
+⌘V              Paste
+⌥⌘V             Paste Attributes
+⌦               Clear
+⇧⌦              Ripple Delete
+⇧⌘/             Duplicate
+⌘A              Select All
+⇧⌘A             Deselect All
+⌘F              Find
+⌘E              Edit Original
+⌥⌘K             Keyboard Shortcuts
+
+[Clip]
+⌘U              Make Subclip
+⇧G              Audio Channels
+G               Audio Gain
+⌘R              Speed/Duration
+,               Insert
+.               Overwrite
+⇧⌘E             Enable
+⌘L              Link
+⌘G              Group
+⇧⌘G             Ungroup
+
+[Sequence]
+⏎               Render Effects In to Out
+F               Match Frame
+⇧R              Reverse Match Frame
+⌘K              Add Edit
+⇧⌘K             Add Edit to All Tracks
+⌘T              Trim Edit
+E               Extend Selected Edit to Playhead
+⌘D              Apply Video Transition
+⇧⌘D             Apply Audio Transition
+⇧D              Apply Default Transitions
+;               Lift
+'               Extract
+=               Zoom In
+-               Zoom Out
+⇧;              Next in Sequence
+⌥;              Previous in Sequence
+S               Snap in Timeline
+
+[Markers]
+I               Mark In
+O               Mark Out
+X               Mark Clip
+/               Mark Selection
+⇧I              Go to In
+⇧O              Go to Out
+⌥I              Clear In
+⌥O              Clear Out
+⌥X              Clear In and Out
+M               Add Marker
+⇧M              Go to Next Marker
+⇧⌘M             Go to Previous Marker
+⌥M              Clear Selected Marker
+⌥⌘M             Clear All Markers
+
+[Graphics & Titles]
+⌘T              New Text Layer
+⌥⌘R             New Rectangle
+⌥⌘E             New Ellipse
+⇧⌘]             Bring to Front
+⌘]              Bring Forward
+⌘[              Send Backward
+⇧⌘[             Send to Back
+⌥⌘]             Select Next Layer
+⌥⌘[             Select Previous Layer
+
+[Captions]
+⌥⌘A             Add new caption track
+⌥⌘C             Add caption at playhead
+⌥⌘↓             Go to next caption segment
+⌥⌘↑             Go to previous caption segment
+
+[Workspaces]
+⌥⇧1             All Panels
+⌥⇧2             Assembly
+⌥⇧3             Audio
+⌥⇧4             Captions and Graphics
+⌥⇧5             Color
+⌥⇧6             Editing
+⌥⇧7             Effects
+⌥⇧8             Essential
+⌥⇧9             Learning
+⌥⇧0             Reset to Saved Layout
+
+[Panels]
+⇧`              Maximize Frame
+⇧1              Projects
+⇧2              Source Monitor
+⇧3              Timeline
+⇧4              Program Monitor
+⇧5              Effect Controls
+⇧6              Audio Track Mixer
+⇧7              Effects
+⇧8              Media Browser
+⇧9              Audio Clip Mixer
+
+[Program Monitor]
+> Select graphic layer first for nudging.
+⌘R              Show Rulers
+⌘;              Show Guides
+⇧⌘;             Snap in Program Monitor
+⌥⇧⌘R            Lock Guides
+⌘↑↓←→           Nudge by one frame
+⇧⌘↑↓←→          Nudge by five frames
+
+[Timeline]
+⌫               Clear Selection
+⌥-              Decrease Audio Tracks Height
+⌘-              Decrease Video Tracks Height
+⌥=              Increase Audio Tracks Height
+⌘=              Increase Video Tracks Height
+⌘←              Nudge Clip Left One Frame
+⌘→              Nudge Clip Right One Frame
+⇧⌘←             Nudge Clip Left Five Frames
+⇧⌘→             Nudge Clip Right Five Frames
+⌥⌫              Ripple Delete
+⌥[              Set Work Area Bar In Point
+⌥]              Set Work Area Bar Out Point
+
+[Project Panel]
+⌘B              New Bin
+⇧H              Hover Scrub
+⇧O              Open in Source Monitor
+⇧]              Thumbnail Size Next
+⇧[              Thumbnail Size Previous
+⇧\              Toggle View
+
+

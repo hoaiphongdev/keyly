@@ -1,0 +1,186 @@
+# Sheet Name: Adobe After Effects Shortcuts
+# App: /Applications/Adobe After Effects 2024/Adobe After Effects 2024.app
+
+[General]
+⌘A              Select all
+F2              Deselect all
+⌘⇧A             Deselect all (alt)
+⌘D              Duplicate
+⌘Z              Undo
+⌘⇧Z             Redo
+⌘Q              Quit
+⌥⌘/             Purge All Memory
+
+[Projects]
+⌥⌘N             New project
+⌘O              Open project
+⌥⇧⌘P            Open most recent project
+⌥⇧⌘N            New folder in Project panel
+⌥⇧⌘K            Project Settings
+⌘F              Find in Project panel
+
+[Compositions]
+⌘N              New composition
+⌘K              Composition Settings
+B               Set work area beginning
+N               Set work area end
+⌥⌘B             Set work area to layers
+⇥               Composition Mini-Flowchart
+⌘⇧X             Trim to work area
+
+[Tools]
+V               Selection tool
+H               Hand tool
+Z               Zoom In tool
+W               Rotation tool
+⌥W              Roto Brush tool
+C               Camera tools (cycle)
+Y               Pan Behind tool
+Q               Mask/Shape tools (cycle)
+⌘T              Type tools (cycle)
+G               Pen/Mask Feather tools
+⌘B              Brush/Clone/Eraser (cycle)
+⌘P              Puppet tools (cycle)
+
+[Time Navigation]
+⌥⇧J             Go to specific time
+⇧Home           Go to work area start
+⇧End            Go to work area end
+J               Previous keyframe/marker
+K               Next keyframe/marker
+Home            Go to beginning
+End             Go to end
+⇟               Go forward 1 frame
+⌘→              Go forward 1 frame (alt)
+⇞               Go backward 1 frame
+⌘←              Go backward 1 frame (alt)
+⇧⇟              Go forward 10 frames
+⇧⇞              Go backward 10 frames
+I               Go to layer In point
+O               Go to layer Out point
+D               Scroll to current time
+
+[Preview]
+Space           Start/Stop preview
+.               Preview audio only
+⇧F5-F8          Take snapshot
+F5-F8           Display snapshot
+
+[Panels]
+⌘0              Project panel
+⌥⌘0             Render Queue
+⌘1              Tools panel
+⌘2              Info panel
+⌘3              Preview panel
+⌘4              Audio panel
+⌘5              Effects & Presets
+⌘6              Character panel
+⌘7              Paragraph panel
+⌘8              Paint panel
+⌘9              Brushes panel
+F3              Effect Controls
+⌘W              Close panel
+`               Maximize panel under pointer
+
+[Views]
+.               Zoom in (Composition)
+,               Zoom out (Composition)
+/               Zoom to 100%
+⇧/              Zoom to fit
+⌘J              Full resolution
+⌘⇧J             Half resolution
+'               Show/Hide safe zones
+⌘'              Show/Hide grid
+⌘R              Show/Hide rulers
+⌘;              Show/Hide guides
+⌘⇧H             Show/Hide layer controls
+
+[Layers]
+⌘Y              New solid layer
+⌥⇧⌘Y            New null layer
+⌥⌘Y             New adjustment layer
+⌘↓              Select next layer
+⌘↑              Select previous layer
+⇧F4             Show/Hide Parent column
+F4              Show/Hide Switches/Modes
+⌘⇧Y             Layer settings dialog
+⌥⌘V             Paste layers at current time
+⌘⇧D             Split layers
+⌘⇧C             Precompose
+⌘⇧T             Open Effect Controls
+[               Move In point to current time
+]               Move Out point to current time
+⌥[              Trim In point to current time
+⌥]              Trim Out point to current time
+⌘L              Lock layers
+⌘⇧L             Unlock all layers
+⌥⌘R             Reverse in time
+⌥⌘T             Enable time remapping
+
+[Properties]
+> Press key to show property only.
+A               Anchor Point
+L               Audio Levels
+F               Mask Feather
+M               Mask Path
+T               Opacity
+P               Position
+R               Rotation
+S               Scale
+E               Effects
+U               Keyframed properties
+UU              Modified properties
+
+[Keyframes]
+F9              Easy ease
+⇧F9             Easy ease in
+⌘⇧F9            Easy ease out
+⌥⌘K             Set interpolation
+⌥⌘H             Hold/Auto Bezier
+⇧F3             Toggle Graph Editor
+⌥→              Move keyframe 1 frame later
+⌥←              Move keyframe 1 frame earlier
+
+[3D Layers]
+F10             3D view 1 (Front)
+F11             3D view 2 (Custom)
+F12             3D view 3 (Active Camera)
+⌥⇧⌘L            New light
+⌥⇧⌘C            New camera
+1               Orbit camera
+2               Pan camera
+3               Dolly camera
+4               Position gizmo
+5               Scale gizmo
+6               Rotation gizmo
+
+[Masks]
+⌘⇧N             New mask
+⌥`              Select next mask
+⌥⇧`             Select previous mask
+⌘⇧I             Invert mask
+⌘⇧F             Mask Feather dialog
+⌘⇧M             Mask Shape dialog
+
+[Text]
+⌥⇧⌘T            New text layer
+⌘⇧L             Align left
+⌘⇧C             Align center
+⌘⇧R             Align right
+⌘⇧K             Toggle All Caps
+⌘⇧.             Increase font size
+⌘⇧,             Decrease font size
+
+[Shapes]
+⌘G              Group shapes
+⌘⇧G             Ungroup shapes
+
+[Saving & Export]
+⌘S              Save
+⌥⇧⌘S            Increment and save
+⌘⇧S             Save As
+⌘⇧/             Add to render queue
+⌥⌘S             Add current frame to queue
+⌥⌘M             Add to Media Encoder
+
+

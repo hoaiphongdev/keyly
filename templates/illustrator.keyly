@@ -1,0 +1,171 @@
+# Sheet Name: Adobe Illustrator Shortcuts
+# App: /Applications/Adobe Illustrator 2024/Adobe Illustrator 2024.app
+
+[File]
+⌘N              New document
+⇧⌘N             New from template
+⌥⌘N             New without dialog
+⌘O              Open
+⌘W              Close
+⌘S              Save
+⇧⌘S             Save As
+⌥⌘S             Save a Copy
+⌥⌘E             Export for screens
+⌥⇧⌘S            Save for Web
+⌘P              Print
+⌘Q              Exit
+
+[Edit]
+⌘Z              Undo
+⇧⌘Z             Redo
+⌘X              Cut
+⌘C              Copy
+⌘V              Paste
+⌘F              Paste in front
+⌘B              Paste in back
+⇧⌘V             Paste in place
+⌥⇧⌘V            Paste on all artboards
+⌘K              Preferences
+⌥⇧⌘K            Keyboard Shortcuts
+
+[Tools]
+> Press key to activate tool.
+V               Selection
+A               Direct Selection
+Y               Magic Wand
+Q               Lasso
+P               Pen
+⇧C              Anchor Point
+T               Type
+⇧T              Touch Type
+\               Line Segment
+M               Rectangle
+L               Ellipse
+B               Paintbrush
+N               Pencil
+⇧B              Blob Brush
+E               Free Transform
+R               Rotate
+O               Reflect
+S               Scale
+⇧R              Warp
+⇧W              Width
+⇧M              Shape Builder
+⇧S              Symbol Sprayer
+U               Mesh
+G               Gradient
+I               Eyedropper
+W               Blend
+K               Live Paint Bucket
+⇧L              Live Paint Selection
+⇧E              Eraser
+C               Scissors
+H               Hand
+Z               Zoom
+⇧O              Artboard
+⇧P              Perspective Grid
+⇧V              Perspective Selection
+
+[View]
+⌘Y              Toggle Outline/GPU Preview
+⌘E              Toggle GPU/CPU Preview
+⌥⇧⌘Y            Overprint Preview
+⌥⌘Y             Pixel Preview
+⌘=              Zoom in
+⌘-              Zoom out
+⌘0              Fit in window
+⌘1              Actual size
+⌥⌘0             View all artboards
+⌘;              Hide/Show guides
+⌥⌘;             Lock guides
+⌘U              Smart guides
+⇧⌘I             Perspective Grid
+⌘'              Show grid
+⇧⌘'             Snap to grid
+⌘H              Show/Hide extras
+⌘R              Show/Hide rulers
+⇧⌘B             Hide bounding box
+⇧⌘H             Show/Hide artboards
+F               Toggle screen modes
+
+[Selection]
+⌘A              Select All
+⇧⌘A             Deselect All
+⌘6              Reselect
+⌥⌘A             Select artwork in artboard
+⌘G              Group
+⇧⌘G             Ungroup
+⌘2              Lock selection
+⌥⌘2             Unlock all
+⌘3              Hide selection
+⌥⌘3             Show all
+⌘]              Bring forward
+⇧⌘]             Bring to front
+⌘[              Send backward
+⇧⌘[             Send to back
+⌥⌘]             Select object above
+⌥⌘[             Select object below
+
+[Transform]
+⌘D              Transform again
+⇧⌘M             Move
+⌥⇧⌘D            Transform Each
+⌘7              Make clipping mask
+⌥⌘7             Release clipping mask
+
+[Paths]
+⌘J              Join paths
+⌥⌘J             Average paths
+⇧⌥⌘J            Corner/smooth join
+⌘8              Make compound path
+⌥⇧⌘8            Release compound path
+⌥⌘B             Blend objects
+⌥⇧⌘B            Finish blend
+
+[Type]
+⇧⌘B             Bold
+⇧⌘I             Italic
+⇧⌘U             Underline
+⇧⌘L             Align left
+⇧⌘R             Align right
+⇧⌘C             Align center
+⇧⌘J             Justify left
+⇧⌘F             Justify all
+⇧⌘.             Increase font size
+⇧⌘,             Decrease font size
+⌥↑↓             Increase/decrease leading
+⌥←→             Adjust kerning/tracking
+⌥⇧↑↓            Adjust baseline shift
+⇧⌘O             Create outlines
+⌘T              Character panel
+⌥⌘T             Paragraph panel
+⇧⌘T             Tabs panel
+
+[Color & Stroke]
+X               Toggle fill/stroke
+D               Default fill/stroke
+⇧X              Swap fill/stroke
+>               Gradient fill mode
+<               Color fill mode
+/               No stroke/fill
+⌥⌘G             Hide gradient annotator
+[               Decrease brush size
+]               Increase brush size
+
+[Panels]
+⇥               Show/Hide all panels
+⇧⇥              Show/Hide panels except Tools
+F5              Brushes
+F6              Color
+F7              Layers
+⇧F5             Graphic Styles
+⇧F6             Appearance
+⇧F7             Align
+⇧F8             Transform
+⌘F9             Gradient
+⌘F10            Stroke
+⇧⌘F9            Pathfinder
+⇧⌘F10           Transparency
+⇧⌘F11           Symbols
+
+

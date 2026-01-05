@@ -1,0 +1,117 @@
+# Sheet Name: Adobe Acrobat Shortcuts
+# App: /Applications/Adobe Acrobat DC/Adobe Acrobat.app
+
+[Tools]
+Space           Hand tool (temporary)
+H               Pan (Hand) tool
+V               Select tool
+Z               Marquee Zoom
+⇧Z              Cycle zoom tools
+R               Select Object tool
+O               Edit Object tool
+A               Enter/Exit Forms editing
+C               Crop tool
+L               Link tool
+F               Text Field tool
+⇧F              Cycle form tools
+T               Edit text
+⇧Y              Redact
+⇧T              Cycle Touch Up tools
+⇧⌘T             Insert blank pages
+⇧⌘I             Insert files
+⇧⌘D             Delete pages
+⇧⌘U             Touch Up Reading Order
+
+[Navigation]
+⇞               Previous screen
+⇟               Next screen
+Home            First page
+End             Last page
+←               Previous page
+→               Next page
+⌘⇧N             Go to page
+⌘⇞              Previous page (alt)
+⌘⇟              Next page (alt)
+↑               Scroll up
+↓               Scroll down
+⌘=              Zoom in
+⌘-              Zoom out
+
+[Task Panes]
+F6              Cycle focus (Document/Task/Message/Nav)
+⇧F6             Cycle focus reverse
+⌥⇥              Next panel in Task pane
+⌘⇧⇥             Previous panel in Task pane
+⇧F4             Open/Close Task pane
+⌃⇧F4            Close action tasks pane
+
+[Comments]
+S               Add a comment tool
+K               Add a stamp tool
+J               Add a stamp tool (alt)
+U               Current highlighting tool
+⇧U              Cycle highlight tools
+D               Current drawing markup
+⇧D              Cycle drawing markup tools
+Q               Cloud tool
+X               Add text comment
+⇧J              Cycle stamp/attach/sound
+⇧K              Add checkmark in Comments list
+⏎               Open pop-up note
+R               Reply to comment
+⎋               Close pop-up note
+
+[Forms]
+P               Toggle edit/preview form
+G               Toggle guides
+L               Align fields left
+R               Align fields right
+T               Align fields top
+B               Align fields bottom
+H               Align fields horizontal
+V               Align fields vertical
+⇧H              Center fields horizontally
+⇧V              Center fields vertically
+⇧L              Highlight fields
+⇧N              Show Tab Order
+⇧D              Document JavaScripts
+
+[General Navigation]
+⇧F8             Move focus to toolbar
+⌃⇥              Next open document tab
+⌃⇧⇥             Previous open document tab
+⌘F6             Next open document window
+⌘⇧F6            Previous open document window
+⌘F4             Close current document
+⌥⌘W             Close all documents
+⇥               Next comment/link/form field
+⇧⇥              Previous comment/link/form field
+F5              Move focus to document pane
+⌘F              Find in document
+⌘G              Next search result
+
+[Navigation Panels]
+⌘⇧F5            Open navigation pane
+→               Expand bookmark
+←               Collapse bookmark
+⇧*              Expand all bookmarks
+/               Collapse selected bookmark
+
+[Accessibility]
+F2              Edit Tag
+⇧⌘5             Change reading settings
+⌘4              Reflow tagged PDF
+⇧⌘Y             Activate/deactivate Read out loud
+⇧⌘V             Read current page out loud
+⇧⌘B             Read whole document out loud
+⇧⌘C             Pause reading
+⇧⌘E             Stop reading
+
+[Help]
+F1              Open Acrobat user guide
+⌘W              Close user guide
+⌘←              Previous topic
+⌘→              Next topic
+⌘P              Print Help topic
+
+

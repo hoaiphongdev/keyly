@@ -21,7 +21,7 @@ final class ShortcutsWindow: NSWindowController {
     
     convenience init() {
         let screenSize = NSScreen.main?.visibleFrame.size ?? NSSize(width: 1200, height: 800)
-        let windowWidth = screenSize.width * 0.8
+        let windowWidth = min(screenSize.width * 0.75, screenSize.width)
         
         let window = NSPanel(
             contentRect: NSRect(x: 0, y: 0, width: windowWidth, height: 400),
@@ -399,12 +399,13 @@ final class ShortcutsWindow: NSWindowController {
         guard let window = window else { return }
         
         let screenSize = NSScreen.main?.visibleFrame.size ?? NSSize(width: 1200, height: 800)
+        let maxWidth = screenSize.width
         let maxHeight = screenSize.height * 0.8
         
         let contentHeight = gridContainer.frame.height + padding * 2 + footerHeight
         let newHeight = min(contentHeight, maxHeight)
         
-        let currentWidth = window.frame.width
+        let currentWidth = min(window.frame.width, maxWidth)
         window.setContentSize(NSSize(width: currentWidth, height: newHeight))
     }
     

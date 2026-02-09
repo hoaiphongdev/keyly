@@ -96,7 +96,9 @@ final class ConfigManager {
         var appPath = ""
         var shortcuts: [ShortcutItem] = []
         var categoryDescriptions: [String: String] = [:]
+        var groupDescriptions: [String: String] = [:]
         var currentCategory = "General"
+        var currentGroup: String? = nil
         var hideDefaultShortcuts = false
         
         let lines = content.components(separatedBy: .newlines)
@@ -122,6 +124,21 @@ final class ConfigManager {
                 continue
             }
             
+            if trimmed.hasPrefix("# Group:") {
+                let groupInfo = trimmed.replacingOccurrences(of: "# Group:", with: "").trimmingCharacters(in: .whitespaces)
+                let components = groupInfo.components(separatedBy: " - ")
+                if components.count >= 1 {
+                    currentGroup = components[0].trimmingCharacters(in: .whitespaces)
+                    if components.count >= 2 {
+                        let description = components[1].trimmingCharacters(in: .whitespaces)
+                        if let group = currentGroup, !group.isEmpty {
+                            groupDescriptions[group] = description
+                        }
+                    }
+                }
+                continue
+            }
+            
             if trimmed.hasPrefix("#") { continue }
             
             if trimmed.hasPrefix("[") && trimmed.hasSuffix("]") {
@@ -135,7 +152,7 @@ final class ConfigManager {
                 continue
             }
             
-            if let shortcut = parseShortcutLine(trimmed, category: currentCategory) {
+            if let shortcut = parseShortcutLine(trimmed, category: currentCategory, group: currentGroup) {
                 shortcuts.append(shortcut)
             }
         }
@@ -145,10 +162,10 @@ final class ConfigManager {
             return nil
         }
         
-        return ShortcutSheet(name: name, appPath: appPath, shortcuts: shortcuts, categoryDescriptions: categoryDescriptions, sourceFile: url, hideDefaultShortcuts: hideDefaultShortcuts)
+        return ShortcutSheet(name: name, appPath: appPath, shortcuts: shortcuts, categoryDescriptions: categoryDescriptions, sourceFile: url, hideDefaultShortcuts: hideDefaultShortcuts, groupDescriptions: groupDescriptions)
     }
     
-    private func parseShortcutLine(_ line: String, category: String) -> ShortcutItem? {
+    private func parseShortcutLine(_ line: String, category: String, group: String? = nil) -> ShortcutItem? {
         let parts = line.components(separatedBy: .whitespaces).filter { !$0.isEmpty }
         
         guard parts.count >= 2 else { return nil }
@@ -162,7 +179,7 @@ final class ConfigManager {
             return nil
         }
         
-        return ShortcutItem(category: category, action: action, shortcut: shortcut)
+        return ShortcutItem(category: category, action: action, shortcut: shortcut, group: group)
     }
     
     private func normalizeShortcut(_ raw: String) -> String {
@@ -214,6 +231,7 @@ final class ConfigManager {
         
         var shortcuts: [ShortcutItem] = []
         var currentCategory = "Global"
+        var currentGroup: String? = nil
         
         let lines = content.components(separatedBy: .newlines)
         
@@ -221,6 +239,15 @@ final class ConfigManager {
             let trimmed = line.trimmingCharacters(in: .whitespaces)
             
             if trimmed.isEmpty { continue }
+            
+            if trimmed.hasPrefix("# Group:") {
+                let groupInfo = trimmed.replacingOccurrences(of: "# Group:", with: "").trimmingCharacters(in: .whitespaces)
+                let components = groupInfo.components(separatedBy: " - ")
+                if components.count >= 1 {
+                    currentGroup = components[0].trimmingCharacters(in: .whitespaces)
+                }
+                continue
+            }
             
             if trimmed.hasPrefix("#") { continue }
             
@@ -231,7 +258,7 @@ final class ConfigManager {
             
             if trimmed.hasPrefix(">") { continue }
             
-            if let shortcut = parseShortcutLine(trimmed, category: currentCategory) {
+            if let shortcut = parseShortcutLine(trimmed, category: currentCategory, group: currentGroup) {
                 shortcuts.append(shortcut)
             }
         }

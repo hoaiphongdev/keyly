@@ -10,6 +10,7 @@ final class ShortcutsWindow: NSWindowController {
     private var scrollViewTopConstraint: NSLayoutConstraint!
     private var shortcuts: [ShortcutItem] = []
     private var categoryDescriptions: [String: String] = [:]
+    private var groupDescriptions: [String: String] = [:]
     private var updateButton: NSButton?
     private var spinner: NSProgressIndicator?
     private var clickOutsideMonitor: Any?
@@ -44,9 +45,10 @@ final class ShortcutsWindow: NSWindowController {
         setupClickOutsideMonitoring()
     }
 
-    func displayShortcuts(_ shortcuts: [ShortcutItem], appName: String, categoryDescriptions: [String: String] = [:]) {
+    func displayShortcuts(_ shortcuts: [ShortcutItem], appName: String, categoryDescriptions: [String: String] = [:], groupDescriptions: [String: String] = [:]) {
         self.shortcuts = shortcuts
         self.categoryDescriptions = categoryDescriptions
+        self.groupDescriptions = groupDescriptions
         rebuildContent()
         updateUpdateBanner()
         resizeWindowToFit()
@@ -410,31 +412,53 @@ final class ShortcutsWindow: NSWindowController {
         let availableWidth = window.frame.width - padding * 2
         let numColumns = max(1, Int(availableWidth / (columnWidth + columnSpacing)))
 
-        let grouped = Dictionary(grouping: shortcuts) { $0.category }
-        let sortedCategories = grouped.keys.sorted()
-
-        var categoryViews: [NSView] = []
-        for category in sortedCategories {
-            guard let items = grouped[category] else { continue }
-            let description = categoryDescriptions[category]
-            let view = createCategoryColumn(title: category, description: description, items: items)
-            view.layoutSubtreeIfNeeded()
-            categoryViews.append(view)
+        let groupedByGroup = Dictionary(grouping: shortcuts) { $0.group ?? "default" }
+        let sortedGroups = groupedByGroup.keys.sorted { group1, group2 in
+            if group1 == "default" { return false }
+            if group2 == "default" { return true }
+            return group1 < group2
         }
 
         var currentColumn = 0
         var columnYPositions = [CGFloat](repeating: 0, count: numColumns)
 
-        for view in categoryViews {
-            let height = view.fittingSize.height
-            let x = CGFloat(currentColumn) * (columnWidth + columnSpacing)
-            let y = columnYPositions[currentColumn]
+        for groupName in sortedGroups {
+            guard let groupShortcuts = groupedByGroup[groupName] else { continue }
+            
+            if groupName != "default" {
+                let groupView = createGroupContainer(groupName: groupName, shortcuts: groupShortcuts)
+                groupView.layoutSubtreeIfNeeded()
+                
+                let height = groupView.fittingSize.height
+                let x = CGFloat(currentColumn) * (columnWidth + columnSpacing)
+                let y = columnYPositions[currentColumn]
 
-            view.frame = NSRect(x: x, y: y, width: columnWidth, height: height)
-            gridContainer.addSubview(view)
+                groupView.frame = NSRect(x: x, y: y, width: columnWidth, height: height)
+                gridContainer.addSubview(groupView)
 
-            columnYPositions[currentColumn] += height + rowSpacing
-            currentColumn = (currentColumn + 1) % numColumns
+                columnYPositions[currentColumn] += height + rowSpacing
+                currentColumn = (currentColumn + 1) % numColumns
+            } else {
+                let grouped = Dictionary(grouping: groupShortcuts) { $0.category }
+                let sortedCategories = grouped.keys.sorted()
+
+                for category in sortedCategories {
+                    guard let items = grouped[category] else { continue }
+                    let description = categoryDescriptions[category]
+                    let view = createCategoryColumn(title: category, description: description, items: items)
+                    view.layoutSubtreeIfNeeded()
+                    
+                    let height = view.fittingSize.height
+                    let x = CGFloat(currentColumn) * (columnWidth + columnSpacing)
+                    let y = columnYPositions[currentColumn]
+
+                    view.frame = NSRect(x: x, y: y, width: columnWidth, height: height)
+                    gridContainer.addSubview(view)
+
+                    columnYPositions[currentColumn] += height + rowSpacing
+                    currentColumn = (currentColumn + 1) % numColumns
+                }
+            }
         }
 
         let maxHeight = columnYPositions.max() ?? 0
@@ -486,6 +510,73 @@ final class ShortcutsWindow: NSWindowController {
         ])
 
         return column
+    }
+    
+    private func createGroupContainer(groupName: String, shortcuts: [ShortcutItem]) -> NSView {
+        let container = NSView()
+        container.translatesAutoresizingMaskIntoConstraints = false
+        container.wantsLayer = true
+        
+        container.layer?.backgroundColor = NSColor.black.withAlphaComponent(0.1).cgColor
+        container.layer?.cornerRadius = 8
+        container.layer?.borderWidth = 1
+        container.layer?.borderColor = NSColor.white.withAlphaComponent(0.1).cgColor
+        
+        let stackView = NSStackView()
+        stackView.orientation = .vertical
+        stackView.alignment = .leading
+        stackView.spacing = 8
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        
+        let groupHeader = NSTextField(labelWithString: groupName)
+        groupHeader.font = NSFont.systemFont(ofSize: 13, weight: .bold)
+        groupHeader.textColor = .white
+        stackView.addArrangedSubview(groupHeader)
+        
+        if let groupDesc = groupDescriptions[groupName], !groupDesc.isEmpty {
+            let descLabel = NSTextField(labelWithString: groupDesc)
+            descLabel.font = NSFont.systemFont(ofSize: 10)
+            descLabel.textColor = NSColor.white.withAlphaComponent(0.6)
+            stackView.addArrangedSubview(descLabel)
+        }
+        
+        let grouped = Dictionary(grouping: shortcuts) { $0.category }
+        let sortedCategories = grouped.keys.sorted()
+        
+        for category in sortedCategories {
+            guard let items = grouped[category] else { continue }
+            
+            if sortedCategories.count > 1 {
+                let categoryHeader = NSTextField(labelWithString: category)
+                categoryHeader.font = NSFont.systemFont(ofSize: 11, weight: .medium)
+                categoryHeader.textColor = NSColor.white.withAlphaComponent(0.8)
+                stackView.addArrangedSubview(categoryHeader)
+                
+                if let desc = categoryDescriptions[category], !desc.isEmpty {
+                    let descLabel = NSTextField(labelWithString: desc)
+                    descLabel.font = NSFont.systemFont(ofSize: 9)
+                    descLabel.textColor = NSColor.white.withAlphaComponent(0.5)
+                    stackView.addArrangedSubview(descLabel)
+                }
+            }
+            
+            for item in items {
+                let row = createShortcutRow(item)
+                stackView.addArrangedSubview(row)
+            }
+        }
+        
+        container.addSubview(stackView)
+        
+        NSLayoutConstraint.activate([
+            container.widthAnchor.constraint(equalToConstant: columnWidth),
+            stackView.topAnchor.constraint(equalTo: container.topAnchor, constant: 12),
+            stackView.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 12),
+            stackView.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -12),
+            stackView.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -12)
+        ])
+        
+        return container
     }
 
     private func createShortcutRow(_ item: ShortcutItem) -> NSView {

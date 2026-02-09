@@ -5,13 +5,22 @@ final class ShortcutExtractor {
     func getShortcuts(for app: NSRunningApplication, mergeCustom: Bool = true) -> [ShortcutItem] {
         var shortcuts: [ShortcutItem] = []
         
-        let appElement = AXUIElementCreateApplication(app.processIdentifier)
+        var appSpecificSheet: ShortcutSheet?
+        if let bundleId = app.bundleIdentifier {
+            appSpecificSheet = ConfigManager.shared.sheets(for: bundleId).first
+        }
         
-        var menuBar: AnyObject?
-        let result = AXUIElementCopyAttributeValue(appElement, kAXMenuBarAttribute as CFString, &menuBar)
+        let shouldHideDefaults = appSpecificSheet?.hideDefaultShortcuts ?? false
         
-        if result == .success, let menuBarElement = menuBar {
-            shortcuts = extractShortcutsFromMenuBar(menuBarElement as! AXUIElement)
+        if !shouldHideDefaults {
+            let appElement = AXUIElementCreateApplication(app.processIdentifier)
+            
+            var menuBar: AnyObject?
+            let result = AXUIElementCopyAttributeValue(appElement, kAXMenuBarAttribute as CFString, &menuBar)
+            
+            if result == .success, let menuBarElement = menuBar {
+                shortcuts = extractShortcutsFromMenuBar(menuBarElement as! AXUIElement)
+            }
         }
         
         if mergeCustom, let bundleId = app.bundleIdentifier {
@@ -21,7 +30,11 @@ final class ShortcutExtractor {
             }
         }
         
-        if shortcuts.isEmpty {
+        if mergeCustom {
+            shortcuts = ConfigManager.shared.globalShortcuts + shortcuts
+        }
+        
+        if shortcuts.isEmpty && !shouldHideDefaults {
             shortcuts = getDefaultShortcuts()
         }
         

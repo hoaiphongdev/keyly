@@ -6,6 +6,7 @@ struct AppConstants {
     static let doubleClickTimeInterval: TimeInterval = 0.5
     static let defaultHoldDuration: TimeInterval = 0.5
     static let aboutIconSize = NSSize(width: 64, height: 64)
+    static let globalTemplateFileName = "global.keyly"
     
     struct KeyCodes {
         static let cmdLeft: UInt16 = 54

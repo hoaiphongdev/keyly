@@ -7,14 +7,16 @@ struct ShortcutSheet: Identifiable {
     let shortcuts: [ShortcutItem]
     let categoryDescriptions: [String: String]
     let sourceFile: URL?
+    let hideDefaultShortcuts: Bool
     
-    init(id: UUID = UUID(), name: String, appPath: String, shortcuts: [ShortcutItem], categoryDescriptions: [String: String] = [:], sourceFile: URL? = nil) {
+    init(id: UUID = UUID(), name: String, appPath: String, shortcuts: [ShortcutItem], categoryDescriptions: [String: String] = [:], sourceFile: URL? = nil, hideDefaultShortcuts: Bool = false) {
         self.id = id
         self.name = name
         self.appPath = appPath
         self.shortcuts = shortcuts
         self.categoryDescriptions = categoryDescriptions
         self.sourceFile = sourceFile
+        self.hideDefaultShortcuts = hideDefaultShortcuts
     }
     
     /// Returns the bundle identifier for the app path if it exists

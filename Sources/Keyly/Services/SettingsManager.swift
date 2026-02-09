@@ -11,7 +11,7 @@ struct SuperKeySettings {
     var modifiers: [String] {
         return keyComponents.filter { SettingsConstants.validModifierKeys.contains($0) }
     }
-    
+
     var mainKey: String? {
         return keyComponents.first { !SettingsConstants.validModifierKeys.contains($0) }
     }
@@ -173,5 +173,4 @@ final class SettingsManager {
         }
         return count
     }
-
 }

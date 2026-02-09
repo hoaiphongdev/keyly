@@ -19,6 +19,7 @@ final class ConfigManager {
     static let shared = ConfigManager()
     
     private(set) var customSheets: [ShortcutSheet] = []
+    private(set) var globalShortcuts: [ShortcutItem] = []
     private var fileWatcher: FileWatcher?
     
     private let editorPreferenceKey = "KeylyPreferredEditor"
@@ -57,21 +58,26 @@ final class ConfigManager {
     
     func loadAllSheets() {
         customSheets.removeAll()
+        globalShortcuts.removeAll()
         
         let fileManager = FileManager.default
         
-        // Load templates from the templates directory
         guard let files = try? fileManager.contentsOfDirectory(at: templatesDirectory, includingPropertiesForKeys: nil) else {
             return
         }
         
         for file in files where file.pathExtension == "keyly" {
-            if let sheet = parseSheetFile(at: file) {
-                customSheets.append(sheet)
+            if file.lastPathComponent == AppConstants.globalTemplateFileName {
+                loadGlobalShortcuts(from: file)
+            } else {
+                if let sheet = parseSheetFile(at: file) {
+                    customSheets.append(sheet)
+                }
             }
         }
         
         print("[Keyly] Loaded \(customSheets.count) custom sheet(s)")
+        print("[Keyly] Loaded \(globalShortcuts.count) global shortcut(s)")
     }
     
     func reload() {
@@ -91,6 +97,7 @@ final class ConfigManager {
         var shortcuts: [ShortcutItem] = []
         var categoryDescriptions: [String: String] = [:]
         var currentCategory = "General"
+        var hideDefaultShortcuts = false
         
         let lines = content.components(separatedBy: .newlines)
         
@@ -106,6 +113,12 @@ final class ConfigManager {
             
             if trimmed.hasPrefix("# App:") {
                 appPath = trimmed.replacingOccurrences(of: "# App:", with: "").trimmingCharacters(in: .whitespaces)
+                continue
+            }
+            
+            if trimmed.hasPrefix("# Hide Default:") {
+                let hideValue = trimmed.replacingOccurrences(of: "# Hide Default:", with: "").trimmingCharacters(in: .whitespaces).lowercased()
+                hideDefaultShortcuts = ["true", "1", "yes", "on"].contains(hideValue)
                 continue
             }
             
@@ -132,7 +145,7 @@ final class ConfigManager {
             return nil
         }
         
-        return ShortcutSheet(name: name, appPath: appPath, shortcuts: shortcuts, categoryDescriptions: categoryDescriptions, sourceFile: url)
+        return ShortcutSheet(name: name, appPath: appPath, shortcuts: shortcuts, categoryDescriptions: categoryDescriptions, sourceFile: url, hideDefaultShortcuts: hideDefaultShortcuts)
     }
     
     private func parseShortcutLine(_ line: String, category: String) -> ShortcutItem? {
@@ -192,6 +205,38 @@ final class ConfigManager {
     
     func sheets(for bundleIdentifier: String) -> [ShortcutSheet] {
         customSheets.filter { $0.bundleIdentifier == bundleIdentifier }
+    }
+    
+    private func loadGlobalShortcuts(from url: URL) {
+        guard let content = try? String(contentsOf: url, encoding: .utf8) else {
+            return
+        }
+        
+        var shortcuts: [ShortcutItem] = []
+        var currentCategory = "Global"
+        
+        let lines = content.components(separatedBy: .newlines)
+        
+        for line in lines {
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            
+            if trimmed.isEmpty { continue }
+            
+            if trimmed.hasPrefix("#") { continue }
+            
+            if trimmed.hasPrefix("[") && trimmed.hasSuffix("]") {
+                currentCategory = String(trimmed.dropFirst().dropLast())
+                continue
+            }
+            
+            if trimmed.hasPrefix(">") { continue }
+            
+            if let shortcut = parseShortcutLine(trimmed, category: currentCategory) {
+                shortcuts.append(shortcut)
+            }
+        }
+        
+        globalShortcuts = shortcuts
     }
     
     func openConfigFolder() {
@@ -270,6 +315,7 @@ final class ConfigManager {
         let exampleContent = """
         # Sheet Name: Example Shortcuts
         # App: /Applications/Safari.app
+        # Hide Default: false
 
         [Navigation]
         CMD+L       Open Location
@@ -288,6 +334,32 @@ final class ConfigManager {
         """
         
         try? exampleContent.write(to: exampleTemplateFile, atomically: true, encoding: .utf8)
+        
+        let globalTemplateFile = templatesDirectory.appendingPathComponent(AppConstants.globalTemplateFileName)
+        guard !FileManager.default.fileExists(atPath: globalTemplateFile.path) else { return }
+        
+        let globalContent = """
+        # Global Shortcuts - Available in all applications
+        # These shortcuts will appear at the top of every app's shortcut list
+
+        [System]
+        > System-wide shortcuts that work everywhere
+        CMD+SPACE       Spotlight Search
+        CMD+TAB         App Switcher
+        CMD+Q           Quit Application
+        CMD+W           Close Window
+
+        [Text Editing]
+        > Universal text editing shortcuts
+        CMD+C           Copy
+        CMD+V           Paste
+        CMD+X           Cut
+        CMD+Z           Undo
+        CMD+A           Select All
+        CMD+F           Find
+        """
+        
+        try? globalContent.write(to: globalTemplateFile, atomically: true, encoding: .utf8)
         
         // Create example config
         let exampleConfigFile = configDirectory.appendingPathComponent("setting.conf")

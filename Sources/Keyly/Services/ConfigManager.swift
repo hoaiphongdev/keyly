@@ -308,9 +308,6 @@ final class ConfigManager {
 
         # Press settings (used when trigger_type = press)
         press_count=2
-
-        # After press settings (used when trigger_type = afterPress)
-        after_press_count=3
         """
         
         try? exampleConfigContent.write(to: exampleConfigFile, atomically: true, encoding: .utf8)

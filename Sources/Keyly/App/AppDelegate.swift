@@ -71,8 +71,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             print("[Keyly] Hold duration: \(currentSettings.hold.duration) seconds")
         case "press":
             print("[Keyly] Press count: \(currentSettings.press.count)")
-        case "afterPress":
-            print("[Keyly] After press count: \(currentSettings.afterPress.count)")
         default:
             print("[Keyly] Unknown trigger type, using hold with duration: \(currentSettings.hold.duration) seconds")
         }
@@ -304,18 +302,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                         superKeyPressCount = 0
                     }
 
-                case "afterPress":
-                    if currentTime - lastSuperKeyPressTime < AppConstants.doubleClickTimeInterval {
-                        superKeyPressCount += 1
-                    } else {
-                        superKeyPressCount = 1
-                    }
-                    lastSuperKeyPressTime = currentTime
-
-                    if isDevMode {
-                        print("[Keyly] After press count: \(superKeyPressCount)/\(settings.afterPress.count)")
-                    }
-
                 default:
                     if isDevMode {
                         print("[Keyly] Unknown trigger type, defaulting to hold")
@@ -349,14 +335,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     print("[Keyly] Hold released - stopping timer")
                 }
                 stopHoldTimer()
-
-            case "afterPress":
-                if superKeyPressCount >= settings.afterPress.count {
-                    if isDevMode {
-                        print("[Keyly] After press count reached on release, showing shortcuts")
-                    }
-                    showShortcuts()
-                }
 
             default:
                 break
@@ -427,18 +405,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                         superKeyPressCount = 0
                     }
 
-                case "afterPress":
-                    if currentTime - lastSuperKeyPressTime < AppConstants.doubleClickTimeInterval {
-                        superKeyPressCount += 1
-                    } else {
-                        superKeyPressCount = 1
-                    }
-                    lastSuperKeyPressTime = currentTime
-
-                    if isDevMode {
-                        print("[Keyly] Modifier after press count: \(superKeyPressCount)/\(settings.afterPress.count)")
-                    }
-
                 default:
                     if isDevMode {
                         print("[Keyly] Unknown modifier trigger type, defaulting to hold")
@@ -452,11 +418,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 switch superKey.triggerType {
                 case "hold":
                     stopHoldTimer()
-
-                case "afterPress":
-                    if superKeyPressCount >= settings.afterPress.count {
-                        showShortcuts()
-                    }
 
                 default:
                     break

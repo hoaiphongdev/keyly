@@ -29,15 +29,10 @@ struct PressSettings {
     let count: Int
 }
 
-struct AfterPressSettings {
-    let count: Int
-}
-
 struct KeylySettings {
     let superKey: SuperKeySettings
     let hold: HoldSettings
     let press: PressSettings
-    let afterPress: AfterPressSettings
 }
 
 final class SettingsManager {
@@ -65,8 +60,7 @@ final class SettingsManager {
         let defaultSettings = KeylySettings(
             superKey: SuperKeySettings(key: "cmd", triggerType: "hold"),
             hold: HoldSettings(duration: SettingsConstants.defaultHoldDuration),
-            press: PressSettings(count: SettingsConstants.defaultPressCount),
-            afterPress: AfterPressSettings(count: SettingsConstants.defaultAfterPressCount)
+            press: PressSettings(count: SettingsConstants.defaultPressCount)
         )
 
         let home = FileManager.default.homeDirectoryForCurrentUser
@@ -127,14 +121,10 @@ final class SettingsManager {
         let pressCount = validatePressCount(userConfig["press_count"], default: defaults.press.count)
         let press = PressSettings(count: pressCount)
 
-        let afterPressCount = validateAfterPressCount(userConfig["after_press_count"], default: defaults.afterPress.count)
-        let afterPress = AfterPressSettings(count: afterPressCount)
-
         return KeylySettings(
             superKey: superKey,
             hold: hold,
-            press: press,
-            afterPress: afterPress
+            press: press
         )
     }
 
@@ -184,15 +174,4 @@ final class SettingsManager {
         return count
     }
 
-    private func validateAfterPressCount(_ value: String?, default defaultValue: Int) -> Int {
-        guard let value = value?.trimmingCharacters(in: .whitespacesAndNewlines),
-              let count = Int(value),
-              count >= SettingsConstants.minCount else {
-            if let value = value {
-                print("[Keyly] Warning: Invalid after_press_count '\(value)', using default \(defaultValue)")
-            }
-            return defaultValue
-        }
-        return count
-    }
 }

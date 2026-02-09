@@ -85,6 +85,11 @@ final class SettingsManager {
             print("[Keyly] Warning: Could not read settings file at \(settingsFile.path)")
             return nil
         }
+        
+        guard !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            print("[Keyly] Warning: Settings file is empty")
+            return nil
+        }
 
         var config: [String: String] = [:]
 
@@ -102,7 +107,11 @@ final class SettingsManager {
                 let value = components[1].trimmingCharacters(in: .whitespaces)
                 if !key.isEmpty && !value.isEmpty {
                     config[key] = value
+                } else {
+                    print("[Keyly] Warning: Empty key or value in settings line: '\(trimmedLine)'")
                 }
+            } else {
+                print("[Keyly] Warning: Invalid settings line format: '\(trimmedLine)'")
             }
         }
 
@@ -130,6 +139,9 @@ final class SettingsManager {
 
     private func validateSuperKey(_ value: String?, default defaultValue: String) -> String {
         guard let value = value?.trimmingCharacters(in: .whitespacesAndNewlines), !value.isEmpty else {
+            if value != nil {
+                print("[Keyly] Warning: Empty super_key value, using default '\(defaultValue)'")
+            }
             return defaultValue
         }
 

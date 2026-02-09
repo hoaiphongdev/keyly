@@ -407,12 +407,23 @@ final class ShortcutsWindow: NSWindowController {
     private func rebuildContent() {
         gridContainer.subviews.forEach { $0.removeFromSuperview() }
 
-        guard let window = window else { return }
+        guard let window = window else { 
+            print("[Keyly] Warning: No window available for content rebuild")
+            return 
+        }
+        
+        guard !shortcuts.isEmpty else {
+            print("[Keyly] Warning: No shortcuts to display")
+            return
+        }
 
-        let availableWidth = window.frame.width - padding * 2
+        let availableWidth = max(columnWidth + columnSpacing, window.frame.width - padding * 2)
         let numColumns = max(1, Int(availableWidth / (columnWidth + columnSpacing)))
 
-        let groupedByGroup = Dictionary(grouping: shortcuts) { $0.group ?? "default" }
+        let groupedByGroup = Dictionary(grouping: shortcuts) { shortcut in
+            return shortcut.group?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false ? shortcut.group! : "default"
+        }
+        
         let sortedGroups = groupedByGroup.keys.sorted { group1, group2 in
             if group1 == "default" { return false }
             if group2 == "default" { return true }
@@ -482,6 +493,11 @@ final class ShortcutsWindow: NSWindowController {
     }
 
     private func createCategoryColumn(title: String, description: String?, items: [ShortcutItem]) -> NSView {
+        guard !title.isEmpty && !items.isEmpty else {
+            print("[Keyly] Warning: Empty title or items for category column")
+            return NSView()
+        }
+        
         let column = NSStackView()
         column.orientation = .vertical
         column.alignment = .leading
@@ -513,6 +529,11 @@ final class ShortcutsWindow: NSWindowController {
     }
     
     private func createGroupContainer(groupName: String, shortcuts: [ShortcutItem]) -> NSView {
+        guard !groupName.isEmpty && !shortcuts.isEmpty else {
+            print("[Keyly] Warning: Empty group name or shortcuts for group container")
+            return NSView()
+        }
+        
         let container = NSView()
         container.translatesAutoresizingMaskIntoConstraints = false
         container.wantsLayer = true

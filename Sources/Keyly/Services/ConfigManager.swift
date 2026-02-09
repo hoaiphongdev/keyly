@@ -89,6 +89,12 @@ final class ConfigManager {
     
     private func parseSheetFile(at url: URL) -> ShortcutSheet? {
         guard let content = try? String(contentsOf: url, encoding: .utf8) else {
+            print("[Keyly] Warning: Could not read file '\(url.lastPathComponent)'")
+            return nil
+        }
+        
+        guard !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            print("[Keyly] Warning: File '\(url.lastPathComponent)' is empty")
             return nil
         }
         
@@ -126,15 +132,24 @@ final class ConfigManager {
             
             if trimmed.hasPrefix("# Group:") {
                 let groupInfo = trimmed.replacingOccurrences(of: "# Group:", with: "").trimmingCharacters(in: .whitespaces)
-                let components = groupInfo.components(separatedBy: " - ")
-                if components.count >= 1 {
-                    currentGroup = components[0].trimmingCharacters(in: .whitespaces)
-                    if components.count >= 2 {
-                        let description = components[1].trimmingCharacters(in: .whitespaces)
-                        if let group = currentGroup, !group.isEmpty {
-                            groupDescriptions[group] = description
+                if !groupInfo.isEmpty {
+                    let components = groupInfo.components(separatedBy: " - ")
+                    if components.count >= 1 {
+                        let groupName = components[0].trimmingCharacters(in: .whitespaces)
+                        if !groupName.isEmpty {
+                            currentGroup = groupName
+                            if components.count >= 2 {
+                                let description = components[1].trimmingCharacters(in: .whitespaces)
+                                if !description.isEmpty {
+                                    groupDescriptions[groupName] = description
+                                }
+                            }
+                        } else {
+                            print("[Keyly] Warning: Empty group name in '\(url.lastPathComponent)'")
                         }
                     }
+                } else {
+                    print("[Keyly] Warning: Empty group directive in '\(url.lastPathComponent)'")
                 }
                 continue
             }
@@ -142,13 +157,21 @@ final class ConfigManager {
             if trimmed.hasPrefix("#") { continue }
             
             if trimmed.hasPrefix("[") && trimmed.hasSuffix("]") {
-                currentCategory = String(trimmed.dropFirst().dropLast())
+                let categoryName = String(trimmed.dropFirst().dropLast()).trimmingCharacters(in: .whitespaces)
+                if !categoryName.isEmpty {
+                    currentCategory = categoryName
+                } else {
+                    print("[Keyly] Warning: Empty category name in '\(url.lastPathComponent)', using 'General'")
+                    currentCategory = "General"
+                }
                 continue
             }
             
             if trimmed.hasPrefix(">") {
                 let desc = String(trimmed.dropFirst()).trimmingCharacters(in: .whitespaces)
-                categoryDescriptions[currentCategory] = desc
+                if !desc.isEmpty {
+                    categoryDescriptions[currentCategory] = desc
+                }
                 continue
             }
             
@@ -168,14 +191,25 @@ final class ConfigManager {
     private func parseShortcutLine(_ line: String, category: String, group: String? = nil) -> ShortcutItem? {
         let parts = line.components(separatedBy: .whitespaces).filter { !$0.isEmpty }
         
-        guard parts.count >= 2 else { return nil }
+        guard parts.count >= 2 else { 
+            if !line.trimmingCharacters(in: .whitespaces).isEmpty {
+                print("[Keyly] Warning: Invalid shortcut line format: '\(line)'")
+            }
+            return nil 
+        }
         
         let rawShortcut = parts[0]
         let action = parts.dropFirst().joined(separator: " ")
         
+        guard !rawShortcut.isEmpty && !action.isEmpty else {
+            print("[Keyly] Warning: Empty shortcut or action in line: '\(line)'")
+            return nil
+        }
+        
         let shortcut = normalizeShortcut(rawShortcut)
         
         guard shortcut.contains(where: { Modifier.allCharacters.contains($0) }) else {
+            print("[Keyly] Warning: No valid modifier found in shortcut: '\(rawShortcut)'")
             return nil
         }
         
@@ -183,6 +217,11 @@ final class ConfigManager {
     }
     
     private func normalizeShortcut(_ raw: String) -> String {
+        guard !raw.isEmpty else {
+            print("[Keyly] Warning: Empty shortcut string")
+            return raw
+        }
+        
         var result = raw.uppercased()
         
         for (patterns, symbol) in ShortcutMapping.modifiersWithSeparator {
@@ -226,6 +265,12 @@ final class ConfigManager {
     
     private func loadGlobalShortcuts(from url: URL) {
         guard let content = try? String(contentsOf: url, encoding: .utf8) else {
+            print("[Keyly] Warning: Could not read global shortcuts file '\(url.lastPathComponent)'")
+            return
+        }
+        
+        guard !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            print("[Keyly] Warning: Global shortcuts file '\(url.lastPathComponent)' is empty")
             return
         }
         
@@ -242,9 +287,18 @@ final class ConfigManager {
             
             if trimmed.hasPrefix("# Group:") {
                 let groupInfo = trimmed.replacingOccurrences(of: "# Group:", with: "").trimmingCharacters(in: .whitespaces)
-                let components = groupInfo.components(separatedBy: " - ")
-                if components.count >= 1 {
-                    currentGroup = components[0].trimmingCharacters(in: .whitespaces)
+                if !groupInfo.isEmpty {
+                    let components = groupInfo.components(separatedBy: " - ")
+                    if components.count >= 1 {
+                        let groupName = components[0].trimmingCharacters(in: .whitespaces)
+                        if !groupName.isEmpty {
+                            currentGroup = groupName
+                        } else {
+                            print("[Keyly] Warning: Empty group name in global shortcuts")
+                        }
+                    }
+                } else {
+                    print("[Keyly] Warning: Empty group directive in global shortcuts")
                 }
                 continue
             }
@@ -252,7 +306,13 @@ final class ConfigManager {
             if trimmed.hasPrefix("#") { continue }
             
             if trimmed.hasPrefix("[") && trimmed.hasSuffix("]") {
-                currentCategory = String(trimmed.dropFirst().dropLast())
+                let categoryName = String(trimmed.dropFirst().dropLast()).trimmingCharacters(in: .whitespaces)
+                if !categoryName.isEmpty {
+                    currentCategory = categoryName
+                } else {
+                    print("[Keyly] Warning: Empty category name in global shortcuts, using 'Global'")
+                    currentCategory = "Global"
+                }
                 continue
             }
             

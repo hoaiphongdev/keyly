@@ -24,6 +24,7 @@ final class ConfigManager {
     private let editorPreferenceKey = "KeylyPreferredEditor"
     
     var onConfigReloaded: (() -> Void)?
+    var onSettingsReloaded: (() -> Void)?
     
     private init() {}
     
@@ -46,11 +47,21 @@ final class ConfigManager {
         return keylyDir
     }
     
+    var templatesDirectory: URL {
+        let templatesDir = configDirectory.appendingPathComponent("templates", isDirectory: true)
+        
+        try? FileManager.default.createDirectory(at: templatesDir, withIntermediateDirectories: true)
+        
+        return templatesDir
+    }
+    
     func loadAllSheets() {
         customSheets.removeAll()
         
         let fileManager = FileManager.default
-        guard let files = try? fileManager.contentsOfDirectory(at: configDirectory, includingPropertiesForKeys: nil) else {
+        
+        // Load templates from the templates directory
+        guard let files = try? fileManager.contentsOfDirectory(at: templatesDirectory, includingPropertiesForKeys: nil) else {
             return
         }
         
@@ -65,7 +76,9 @@ final class ConfigManager {
     
     func reload() {
         loadAllSheets()
+        SettingsManager.shared.reloadSettings()
         onConfigReloaded?()
+        onSettingsReloaded?()
     }
     
     private func parseSheetFile(at url: URL) -> ShortcutSheet? {
@@ -162,7 +175,11 @@ final class ConfigManager {
     }
     
     func startWatching() {
-        fileWatcher = FileWatcher(paths: [configDirectory.path]) { [weak self] in
+        let watchPaths = [
+            templatesDirectory.path,
+            configDirectory.path
+        ]
+        fileWatcher = FileWatcher(paths: watchPaths) { [weak self] in
             self?.reload()
         }
         fileWatcher?.start()
@@ -246,8 +263,9 @@ final class ConfigManager {
     }
     
     private func createExampleIfNeeded() {
-        let exampleFile = configDirectory.appendingPathComponent("example.keyly")
-        guard !FileManager.default.fileExists(atPath: exampleFile.path) else { return }
+        // Create example template
+        let exampleTemplateFile = templatesDirectory.appendingPathComponent("example.keyly")
+        guard !FileManager.default.fileExists(atPath: exampleTemplateFile.path) else { return }
         
         let exampleContent = """
         # Sheet Name: Example Shortcuts
@@ -269,6 +287,32 @@ final class ConfigManager {
         CMD+0       Actual Size
         """
         
-        try? exampleContent.write(to: exampleFile, atomically: true, encoding: .utf8)
+        try? exampleContent.write(to: exampleTemplateFile, atomically: true, encoding: .utf8)
+        
+        // Create example config
+        let exampleConfigFile = configDirectory.appendingPathComponent("setting.conf")
+        guard !FileManager.default.fileExists(atPath: exampleConfigFile.path) else { return }
+        
+        let exampleConfigContent = """
+        # Keyly Configuration File
+        # Place this file at ~/.config/keyly/setting.conf
+
+        # Super key configuration - can be single key or combinations:
+        # Single keys: cmd, ctrl, alt, shift, fn, space, a, b, c, f1, etc.
+        # Combinations: cmd+a, ctrl+shift+x, alt+space, fn+f12, etc.
+        super_key=cmd+a
+        trigger_type=hold
+
+        # Hold settings (used when trigger_type = hold)
+        hold_duration=0.5
+
+        # Press settings (used when trigger_type = press)
+        press_count=2
+
+        # After press settings (used when trigger_type = afterPress)
+        after_press_count=3
+        """
+        
+        try? exampleConfigContent.write(to: exampleConfigFile, atomically: true, encoding: .utf8)
     }
 }

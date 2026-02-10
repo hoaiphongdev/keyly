@@ -34,7 +34,7 @@ struct WindowConstants {
 
         static let modifiersTextColor = NSColor.white
         static let keyTextColor = NSColor.white
-        static let actionTextColor = NSColor.white
+        static let actionTextColor = NSColor.white.withAlphaComponent(0.7)
 
         static let containerBackgroundColor = NSColor.black
         static let containerBorderColor = NSColor.white.withAlphaComponent(0.2)

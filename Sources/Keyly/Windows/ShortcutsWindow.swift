@@ -26,7 +26,6 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
     private var allShortcuts: [ShortcutItem] = []
     private var categoryDescriptions: [String: String] = [:]
     private var groupDescriptions: [String: String] = [:]
-    private var groupSizes: [String: Int] = [:]
     private var updateButton: NSButton?
     private var spinner: NSProgressIndicator?
     private var clickOutsideMonitor: Any?
@@ -44,6 +43,7 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
     private let padding = WindowConstants.padding
     private let footerHeight = WindowConstants.footerHeight
     private let bannerHeight = WindowConstants.bannerHeight
+    private let shortcutRowGap: CGFloat = 10
 
     convenience init() {
         let initialWidth = WindowConstants.columnWidth + WindowConstants.padding * 2
@@ -78,12 +78,11 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
         }
     }
 
-    func displayShortcuts(_ shortcuts: [ShortcutItem], appName: String, categoryDescriptions: [String: String] = [:], groupDescriptions: [String: String] = [:], groupSizes: [String: Int] = [:]) {
+    func displayShortcuts(_ shortcuts: [ShortcutItem], appName: String, categoryDescriptions: [String: String] = [:], groupDescriptions: [String: String] = [:]) {
         self.allShortcuts = shortcuts
         self.shortcuts = shortcuts
         self.categoryDescriptions = categoryDescriptions
         self.groupDescriptions = groupDescriptions
-        self.groupSizes = groupSizes
 
         searchField?.stringValue = ""
 
@@ -598,13 +597,22 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
         let maxPossibleColumns = max(1, Int(maxScreenWidth / (columnWidth + columnSpacing)))
 
         let numColumns = min(totalColumns, maxPossibleColumns)
+        let maxColumnWidthForLayout = max(
+            columnWidth,
+            (maxScreenWidth - padding * 2 - CGFloat(max(0, numColumns - 1)) * columnSpacing) / CGFloat(max(1, numColumns))
+        )
+        let dynamicColumnWidth = calculateDynamicColumnWidth(
+            shortcuts: shortcuts,
+            maxColumnWidth: maxColumnWidthForLayout
+        )
 
-        let actualTotalWidth = CGFloat(numColumns) * columnWidth + CGFloat(max(0, numColumns - 1)) * columnSpacing
+        let actualTotalWidth = CGFloat(numColumns) * dynamicColumnWidth + CGFloat(max(0, numColumns - 1)) * columnSpacing
         var newWindowWidth = actualTotalWidth + padding * 2
 
         if isSearchActive {
             newWindowWidth = max(newWindowWidth, WindowConstants.minSearchWindowWidth)
         }
+        newWindowWidth = min(newWindowWidth, maxScreenWidth)
 
         window.setContentSize(NSSize(width: newWindowWidth, height: window.frame.height))
 
@@ -636,36 +644,18 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
             guard let groupShortcuts = groupedByGroup[groupName] else { continue }
 
             if groupName != "default" {
-                let requestedSize = groupSizes[groupName] ?? 1
-                let groupSize = min(max(1, requestedSize), numColumns)
-
-                var bestStartColumn = 0
-                var lowestMaxHeight = CGFloat.greatestFiniteMagnitude
-
-                for startCol in 0...(numColumns - groupSize) {
-                    let maxHeightInRange = (startCol..<(startCol + groupSize)).map { columnYPositions[$0] }.max() ?? 0
-                    if maxHeightInRange < lowestMaxHeight {
-                        lowestMaxHeight = maxHeightInRange
-                        bestStartColumn = startCol
-                    }
-                }
-
-                let groupWidth = CGFloat(groupSize) * columnWidth + CGFloat(max(0, groupSize - 1)) * columnSpacing
-                let groupView = createGroupContainer(groupName: groupName, shortcuts: groupShortcuts, containerWidth: groupWidth)
+                let groupView = createGroupContainer(groupName: groupName, shortcuts: groupShortcuts, containerWidth: dynamicColumnWidth)
                 groupView.layoutSubtreeIfNeeded()
 
                 let height = groupView.fittingSize.height
-                let x = gridOffset + CGFloat(bestStartColumn) * (columnWidth + columnSpacing)
-                let y = lowestMaxHeight
+                let x = gridOffset + CGFloat(currentColumn) * (dynamicColumnWidth + columnSpacing)
+                let y = columnYPositions[currentColumn]
 
-                groupView.frame = NSRect(x: x, y: y, width: groupWidth, height: height)
+                groupView.frame = NSRect(x: x, y: y, width: dynamicColumnWidth, height: height)
                 gridContainer.addSubview(groupView)
 
-                for col in bestStartColumn..<(bestStartColumn + groupSize) {
-                    columnYPositions[col] = y + height + rowSpacing
-                }
-
-                currentColumn = (bestStartColumn + groupSize) % numColumns
+                columnYPositions[currentColumn] += height + rowSpacing
+                currentColumn = (currentColumn + 1) % numColumns
             } else {
                 let grouped = Dictionary(grouping: groupShortcuts) { $0.category }
                 let sortedCategories = grouped.keys.sorted()
@@ -673,14 +663,14 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
                 for category in sortedCategories {
                     guard let items = grouped[category] else { continue }
                     let description = categoryDescriptions[category]
-                    let view = createCategoryColumn(title: category, description: description, items: items)
+                    let view = createCategoryColumn(title: category, description: description, items: items, columnWidth: dynamicColumnWidth)
                     view.layoutSubtreeIfNeeded()
 
                     let height = view.fittingSize.height
-                    let x = gridOffset + CGFloat(currentColumn) * (columnWidth + columnSpacing)
+                    let x = gridOffset + CGFloat(currentColumn) * (dynamicColumnWidth + columnSpacing)
                     let y = columnYPositions[currentColumn]
 
-                    view.frame = NSRect(x: x, y: y, width: columnWidth, height: height)
+                    view.frame = NSRect(x: x, y: y, width: dynamicColumnWidth, height: height)
                     gridContainer.addSubview(view)
 
                     columnYPositions[currentColumn] += height + rowSpacing
@@ -709,7 +699,24 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
         window.setContentSize(NSSize(width: window.frame.width, height: newHeight))
     }
 
-    private func createCategoryColumn(title: String, description: String?, items: [ShortcutItem]) -> NSView {
+    private func calculateDynamicColumnWidth(shortcuts: [ShortcutItem], maxColumnWidth: CGFloat) -> CGFloat {
+        guard !shortcuts.isEmpty else { return columnWidth }
+
+        let leftFont = NSFont.systemFont(ofSize: 11, weight: .semibold)
+        let rightFont = NSFont.systemFont(ofSize: 11)
+        var widestRequired: CGFloat = columnWidth
+
+        for item in shortcuts {
+            let leftWidth = (item.shortcut as NSString).size(withAttributes: [.font: leftFont]).width
+            let rightWidth = (item.action as NSString).size(withAttributes: [.font: rightFont]).width
+            let rowRequired = leftWidth + shortcutRowGap + rightWidth + 12
+            widestRequired = max(widestRequired, rowRequired)
+        }
+
+        return min(max(widestRequired, columnWidth), maxColumnWidth)
+    }
+
+    private func createCategoryColumn(title: String, description: String?, items: [ShortcutItem], columnWidth: CGFloat) -> NSView {
         guard !title.isEmpty && !items.isEmpty else {
             print("[Keyly] Warning: Empty title or items for category column")
             return NSView()
@@ -802,7 +809,7 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
             stackView.addArrangedSubview(descLabel)
 
             NSLayoutConstraint.activate([
-                descLabel.widthAnchor.constraint(equalToConstant: max(columnWidth - 16, containerWidth - 16)) // Use actual container width
+                descLabel.widthAnchor.constraint(equalToConstant: max(80, containerWidth - 16))
             ])
         }
 
@@ -835,13 +842,13 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
                     stackView.addArrangedSubview(descLabel)
 
                     NSLayoutConstraint.activate([
-                        descLabel.widthAnchor.constraint(equalToConstant: max(columnWidth - 16, containerWidth - 16))
+                        descLabel.widthAnchor.constraint(equalToConstant: max(80, containerWidth - 16))
                     ])
                 }
             }
 
             for item in items {
-                let row = createShortcutRow(item, availableWidth: max(columnWidth, containerWidth))
+                let row = createShortcutRow(item, availableWidth: max(80, containerWidth))
                 stackView.addArrangedSubview(row)
             }
         }
@@ -859,72 +866,71 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
         return container
     }
 
+    private func measureTextHeight(_ text: String, font: NSFont, width: CGFloat) -> CGFloat {
+        let storage = NSTextStorage(string: text, attributes: [.font: font])
+        let container = NSTextContainer(size: NSSize(width: width, height: .greatestFiniteMagnitude))
+        container.lineFragmentPadding = 0
+        let lm = NSLayoutManager()
+        lm.addTextContainer(container)
+        storage.addLayoutManager(lm)
+        lm.ensureLayout(for: container)
+        return ceil(lm.usedRect(for: container).height)
+    }
+
+    private func makeTextView(_ text: String, font: NSFont, color: NSColor, alignment: NSTextAlignment, width: CGFloat) -> NSTextView {
+        let tv = NSTextView(frame: NSRect(x: 0, y: 0, width: width, height: 0))
+        tv.string = text
+        tv.font = font
+        tv.textColor = color
+        tv.alignment = alignment
+        tv.isEditable = false
+        tv.isSelectable = false
+        tv.drawsBackground = false
+        tv.isVerticallyResizable = false
+        tv.isHorizontallyResizable = false
+        tv.textContainerInset = .zero
+        tv.textContainer?.lineFragmentPadding = 0
+        tv.textContainer?.widthTracksTextView = true
+        tv.translatesAutoresizingMaskIntoConstraints = false
+        return tv
+    }
+
     private func createShortcutRow(_ item: ShortcutItem, availableWidth: CGFloat = 200) -> NSView {
+        let contentWidth = max(120, availableWidth - 4)
+        let leftColumnWidth = max(50, floor((contentWidth - shortcutRowGap) * 0.45))
+        let rightColumnWidth = max(50, contentWidth - leftColumnWidth - shortcutRowGap)
+
+        let leftFont = NSFont.systemFont(ofSize: 11, weight: .semibold)
+        let rightFont = NSFont.systemFont(ofSize: 11)
+
+        let leftHeight = measureTextHeight(item.shortcut, font: leftFont, width: leftColumnWidth)
+        let rightHeight = measureTextHeight(item.action, font: rightFont, width: rightColumnWidth)
+        let rowHeight = max(leftHeight, rightHeight)
+
+        let leftView = makeTextView(item.shortcut, font: leftFont, color: WindowConstants.Colors.keyTextColor, alignment: .left, width: leftColumnWidth)
+        let rightView = makeTextView(item.action, font: rightFont, color: WindowConstants.Colors.actionTextColor, alignment: .right, width: rightColumnWidth)
+
         let row = NSView()
         row.translatesAutoresizingMaskIntoConstraints = false
-
-        let (modifiers, key) = parseShortcut(item.shortcut)
-
-        let modifiersLabel = NSTextField(labelWithString: modifiers)
-        modifiersLabel.font = NSFont.systemFont(ofSize: 11, weight: .regular)
-        modifiersLabel.textColor = WindowConstants.Colors.modifiersTextColor
-        modifiersLabel.alignment = .right
-        modifiersLabel.translatesAutoresizingMaskIntoConstraints = false
-
-        let keyLabel = NSTextField(labelWithString: key)
-        keyLabel.font = NSFont.systemFont(ofSize: 11, weight: .semibold)
-        keyLabel.textColor = WindowConstants.Colors.keyTextColor
-        keyLabel.translatesAutoresizingMaskIntoConstraints = false
-
-        let actionLabel = NSTextField(wrappingLabelWithString: item.action)
-        actionLabel.font = NSFont.systemFont(ofSize: 11)
-        actionLabel.textColor = WindowConstants.Colors.actionTextColor
-        actionLabel.translatesAutoresizingMaskIntoConstraints = false
-        actionLabel.maximumNumberOfLines = 2
-        actionLabel.preferredMaxLayoutWidth = availableWidth - 95
-
-        row.addSubview(modifiersLabel)
-        row.addSubview(keyLabel)
-        row.addSubview(actionLabel)
-
-        let modifiersWidth: CGFloat = 40
-        let keyWidth: CGFloat = 45
+        row.addSubview(leftView)
+        row.addSubview(rightView)
 
         NSLayoutConstraint.activate([
-            row.widthAnchor.constraint(equalToConstant: availableWidth - 4),
-            row.heightAnchor.constraint(greaterThanOrEqualToConstant: 18),
+            row.widthAnchor.constraint(equalToConstant: contentWidth),
+            row.heightAnchor.constraint(equalToConstant: rowHeight),
 
-            modifiersLabel.leadingAnchor.constraint(equalTo: row.leadingAnchor),
-            modifiersLabel.widthAnchor.constraint(equalToConstant: modifiersWidth),
-            modifiersLabel.topAnchor.constraint(equalTo: row.topAnchor, constant: 2),
+            leftView.leadingAnchor.constraint(equalTo: row.leadingAnchor),
+            leftView.topAnchor.constraint(equalTo: row.topAnchor),
+            leftView.widthAnchor.constraint(equalToConstant: leftColumnWidth),
+            leftView.heightAnchor.constraint(equalToConstant: leftHeight),
 
-            keyLabel.leadingAnchor.constraint(equalTo: modifiersLabel.trailingAnchor, constant: 2),
-            keyLabel.widthAnchor.constraint(equalToConstant: keyWidth),
-            keyLabel.topAnchor.constraint(equalTo: row.topAnchor, constant: 2),
-
-            actionLabel.leadingAnchor.constraint(equalTo: keyLabel.trailingAnchor, constant: 1),
-            actionLabel.trailingAnchor.constraint(equalTo: row.trailingAnchor),
-            actionLabel.topAnchor.constraint(equalTo: row.topAnchor, constant: 2),
-            actionLabel.bottomAnchor.constraint(equalTo: row.bottomAnchor, constant: -2)
+            rightView.trailingAnchor.constraint(equalTo: row.trailingAnchor),
+            rightView.topAnchor.constraint(equalTo: row.topAnchor),
+            rightView.widthAnchor.constraint(equalToConstant: rightColumnWidth),
+            rightView.heightAnchor.constraint(equalToConstant: rightHeight),
         ])
 
         return row
-    }
-
-    private func parseShortcut(_ shortcut: String) -> (modifiers: String, key: String) {
-        let modifierChars = Modifier.allCharacters
-        var modifiers = ""
-        var key = ""
-
-        for char in shortcut {
-            if modifierChars.contains(char) {
-                modifiers.append(char)
-            } else {
-                key.append(char)
-            }
-        }
-
-        return (modifiers, key)
     }
 }
 

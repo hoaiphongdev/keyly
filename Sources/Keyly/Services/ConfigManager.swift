@@ -103,7 +103,6 @@ final class ConfigManager {
         var shortcuts: [ShortcutItem] = []
         var categoryDescriptions: [String: String] = [:]
         var groupDescriptions: [String: String] = [:]
-        var groupSizes: [String: Int] = [:]
         var currentCategory = "General"
         var currentGroup: String? = nil
         var hideDefaultShortcuts = false
@@ -141,29 +140,13 @@ final class ConfigManager {
                             currentGroup = groupName
 
                             if components.count >= 2 {
-                                let description = components[1].trimmingCharacters(in: .whitespaces)
-                                if !description.isEmpty && !description.hasPrefix("Size:") {
+                                let description = components
+                                    .dropFirst()
+                                    .map { $0.trimmingCharacters(in: .whitespaces) }
+                                    .first { !$0.isEmpty && !$0.hasPrefix("Size:") }
+                                if let description {
                                     groupDescriptions[groupName] = description
                                 }
-                            }
-
-                            for component in components {
-                                let trimmedComponent = component.trimmingCharacters(in: .whitespaces)
-                                if trimmedComponent.hasPrefix("Size:") {
-                                    let sizeString = trimmedComponent.replacingOccurrences(of: "Size:", with: "").trimmingCharacters(in: .whitespaces)
-                                    if let size = Int(sizeString), size > 0 {
-                                        groupSizes[groupName] = size
-                                    } else {
-                                        print("[Keyly] Warning: Invalid group size '\(sizeString)' for group '\(groupName)', using default size 1")
-                                        groupSizes[groupName] = 1
-                                    }
-                                    break
-                                }
-                            }
-
-                            // Default size is 1 if not specified
-                            if groupSizes[groupName] == nil {
-                                groupSizes[groupName] = 1
                             }
                         } else {
                             print("[Keyly] Warning: Empty group name in '\(url.lastPathComponent)'")
@@ -206,28 +189,25 @@ final class ConfigManager {
             return nil
         }
 
-        return ShortcutSheet(name: name, appPath: appPath, shortcuts: shortcuts, categoryDescriptions: categoryDescriptions, sourceFile: url, hideDefaultShortcuts: hideDefaultShortcuts, groupDescriptions: groupDescriptions, groupSizes: groupSizes)
+        return ShortcutSheet(name: name, appPath: appPath, shortcuts: shortcuts, categoryDescriptions: categoryDescriptions, sourceFile: url, hideDefaultShortcuts: hideDefaultShortcuts, groupDescriptions: groupDescriptions)
     }
 
     private func parseShortcutLine(_ line: String, category: String, group: String? = nil) -> ShortcutItem? {
-        let parts = line.components(separatedBy: .whitespaces).filter { !$0.isEmpty }
-
-        guard parts.count >= 2 else {
-            if !line.trimmingCharacters(in: .whitespaces).isEmpty {
-                print("[Keyly] Warning: Invalid shortcut line format: '\(line)'")
-            }
+        let parts = line.components(separatedBy: "|")
+        guard parts.count == 2 else {
             return nil
         }
 
-        let rawShortcut = parts[0]
-        let action = parts.dropFirst().joined(separator: " ")
+        let rawShortcutOrCommand = parts[0].trimmingCharacters(in: .whitespaces)
+        let action = parts[1].trimmingCharacters(in: .whitespaces)
 
-        guard !rawShortcut.isEmpty && !action.isEmpty else {
-            print("[Keyly] Warning: Empty shortcut or action in line: '\(line)'")
+        guard !rawShortcutOrCommand.isEmpty, !action.isEmpty else {
             return nil
         }
 
-        let shortcut = normalizeShortcut(rawShortcut)
+        let shortcut = rawShortcutOrCommand.contains(" ")
+            ? rawShortcutOrCommand
+            : normalizeShortcut(rawShortcutOrCommand)
 
         return ShortcutItem(category: category, action: action, shortcut: shortcut, group: group)
     }

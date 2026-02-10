@@ -14,6 +14,8 @@ struct WindowConstants {
     static let screenWidthRatio: CGFloat = 0.7
     static let defaultWindowHeight: CGFloat = 400
     static let minWindowHeight: CGFloat = 200
+    static let minSearchWindowHeight: CGFloat = 300
+    static let minSearchWindowWidth: CGFloat = 500
     static let maxScreenHeightRatio: CGFloat = 0.8
 
     static let cornerRadius: CGFloat = 12

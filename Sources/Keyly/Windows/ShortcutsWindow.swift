@@ -34,6 +34,7 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
     private var searchField: NSSearchField!
     private var searchContainer: NSView!
     private var isSearchFocused = false
+    private var isSearchActive = false
     private var keyboardMonitor: Any?
     private var searchTimer: Timer?
 
@@ -372,11 +373,13 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
     private func filterShortcuts(with searchText: String) {
         if searchText.isEmpty {
             shortcuts = allShortcuts
+            isSearchActive = false
         } else {
             let lowercaseSearch = searchText.lowercased()
             shortcuts = allShortcuts.filter { shortcut in
                 matchesSearch(shortcut: shortcut, searchText: lowercaseSearch)
             }
+            isSearchActive = true
         }
 
         DispatchQueue.main.async { [weak self] in
@@ -597,7 +600,11 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
         let numColumns = min(totalColumns, maxPossibleColumns)
 
         let actualTotalWidth = CGFloat(numColumns) * columnWidth + CGFloat(max(0, numColumns - 1)) * columnSpacing
-        let newWindowWidth = actualTotalWidth + padding * 2
+        var newWindowWidth = actualTotalWidth + padding * 2
+
+        if isSearchActive {
+            newWindowWidth = max(newWindowWidth, WindowConstants.minSearchWindowWidth)
+        }
 
         window.setContentSize(NSSize(width: newWindowWidth, height: window.frame.height))
 
@@ -696,7 +703,8 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
         let contentHeight = gridContainer.frame.height + padding * 2 + footerHeight + WindowConstants.searchBarHeight + 8
         let calculatedHeight = min(contentHeight, maxHeight)
 
-        let newHeight = max(calculatedHeight, WindowConstants.minWindowHeight)
+        let minHeight = isSearchActive ? WindowConstants.minSearchWindowHeight : WindowConstants.minWindowHeight
+        let newHeight = max(calculatedHeight, minHeight)
 
         window.setContentSize(NSSize(width: window.frame.width, height: newHeight))
     }

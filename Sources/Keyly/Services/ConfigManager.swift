@@ -229,11 +229,6 @@ final class ConfigManager {
 
         let shortcut = normalizeShortcut(rawShortcut)
 
-        guard shortcut.contains(where: { Modifier.allCharacters.contains($0) }) else {
-            print("[Keyly] Warning: No valid modifier found in shortcut: '\(rawShortcut)'")
-            return nil
-        }
-
         return ShortcutItem(category: category, action: action, shortcut: shortcut, group: group)
     }
 

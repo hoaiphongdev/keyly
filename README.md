@@ -28,7 +28,7 @@ curl -fsSL https://raw.githubusercontent.com/hoaiphongdev/keyly/main/scripts/ins
 
 - **Customizable Trigger**: Hold ⌘ for specified duration or press multiple times
 - **Real-time Search**: Search shortcuts with instant filtering
-- **Group System**: Organize shortcuts with descriptions and multi-column layouts
+- **Group System**: Organize shortcuts into groups with descriptions
 - **Custom Templates**: Create `.keyly` files for any application
 - **Runtime Settings**: Configure via `~/.config/keyly/setting.conf`
 - **Multiple Close Options**: Press ESC or click outside to close
@@ -91,21 +91,33 @@ Create `.keyly` files for any application:
 # App: /Applications/Safari.app
 # Hide Default: false
 
-# Group: Navigation - Web browsing shortcuts - Size: 2
-[Navigation]
-CMD+L       Open Location
-CMD+T       New Tab
-CMD+SHIFT+T Reopen Last Tab
+# Group: Navigation - Web browsing shortcuts
+
+[Tabs]
+⌘T | New tab
+⌘W | Close tab
+⇧⌘T | Reopen last tab
 
 [Bookmarks]
 > Bookmark management
-CMD+D       Add Bookmark
+⌘D | Add bookmark
+⌘L | Open location
+
+# Group: Tools - CLI shortcuts
+
+[Session]
+tool start | Start new session
+tool attach <name> | Attach to session
 ```
 
+**Syntax:** `key/command | description` — each line split by `|`
+
 **Template Features:**
-- `# Hide Default: true` - Hide system menu shortcuts
-- `# Group: Name - Description - Size: 2` - Multi-column groups
-- `> Description` - Category descriptions
+- `# Hide Default: true` — Hide system menu shortcuts
+- `# Group: Name - Description` — Group shortcuts with optional description
+- `[Category]` — Category header
+- `> Description` — Category description
+- Lines without valid `|` format are ignored
 
 ## Community Templates
 

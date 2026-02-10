@@ -153,7 +153,7 @@ final class SettingsManager {
             return defaultValue
         }
 
-        let validTypes = ["hold", "press", "afterPress"]
+        let validTypes = ["hold", "press"]
         if validTypes.contains(value) {
             return value
         } else {

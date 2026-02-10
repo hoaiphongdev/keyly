@@ -8,10 +8,13 @@ struct WindowConstants {
     static let padding: CGFloat = 16
     static let footerHeight: CGFloat = 32
     static let bannerHeight: CGFloat = 48
+    static let searchBarHeight: CGFloat = 32
     
     static let defaultScreenSize = NSSize(width: 1200, height: 800)
-    static let screenWidthRatio: CGFloat = 0.75
+    static let screenWidthRatio: CGFloat = 0.7
+    static let maxColumns: Int = 6
     static let defaultWindowHeight: CGFloat = 400
+    static let minWindowHeight: CGFloat = 200
     static let maxScreenHeightRatio: CGFloat = 0.8
     
     static let cornerRadius: CGFloat = 12

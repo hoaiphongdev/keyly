@@ -1,6 +1,20 @@
 import Cocoa
 
-final class ShortcutsWindow: NSWindowController {
+class KeylyPanel: NSPanel {
+    override var canBecomeKey: Bool {
+        return true
+    }
+
+    override var canBecomeMain: Bool {
+        return false
+    }
+
+    override var acceptsFirstResponder: Bool {
+        return true
+    }
+}
+
+final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
     private var containerView: NSView!
     private var scrollView: NSScrollView!
     private var gridContainer: NSView!
@@ -9,11 +23,18 @@ final class ShortcutsWindow: NSWindowController {
     private var updateBanner: NSView?
     private var scrollViewTopConstraint: NSLayoutConstraint!
     private var shortcuts: [ShortcutItem] = []
+    private var allShortcuts: [ShortcutItem] = []
     private var categoryDescriptions: [String: String] = [:]
     private var groupDescriptions: [String: String] = [:]
     private var updateButton: NSButton?
     private var spinner: NSProgressIndicator?
     private var clickOutsideMonitor: Any?
+    private var localClickMonitor: Any?
+    private var searchField: NSSearchField!
+    private var searchContainer: NSView!
+    private var isSearchFocused = false
+    private var keyboardMonitor: Any?
+    private var searchTimer: Timer?
 
     private let columnWidth = WindowConstants.columnWidth
     private let columnSpacing = WindowConstants.columnSpacing
@@ -23,11 +44,11 @@ final class ShortcutsWindow: NSWindowController {
     private let bannerHeight = WindowConstants.bannerHeight
 
     convenience init() {
-        let screenSize = NSScreen.main?.visibleFrame.size ?? WindowConstants.defaultScreenSize
-        let windowWidth = min(screenSize.width * WindowConstants.screenWidthRatio, screenSize.width)
+        // Start with minimum width, will be resized dynamically based on content
+        let initialWidth = WindowConstants.columnWidth + WindowConstants.padding * 2
 
-        let window = NSPanel(
-            contentRect: NSRect(x: 0, y: 0, width: windowWidth, height: WindowConstants.defaultWindowHeight),
+        let window = KeylyPanel(
+            contentRect: NSRect(x: 0, y: 0, width: initialWidth, height: WindowConstants.defaultWindowHeight),
             styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
             defer: false
@@ -41,14 +62,29 @@ final class ShortcutsWindow: NSWindowController {
         window.level = .floating
         window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
 
+        window.delegate = self
+
         setupUI()
         setupClickOutsideMonitoring()
     }
 
+    override func showWindow(_ sender: Any?) {
+        super.showWindow(sender)
+        window?.makeKeyAndOrderFront(nil)
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+            self?.window?.makeFirstResponder(nil)
+        }
+    }
+
     func displayShortcuts(_ shortcuts: [ShortcutItem], appName: String, categoryDescriptions: [String: String] = [:], groupDescriptions: [String: String] = [:]) {
+        self.allShortcuts = shortcuts
         self.shortcuts = shortcuts
         self.categoryDescriptions = categoryDescriptions
         self.groupDescriptions = groupDescriptions
+
+        searchField?.stringValue = ""
+
         rebuildContent()
         updateUpdateBanner()
         resizeWindowToFit()
@@ -60,7 +96,7 @@ final class ShortcutsWindow: NSWindowController {
         updateBanner = nil
         updateButton = nil
         spinner = nil
-        scrollViewTopConstraint.constant = padding
+        scrollViewTopConstraint.constant = 8
 
         let state = UpdateManager.shared.updateState
         switch state {
@@ -205,7 +241,7 @@ final class ShortcutsWindow: NSWindowController {
         ])
 
         updateBanner = banner
-        scrollViewTopConstraint.constant = padding + bannerHeight
+        scrollViewTopConstraint.constant = 8 + bannerHeight
 
         UpdateManager.shared.onUpdateStateChanged = { [weak self] newState in
             self?.updateUpdateBanner()
@@ -232,7 +268,7 @@ final class ShortcutsWindow: NSWindowController {
     @objc private func dismissBanner() {
         updateBanner?.removeFromSuperview()
         updateBanner = nil
-        scrollViewTopConstraint.constant = padding
+        scrollViewTopConstraint.constant = 8
         containerView.layoutSubtreeIfNeeded()
     }
 
@@ -248,9 +284,7 @@ final class ShortcutsWindow: NSWindowController {
         visualEffect.layer?.masksToBounds = true
         visualEffect.autoresizingMask = [.width, .height]
 
-        let overlay = GradientOverlayView(frame: visualEffect.bounds)
-        overlay.autoresizingMask = [.width, .height]
-        visualEffect.addSubview(overlay)
+        // Removed gradient overlay to eliminate flash animation
 
         containerView = visualEffect
         window.contentView?.addSubview(containerView)
@@ -268,7 +302,9 @@ final class ShortcutsWindow: NSWindowController {
         gridContainer.translatesAutoresizingMaskIntoConstraints = false
         scrollView.documentView = gridContainer
 
-        scrollViewTopConstraint = scrollView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: padding)
+        setupSearchBar()
+
+        scrollViewTopConstraint = scrollView.topAnchor.constraint(equalTo: searchContainer.bottomAnchor, constant: 8)
 
         NSLayoutConstraint.activate([
             scrollViewTopConstraint,
@@ -279,6 +315,108 @@ final class ShortcutsWindow: NSWindowController {
 
         setupSettingsButton()
         setupEscLabel()
+    }
+
+    private func setupSearchBar() {
+        searchContainer = NSView()
+        searchContainer.translatesAutoresizingMaskIntoConstraints = false
+        containerView.addSubview(searchContainer)
+
+        searchField = NSSearchField()
+        searchField.translatesAutoresizingMaskIntoConstraints = false
+        searchField.placeholderString = "Search shortcuts..."
+        searchField.font = NSFont.systemFont(ofSize: 13)
+        searchField.target = self
+        searchField.action = #selector(searchTextChanged)
+        searchField.delegate = self
+        searchField.isEditable = true
+        searchField.isSelectable = true
+        searchField.sendsWholeSearchString = false
+        searchField.sendsSearchStringImmediately = true
+        searchField.refusesFirstResponder = false
+
+        // Custom appearance for better border
+        searchField.wantsLayer = true
+        searchField.layer?.cornerRadius = 6
+        searchField.layer?.borderWidth = 1
+        searchField.layer?.borderColor = NSColor.separatorColor.cgColor
+        searchField.focusRingType = .none
+
+        searchContainer.addSubview(searchField)
+
+        NSLayoutConstraint.activate([
+            searchContainer.topAnchor.constraint(equalTo: containerView.topAnchor, constant: padding),
+            searchContainer.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: padding),
+            searchContainer.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -padding),
+            searchContainer.heightAnchor.constraint(equalToConstant: WindowConstants.searchBarHeight),
+
+            searchField.topAnchor.constraint(equalTo: searchContainer.topAnchor),
+            searchField.leadingAnchor.constraint(equalTo: searchContainer.leadingAnchor),
+            searchField.trailingAnchor.constraint(equalTo: searchContainer.trailingAnchor),
+            searchField.bottomAnchor.constraint(equalTo: searchContainer.bottomAnchor)
+        ])
+    }
+
+    @objc private func focusSearchField() {
+        window?.makeFirstResponder(searchField)
+        searchField.selectText(nil)
+    }
+
+    @objc private func searchTextChanged() {
+        searchTimer?.invalidate()
+
+        let searchText = searchField.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        searchTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { [weak self] _ in
+            self?.filterShortcuts(with: searchText)
+        }
+    }
+
+    private func filterShortcuts(with searchText: String) {
+        if searchText.isEmpty {
+            shortcuts = allShortcuts
+        } else {
+            let lowercaseSearch = searchText.lowercased()
+            shortcuts = allShortcuts.filter { shortcut in
+                matchesSearch(shortcut: shortcut, searchText: lowercaseSearch)
+            }
+        }
+
+        DispatchQueue.main.async { [weak self] in
+            self?.rebuildContent()
+            self?.resizeWindowToFit()
+        }
+    }
+
+    private func matchesSearch(shortcut: ShortcutItem, searchText: String) -> Bool {
+        if shortcut.action.lowercased().contains(searchText) {
+            return true
+        }
+
+        if shortcut.category.lowercased().contains(searchText) {
+            return true
+        }
+
+        if let group = shortcut.group, group.lowercased().contains(searchText) {
+            return true
+        }
+
+        if let categoryDesc = categoryDescriptions[shortcut.category],
+           categoryDesc.lowercased().contains(searchText) {
+            return true
+        }
+
+        if let group = shortcut.group,
+           let groupDesc = groupDescriptions[group],
+           groupDesc.lowercased().contains(searchText) {
+            return true
+        }
+
+        if shortcut.shortcut.lowercased().contains(searchText) {
+            return true
+        }
+
+        return false
     }
 
     private func setupSettingsButton() {
@@ -317,6 +455,7 @@ final class ShortcutsWindow: NSWindowController {
     }
 
     private func setupClickOutsideMonitoring() {
+        // Global monitor for clicks outside the app
         clickOutsideMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
             guard let self = self, let window = self.window, window.isVisible else { return }
 
@@ -324,8 +463,25 @@ final class ShortcutsWindow: NSWindowController {
             let windowFrame = window.frame
 
             if !windowFrame.contains(screenClickLocation) {
-                self.close()
+                DispatchQueue.main.async {
+                    self.close()
+                }
             }
+        }
+
+        // Local monitor for clicks in other windows of the same app
+        localClickMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
+            guard let self = self, let window = self.window, window.isVisible else { return event }
+
+            // If click is in a different window, close our panel
+            if let eventWindow = event.window, eventWindow != window {
+                DispatchQueue.main.async {
+                    self.close()
+                }
+                return event // Don't consume the event
+            }
+
+            return event
         }
     }
 
@@ -334,15 +490,23 @@ final class ShortcutsWindow: NSWindowController {
             NSEvent.removeMonitor(monitor)
             clickOutsideMonitor = nil
         }
+
+        if let monitor = localClickMonitor {
+            NSEvent.removeMonitor(monitor)
+            localClickMonitor = nil
+        }
     }
 
     override func close() {
         stopClickOutsideMonitoring()
+        searchTimer?.invalidate()
+        searchTimer = nil
         super.close()
     }
 
     deinit {
         stopClickOutsideMonitoring()
+        searchTimer?.invalidate()
     }
 
     @objc private func showSettingsMenu() {
@@ -407,23 +571,43 @@ final class ShortcutsWindow: NSWindowController {
     private func rebuildContent() {
         gridContainer.subviews.forEach { $0.removeFromSuperview() }
 
-        guard let window = window else { 
+        guard let window = window else {
             print("[Keyly] Warning: No window available for content rebuild")
-            return 
+            return
         }
-        
+
         guard !shortcuts.isEmpty else {
             print("[Keyly] Warning: No shortcuts to display")
             return
         }
 
-        let availableWidth = max(columnWidth + columnSpacing, window.frame.width - padding * 2)
-        let numColumns = max(1, Int(availableWidth / (columnWidth + columnSpacing)))
-
         let groupedByGroup = Dictionary(grouping: shortcuts) { shortcut in
             return shortcut.group?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false ? shortcut.group! : "default"
         }
-        
+
+        var totalColumns = 0
+        for (groupName, groupShortcuts) in groupedByGroup {
+            if groupName != "default" {
+                totalColumns += 1
+            } else {
+                let categories = Set(groupShortcuts.map { $0.category })
+                totalColumns += categories.count
+            }
+        }
+
+        let screenSize = NSScreen.main?.visibleFrame.size ?? WindowConstants.defaultScreenSize
+        let maxScreenWidth = screenSize.width * WindowConstants.screenWidthRatio
+        let maxPossibleColumns = min(WindowConstants.maxColumns, Int(maxScreenWidth / (columnWidth + columnSpacing)))
+
+        let numColumns = min(totalColumns, maxPossibleColumns, max(1, totalColumns))
+
+        let actualTotalWidth = CGFloat(numColumns) * columnWidth + CGFloat(max(0, numColumns - 1)) * columnSpacing
+        let newWindowWidth = actualTotalWidth + padding * 2
+
+        window.setContentSize(NSSize(width: newWindowWidth, height: window.frame.height))
+
+        let availableWidth = newWindowWidth - padding * 2
+
         let sortedGroups = groupedByGroup.keys.sorted { group1, group2 in
             if group1 == "default" { return false }
             if group2 == "default" { return true }
@@ -433,15 +617,17 @@ final class ShortcutsWindow: NSWindowController {
         var currentColumn = 0
         var columnYPositions = [CGFloat](repeating: 0, count: numColumns)
 
+        let gridOffset = (availableWidth - actualTotalWidth) / 2
+
         for groupName in sortedGroups {
             guard let groupShortcuts = groupedByGroup[groupName] else { continue }
-            
+
             if groupName != "default" {
                 let groupView = createGroupContainer(groupName: groupName, shortcuts: groupShortcuts)
                 groupView.layoutSubtreeIfNeeded()
-                
+
                 let height = groupView.fittingSize.height
-                let x = CGFloat(currentColumn) * (columnWidth + columnSpacing)
+                let x = gridOffset + CGFloat(currentColumn) * (columnWidth + columnSpacing)
                 let y = columnYPositions[currentColumn]
 
                 groupView.frame = NSRect(x: x, y: y, width: columnWidth, height: height)
@@ -458,9 +644,9 @@ final class ShortcutsWindow: NSWindowController {
                     let description = categoryDescriptions[category]
                     let view = createCategoryColumn(title: category, description: description, items: items)
                     view.layoutSubtreeIfNeeded()
-                    
+
                     let height = view.fittingSize.height
-                    let x = CGFloat(currentColumn) * (columnWidth + columnSpacing)
+                    let x = gridOffset + CGFloat(currentColumn) * (columnWidth + columnSpacing)
                     let y = columnYPositions[currentColumn]
 
                     view.frame = NSRect(x: x, y: y, width: columnWidth, height: height)
@@ -473,23 +659,22 @@ final class ShortcutsWindow: NSWindowController {
         }
 
         let maxHeight = columnYPositions.max() ?? 0
-        let totalWidth = CGFloat(numColumns) * columnWidth + CGFloat(numColumns - 1) * columnSpacing
 
-        gridContainer.frame = NSRect(x: 0, y: 0, width: totalWidth, height: maxHeight)
+        gridContainer.frame = NSRect(x: 0, y: 0, width: availableWidth, height: maxHeight)
     }
 
     private func resizeWindowToFit() {
         guard let window = window else { return }
 
         let screenSize = NSScreen.main?.visibleFrame.size ?? NSSize(width: 1200, height: 800)
-        let maxWidth = screenSize.width
-        let maxHeight = screenSize.height * 0.8
+        let maxHeight = screenSize.height * WindowConstants.maxScreenHeightRatio
 
-        let contentHeight = gridContainer.frame.height + padding * 2 + footerHeight
-        let newHeight = min(contentHeight, maxHeight)
+        let contentHeight = gridContainer.frame.height + padding * 2 + footerHeight + WindowConstants.searchBarHeight + 8
+        let calculatedHeight = min(contentHeight, maxHeight)
 
-        let currentWidth = min(window.frame.width, maxWidth)
-        window.setContentSize(NSSize(width: currentWidth, height: newHeight))
+        let newHeight = max(calculatedHeight, WindowConstants.minWindowHeight)
+
+        window.setContentSize(NSSize(width: window.frame.width, height: newHeight))
     }
 
     private func createCategoryColumn(title: String, description: String?, items: [ShortcutItem]) -> NSView {
@@ -497,7 +682,7 @@ final class ShortcutsWindow: NSWindowController {
             print("[Keyly] Warning: Empty title or items for category column")
             return NSView()
         }
-        
+
         let column = NSStackView()
         column.orientation = .vertical
         column.alignment = .leading
@@ -510,10 +695,24 @@ final class ShortcutsWindow: NSWindowController {
         column.addArrangedSubview(header)
 
         if let desc = description, !desc.isEmpty {
-            let descLabel = NSTextField(labelWithString: desc)
+            let descLabel = NSTextField()
+            descLabel.stringValue = desc
             descLabel.font = NSFont.systemFont(ofSize: 10)
             descLabel.textColor = NSColor.white.withAlphaComponent(0.5)
+            descLabel.backgroundColor = .clear
+            descLabel.isBordered = false
+            descLabel.isEditable = false
+            descLabel.isSelectable = false
+            descLabel.lineBreakMode = .byWordWrapping
+            descLabel.usesSingleLineMode = false
+            descLabel.maximumNumberOfLines = 0
+            descLabel.translatesAutoresizingMaskIntoConstraints = false
+
             column.addArrangedSubview(descLabel)
+
+            NSLayoutConstraint.activate([
+                descLabel.widthAnchor.constraint(equalToConstant: columnWidth - 8)
+            ])
         }
 
         for item in items {
@@ -527,52 +726,66 @@ final class ShortcutsWindow: NSWindowController {
 
         return column
     }
-    
+
     private func createGroupContainer(groupName: String, shortcuts: [ShortcutItem]) -> NSView {
         guard !groupName.isEmpty && !shortcuts.isEmpty else {
             print("[Keyly] Warning: Empty group name or shortcuts for group container")
             return NSView()
         }
-        
+
         let container = NSView()
         container.translatesAutoresizingMaskIntoConstraints = false
         container.wantsLayer = true
-        
+
         container.layer?.backgroundColor = NSColor.black.withAlphaComponent(0.1).cgColor
         container.layer?.cornerRadius = 8
         container.layer?.borderWidth = 1
         container.layer?.borderColor = NSColor.white.withAlphaComponent(0.1).cgColor
-        
+
         let stackView = NSStackView()
         stackView.orientation = .vertical
         stackView.alignment = .leading
         stackView.spacing = 8
         stackView.translatesAutoresizingMaskIntoConstraints = false
-        
+
         let groupHeader = NSTextField(labelWithString: groupName)
         groupHeader.font = NSFont.systemFont(ofSize: 13, weight: .bold)
         groupHeader.textColor = .white
         stackView.addArrangedSubview(groupHeader)
-        
+
         if let groupDesc = groupDescriptions[groupName], !groupDesc.isEmpty {
-            let descLabel = NSTextField(labelWithString: groupDesc)
+            let descLabel = NSTextField()
+            descLabel.stringValue = groupDesc
             descLabel.font = NSFont.systemFont(ofSize: 10)
             descLabel.textColor = NSColor.white.withAlphaComponent(0.6)
+            descLabel.backgroundColor = .clear
+            descLabel.isBordered = false
+            descLabel.isEditable = false
+            descLabel.isSelectable = false
+            descLabel.lineBreakMode = .byWordWrapping
+            descLabel.usesSingleLineMode = false
+            descLabel.maximumNumberOfLines = 0
+            descLabel.translatesAutoresizingMaskIntoConstraints = false
+
             stackView.addArrangedSubview(descLabel)
+
+            NSLayoutConstraint.activate([
+                descLabel.widthAnchor.constraint(equalToConstant: columnWidth - 16) // Account for container padding
+            ])
         }
-        
+
         let grouped = Dictionary(grouping: shortcuts) { $0.category }
         let sortedCategories = grouped.keys.sorted()
-        
+
         for category in sortedCategories {
             guard let items = grouped[category] else { continue }
-            
+
             if sortedCategories.count > 1 {
                 let categoryHeader = NSTextField(labelWithString: category)
                 categoryHeader.font = NSFont.systemFont(ofSize: 11, weight: .medium)
                 categoryHeader.textColor = NSColor.white.withAlphaComponent(0.8)
                 stackView.addArrangedSubview(categoryHeader)
-                
+
                 if let desc = categoryDescriptions[category], !desc.isEmpty {
                     let descLabel = NSTextField(labelWithString: desc)
                     descLabel.font = NSFont.systemFont(ofSize: 9)
@@ -580,15 +793,15 @@ final class ShortcutsWindow: NSWindowController {
                     stackView.addArrangedSubview(descLabel)
                 }
             }
-            
+
             for item in items {
                 let row = createShortcutRow(item)
                 stackView.addArrangedSubview(row)
             }
         }
-        
+
         container.addSubview(stackView)
-        
+
         NSLayoutConstraint.activate([
             container.widthAnchor.constraint(equalToConstant: columnWidth),
             stackView.topAnchor.constraint(equalTo: container.topAnchor, constant: 12),
@@ -596,7 +809,7 @@ final class ShortcutsWindow: NSWindowController {
             stackView.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -12),
             stackView.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -12)
         ])
-        
+
         return container
     }
 
@@ -673,34 +886,41 @@ final class FlippedView: NSView {
     override var isFlipped: Bool { true }
 }
 
-final class GradientOverlayView: NSView {
-    private var gradientLayer: CAGradientLayer?
 
-    override init(frame: NSRect) {
-        super.init(frame: frame)
-        setupGradient()
+// MARK: - NSWindowDelegate
+extension ShortcutsWindow {
+    func windowDidResignKey(_ notification: Notification) {
+        // Close when window loses focus (user clicked elsewhere)
+        if !isSearchFocused {
+            close()
+        }
+    }
+}
+
+// MARK: - NSSearchFieldDelegate
+extension ShortcutsWindow: NSSearchFieldDelegate {
+
+    func searchFieldDidEndSearching(_ sender: NSSearchField) {
+        sender.stringValue = ""
+        filterShortcuts(with: "")
+        isSearchFocused = false
     }
 
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        setupGradient()
+    func controlTextDidBeginEditing(_ obj: Notification) {
+        if obj.object as? NSSearchField == searchField {
+            isSearchFocused = true
+            // Update border color when focused
+            searchField.layer?.borderColor = NSColor.controlAccentColor.cgColor
+            searchField.layer?.borderWidth = 1.5
+        }
     }
 
-    private func setupGradient() {
-        wantsLayer = true
-        let gradient = CAGradientLayer()
-        gradient.colors = [
-            NSColor.black.withAlphaComponent(0.4).cgColor,
-            NSColor.black.withAlphaComponent(0.3).cgColor
-        ]
-        gradient.startPoint = CGPoint(x: 0, y: 0)
-        gradient.endPoint = CGPoint(x: 1, y: 1)
-        layer?.addSublayer(gradient)
-        gradientLayer = gradient
-    }
-
-    override func layout() {
-        super.layout()
-        gradientLayer?.frame = bounds
+    func controlTextDidEndEditing(_ obj: Notification) {
+        if obj.object as? NSSearchField == searchField {
+            isSearchFocused = false
+            // Reset border color when unfocused
+            searchField.layer?.borderColor = NSColor.separatorColor.cgColor
+            searchField.layer?.borderWidth = 1
+        }
     }
 }

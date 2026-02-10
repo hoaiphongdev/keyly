@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.0] - 2026-02-10
+
+### Changed
+- **Template syntax**: New pipe format `key/command | description`, invalid lines ignored
+- **Dynamic column width**: Scales with content, capped by `screen_width_ratio`
+- **Text wrapping**: Long descriptions wrap to new lines via `NSTextView`
+- **Description color**: Slightly dimmed for visual hierarchy
+
+### Removed
+- **Group sizes**: Removed `groupSizes` from model, parser, extractor, and UI
+- **Multi-column spanning**: Groups now render as single-column containers
+
 ## [1.6.0] - 2026-02-09
 
 ### Added

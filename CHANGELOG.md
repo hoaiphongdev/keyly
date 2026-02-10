@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.1] - 2026-02-10
+
+### Changed
+- **Smart group layout**: Groups with >10 items auto-split into multi-column (max 4), grid-snapped for alignment
+- **Bordered cards**: Default categories now wrapped in bordered containers for visual consistency
+- **Shortest-column-first**: All items placed into shortest column instead of round-robin
+
 ## [1.7.0] - 2026-02-10
 
 ### Changed

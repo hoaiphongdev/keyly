@@ -87,12 +87,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let shortcuts = shortcutExtractor.getShortcuts(for: app)
         let categoryDescriptions = shortcutExtractor.getCategoryDescriptions(for: app)
         let groupDescriptions = shortcutExtractor.getGroupDescriptions(for: app)
+        let groupSizes = shortcutExtractor.getGroupSizes(for: app)
 
         if shortcutsWindow == nil {
             shortcutsWindow = ShortcutsWindow()
         }
 
-        shortcutsWindow?.displayShortcuts(shortcuts, appName: app.localizedName ?? "Unknown", categoryDescriptions: categoryDescriptions, groupDescriptions: groupDescriptions)
+        shortcutsWindow?.displayShortcuts(shortcuts, appName: app.localizedName ?? "Unknown", categoryDescriptions: categoryDescriptions, groupDescriptions: groupDescriptions, groupSizes: groupSizes)
         shortcutsWindow?.showWindow(nil)
         shortcutsWindow?.window?.orderFrontRegardless()
     }
@@ -459,12 +460,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let shortcuts = shortcutExtractor.getShortcuts(for: frontmostApp)
         let categoryDescriptions = shortcutExtractor.getCategoryDescriptions(for: frontmostApp)
         let groupDescriptions = shortcutExtractor.getGroupDescriptions(for: frontmostApp)
+        let groupSizes = shortcutExtractor.getGroupSizes(for: frontmostApp)
 
         if shortcutsWindow == nil {
             shortcutsWindow = ShortcutsWindow()
         }
 
-        shortcutsWindow?.displayShortcuts(shortcuts, appName: frontmostApp.localizedName ?? "Unknown App", categoryDescriptions: categoryDescriptions, groupDescriptions: groupDescriptions)
+        shortcutsWindow?.displayShortcuts(shortcuts, appName: frontmostApp.localizedName ?? "Unknown App", categoryDescriptions: categoryDescriptions, groupDescriptions: groupDescriptions, groupSizes: groupSizes)
         shortcutsWindow?.showWindow(nil)
         shortcutsWindow?.window?.orderFrontRegardless()
     }

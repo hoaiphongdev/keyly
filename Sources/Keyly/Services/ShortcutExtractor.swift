@@ -59,6 +59,15 @@ final class ShortcutExtractor {
         return descriptions
     }
     
+    func getGroupSizes(for app: NSRunningApplication) -> [String: Int] {
+        guard let bundleId = app.bundleIdentifier else { return [:] }
+        var sizes: [String: Int] = [:]
+        for sheet in ConfigManager.shared.sheets(for: bundleId) {
+            sizes.merge(sheet.groupSizes) { _, new in new }
+        }
+        return sizes
+    }
+    
     private func extractShortcutsFromMenuBar(_ menuBar: AXUIElement) -> [ShortcutItem] {
         var shortcuts: [ShortcutItem] = []
         

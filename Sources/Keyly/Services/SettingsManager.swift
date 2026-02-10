@@ -29,10 +29,15 @@ struct PressSettings {
     let count: Int
 }
 
+struct UISettings {
+    let screenWidthRatio: Double
+}
+
 struct KeylySettings {
     let superKey: SuperKeySettings
     let hold: HoldSettings
     let press: PressSettings
+    let ui: UISettings
 }
 
 final class SettingsManager {
@@ -60,7 +65,8 @@ final class SettingsManager {
         let defaultSettings = KeylySettings(
             superKey: SuperKeySettings(key: "cmd", triggerType: "hold"),
             hold: HoldSettings(duration: SettingsConstants.defaultHoldDuration),
-            press: PressSettings(count: SettingsConstants.defaultPressCount)
+            press: PressSettings(count: SettingsConstants.defaultPressCount),
+            ui: UISettings(screenWidthRatio: 0.7)
         )
 
         let home = FileManager.default.homeDirectoryForCurrentUser
@@ -130,10 +136,14 @@ final class SettingsManager {
         let pressCount = validatePressCount(userConfig["press_count"], default: defaults.press.count)
         let press = PressSettings(count: pressCount)
 
+        let screenWidthRatio = validateScreenWidthRatio(userConfig["screen_width_ratio"], default: defaults.ui.screenWidthRatio)
+        let ui = UISettings(screenWidthRatio: screenWidthRatio)
+
         return KeylySettings(
             superKey: superKey,
             hold: hold,
-            press: press
+            press: press,
+            ui: ui
         )
     }
 
@@ -184,5 +194,24 @@ final class SettingsManager {
             return defaultValue
         }
         return count
+    }
+
+    private func validateScreenWidthRatio(_ value: String?, default defaultValue: Double) -> Double {
+        guard let value = value?.trimmingCharacters(in: .whitespacesAndNewlines),
+              let ratio = Double(value) else {
+            if let value = value {
+                print("[Keyly] Warning: Invalid screen_width_ratio '\(value)', using default \(defaultValue)")
+            }
+            return defaultValue
+        }
+
+        // Clamp between 0.1 and 1.0 to prevent overUI on 14inch and negative values
+        let clampedRatio = max(0.1, min(1.0, ratio))
+        
+        if clampedRatio != ratio {
+            print("[Keyly] Warning: screen_width_ratio '\(ratio)' clamped to \(clampedRatio) (valid range: 0.1-1.0)")
+        }
+        
+        return clampedRatio
     }
 }

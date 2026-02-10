@@ -12,7 +12,6 @@ struct WindowConstants {
     
     static let defaultScreenSize = NSSize(width: 1200, height: 800)
     static let screenWidthRatio: CGFloat = 0.7
-    static let maxColumns: Int = 6
     static let defaultWindowHeight: CGFloat = 400
     static let minWindowHeight: CGFloat = 200
     static let maxScreenHeightRatio: CGFloat = 0.8

@@ -596,10 +596,11 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
         }
 
         let screenSize = NSScreen.main?.visibleFrame.size ?? WindowConstants.defaultScreenSize
-        let maxScreenWidth = screenSize.width * WindowConstants.screenWidthRatio
-        let maxPossibleColumns = min(WindowConstants.maxColumns, Int(maxScreenWidth / (columnWidth + columnSpacing)))
+        let settings = SettingsManager.shared.getSettings()
+        let maxScreenWidth = screenSize.width * CGFloat(settings.ui.screenWidthRatio)
+        let maxPossibleColumns = max(1, Int(maxScreenWidth / (columnWidth + columnSpacing)))
 
-        let numColumns = min(totalColumns, maxPossibleColumns, max(1, totalColumns))
+        let numColumns = min(totalColumns, maxPossibleColumns)
 
         let actualTotalWidth = CGFloat(numColumns) * columnWidth + CGFloat(max(0, numColumns - 1)) * columnSpacing
         let newWindowWidth = actualTotalWidth + padding * 2

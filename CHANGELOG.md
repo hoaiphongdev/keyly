@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.2] - 2026-02-10
+
+### Fixed
+- **Group reset**: `# Group: None/Empty` exits current group, renders plain without border
+- **File order**: Chunks now render in exact template file order instead of dictionary-sorted
+- **Category bleed**: New `# Group:` resets `currentCategory` to prevent description leaking
+- **Shortcut casing**: Commands like `mole`, `git show` no longer uppercased — only modifier-based shortcuts normalize
+- **Window width**: Calculated from widest group span + ungrouped count, no extra blank columns
+
 ## [1.7.1] - 2026-02-10
 
 ### Changed

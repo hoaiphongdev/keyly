@@ -132,28 +132,28 @@ final class ConfigManager {
 
             if trimmed.hasPrefix("# Group:") {
                 let groupInfo = trimmed.replacingOccurrences(of: "# Group:", with: "").trimmingCharacters(in: .whitespaces)
-                if !groupInfo.isEmpty {
-                    let components = groupInfo.components(separatedBy: " - ")
-                    if components.count >= 1 {
-                        let groupName = components[0].trimmingCharacters(in: .whitespaces)
-                        if !groupName.isEmpty {
-                            currentGroup = groupName
+                let resetKeywords = ["", "none", "empty"]
 
-                            if components.count >= 2 {
-                                let description = components
-                                    .dropFirst()
-                                    .map { $0.trimmingCharacters(in: .whitespaces) }
-                                    .first { !$0.isEmpty && !$0.hasPrefix("Size:") }
-                                if let description {
-                                    groupDescriptions[groupName] = description
-                                }
+                if resetKeywords.contains(groupInfo.lowercased()) {
+                    currentGroup = nil
+                    currentCategory = "General"
+                } else {
+                    let components = groupInfo.components(separatedBy: " - ")
+                    let groupName = components[0].trimmingCharacters(in: .whitespaces)
+                    if !groupName.isEmpty {
+                        currentGroup = groupName
+                        currentCategory = "General"
+
+                        if components.count >= 2 {
+                            let description = components
+                                .dropFirst()
+                                .map { $0.trimmingCharacters(in: .whitespaces) }
+                                .first { !$0.isEmpty && !$0.hasPrefix("Size:") }
+                            if let description {
+                                groupDescriptions[groupName] = description
                             }
-                        } else {
-                            print("[Keyly] Warning: Empty group name in '\(url.lastPathComponent)'")
                         }
                     }
-                } else {
-                    print("[Keyly] Warning: Empty group directive in '\(url.lastPathComponent)'")
                 }
                 continue
             }
@@ -205,11 +205,20 @@ final class ConfigManager {
             return nil
         }
 
-        let shortcut = rawShortcutOrCommand.contains(" ")
-            ? rawShortcutOrCommand
-            : normalizeShortcut(rawShortcutOrCommand)
+        let shortcut = looksLikeKeyboardShortcut(rawShortcutOrCommand)
+            ? normalizeShortcut(rawShortcutOrCommand)
+            : rawShortcutOrCommand
 
         return ShortcutItem(category: category, action: action, shortcut: shortcut, group: group)
+    }
+
+    private func looksLikeKeyboardShortcut(_ raw: String) -> Bool {
+        let lower = raw.lowercased()
+        let modifierKeywords = ["cmd", "ctrl", "alt", "opt", "shift", "super", "meta", "fn",
+                                "command", "control", "option",
+                                "⌘", "⌃", "⌥", "⇧", "⇪"]
+        return modifierKeywords.contains(where: { lower.contains($0) })
+            || (raw.count <= 3 && !raw.contains(" "))
     }
 
     private func normalizeShortcut(_ raw: String) -> String {

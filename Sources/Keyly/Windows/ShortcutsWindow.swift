@@ -577,19 +577,110 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
             return
         }
 
-        let groupedByGroup = Dictionary(grouping: shortcuts) { shortcut in
-            return shortcut.group?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false ? shortcut.group! : "default"
+        enum LayoutChunk {
+            case group(name: String, shortcuts: [ShortcutItem])
+            case ungroupedCategory(name: String, shortcuts: [ShortcutItem])
         }
 
-        var totalItems = 0
-        for (groupName, groupShortcuts) in groupedByGroup {
-            if groupName != "default" {
-                totalItems += 1
+        var chunks: [LayoutChunk] = []
+        var currentGroupName: String? = nil
+        var currentGroupItems: [ShortcutItem] = []
+        var seenGroups = Set<String>()
+
+        for shortcut in shortcuts {
+            let group = shortcut.group?.trimmingCharacters(in: .whitespacesAndNewlines)
+            let hasGroup = group != nil && !group!.isEmpty
+
+            if hasGroup {
+                if group! != (currentGroupName ?? "") {
+                    if let prevGroup = currentGroupName, !currentGroupItems.isEmpty {
+                        if seenGroups.contains(prevGroup) {
+                            if let idx = chunks.firstIndex(where: {
+                                if case .group(let n, _) = $0 { return n == prevGroup }
+                                return false
+                            }) {
+                                if case .group(let n, let existing) = chunks[idx] {
+                                    chunks[idx] = .group(name: n, shortcuts: existing + currentGroupItems)
+                                }
+                            }
+                        } else {
+                            chunks.append(.group(name: prevGroup, shortcuts: currentGroupItems))
+                            seenGroups.insert(prevGroup)
+                        }
+                    }
+                    currentGroupName = group!
+                    currentGroupItems = [shortcut]
+                } else {
+                    currentGroupItems.append(shortcut)
+                }
             } else {
-                let categories = Set(groupShortcuts.map { $0.category })
-                totalItems += categories.count
+                // Flush pending group
+                if let prevGroup = currentGroupName, !currentGroupItems.isEmpty {
+                    if seenGroups.contains(prevGroup) {
+                        if let idx = chunks.firstIndex(where: {
+                            if case .group(let n, _) = $0 { return n == prevGroup }
+                            return false
+                        }) {
+                            if case .group(let n, let existing) = chunks[idx] {
+                                chunks[idx] = .group(name: n, shortcuts: existing + currentGroupItems)
+                            }
+                        }
+                    } else {
+                        chunks.append(.group(name: prevGroup, shortcuts: currentGroupItems))
+                        seenGroups.insert(prevGroup)
+                    }
+                    currentGroupName = nil
+                    currentGroupItems = []
+                }
+
+                let cat = shortcut.category
+                if let lastIdx = chunks.lastIndex(where: {
+                    if case .ungroupedCategory(let n, _) = $0 { return n == cat }
+                    return false
+                }) {
+                    if case .ungroupedCategory(let n, let existing) = chunks[lastIdx] {
+                        chunks[lastIdx] = .ungroupedCategory(name: n, shortcuts: existing + [shortcut])
+                    }
+                } else {
+                    chunks.append(.ungroupedCategory(name: cat, shortcuts: [shortcut]))
+                }
             }
         }
+
+        if let prevGroup = currentGroupName, !currentGroupItems.isEmpty {
+            if seenGroups.contains(prevGroup) {
+                if let idx = chunks.firstIndex(where: {
+                    if case .group(let n, _) = $0 { return n == prevGroup }
+                    return false
+                }) {
+                    if case .group(let n, let existing) = chunks[idx] {
+                        chunks[idx] = .group(name: n, shortcuts: existing + currentGroupItems)
+                    }
+                }
+            } else {
+                chunks.append(.group(name: prevGroup, shortcuts: currentGroupItems))
+            }
+        }
+
+        var maxGroupSpan = 1
+        var ungroupedCount = 0
+        for chunk in chunks {
+            switch chunk {
+            case .group(_, let groupShortcuts):
+                let itemCount = groupShortcuts.count
+                let categoryCount = Set(groupShortcuts.map { $0.category }).count
+                let span: Int
+                if itemCount <= 10 {
+                    span = 1
+                } else {
+                    span = min(categoryCount, 4)
+                }
+                maxGroupSpan = max(maxGroupSpan, span)
+            case .ungroupedCategory:
+                ungroupedCount += 1
+            }
+        }
+        let totalItems = max(maxGroupSpan, ungroupedCount)
 
         let screenSize = NSScreen.main?.visibleFrame.size ?? WindowConstants.defaultScreenSize
         let settings = SettingsManager.shared.getSettings()
@@ -617,32 +708,12 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
         window.setContentSize(NSSize(width: newWindowWidth, height: window.frame.height))
 
         let availableWidth = newWindowWidth - padding * 2
-
-        let sortedGroups = groupedByGroup.keys.sorted { group1, group2 in
-            if group1 == "default" { return true }
-            if group2 == "default" { return false }
-
-            let firstIndex1 = shortcuts.firstIndex { shortcut in
-                let group = shortcut.group?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false ? shortcut.group! : "default"
-                return group == group1
-            } ?? Int.max
-
-            let firstIndex2 = shortcuts.firstIndex { shortcut in
-                let group = shortcut.group?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false ? shortcut.group! : "default"
-                return group == group2
-            } ?? Int.max
-
-            return firstIndex1 < firstIndex2
-        }
-
         var columnYPositions = [CGFloat](repeating: 0, count: numColumns)
-
         let gridOffset = (availableWidth - actualTotalWidth) / 2
 
-        for groupName in sortedGroups {
-            guard let groupShortcuts = groupedByGroup[groupName] else { continue }
-
-            if groupName != "default" {
+        for chunk in chunks {
+            switch chunk {
+            case .group(let groupName, let groupShortcuts):
                 let itemCount = groupShortcuts.count
                 let categoryCount = Set(groupShortcuts.map { $0.category }).count
                 let innerColumnsNeeded: Int
@@ -671,36 +742,28 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
                 }
 
                 let x = gridOffset + CGFloat(bestStart) * (dynamicColumnWidth + columnSpacing)
-                let y = bestY
-
-                groupView.frame = NSRect(x: x, y: y, width: placedWidth, height: height)
+                groupView.frame = NSRect(x: x, y: bestY, width: placedWidth, height: height)
                 gridContainer.addSubview(groupView)
 
-                let newY = y + height + rowSpacing
+                let newY = bestY + height + rowSpacing
                 for col in bestStart..<(bestStart + gridColumnsNeeded) {
                     columnYPositions[col] = newY
                 }
-            } else {
-                let grouped = Dictionary(grouping: groupShortcuts) { $0.category }
-                let sortedCategories = grouped.keys.sorted()
 
-                for category in sortedCategories {
-                    guard let items = grouped[category] else { continue }
-                    let description = categoryDescriptions[category]
-                    let innerView = createCategoryColumn(title: category, description: description, items: items, columnWidth: dynamicColumnWidth - 24)
-                    let view = wrapInBorderedContainer(innerView, padding: 12)
-                    view.layoutSubtreeIfNeeded()
+            case .ungroupedCategory(let category, let items):
+                let description = categoryDescriptions[category]
+                let view = createCategoryColumn(title: category, description: description, items: items, columnWidth: dynamicColumnWidth)
+                view.layoutSubtreeIfNeeded()
 
-                    let height = view.fittingSize.height
-                    let targetColumn = columnYPositions.enumerated().min(by: { $0.element < $1.element })?.offset ?? 0
-                    let x = gridOffset + CGFloat(targetColumn) * (dynamicColumnWidth + columnSpacing)
-                    let y = columnYPositions[targetColumn]
+                let height = view.fittingSize.height
+                let targetColumn = columnYPositions.enumerated().min(by: { $0.element < $1.element })?.offset ?? 0
+                let x = gridOffset + CGFloat(targetColumn) * (dynamicColumnWidth + columnSpacing)
+                let y = columnYPositions[targetColumn]
 
-                    view.frame = NSRect(x: x, y: y, width: dynamicColumnWidth, height: height)
-                    gridContainer.addSubview(view)
+                view.frame = NSRect(x: x, y: y, width: dynamicColumnWidth, height: height)
+                gridContainer.addSubview(view)
 
-                    columnYPositions[targetColumn] += height + rowSpacing
-                }
+                columnYPositions[targetColumn] += height + rowSpacing
             }
         }
 

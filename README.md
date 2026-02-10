@@ -160,7 +160,7 @@ Keyly uses [Sparkle](https://sparkle-project.org/) for automatic updates. Update
 
 ## License
 
-Licensed under the [Apache License, Version 2.0](LICENSE).
+Licensed under the [MIT License](LICENSE).
 
 ---
 

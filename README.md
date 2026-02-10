@@ -2,8 +2,6 @@
 
 macOS menu bar app that displays keyboard shortcuts for the currently active application when you hold the ⌘ (Command) key.
 
-> **Inspiration**: This project is inspired by [CheatSheet](https://www.mediaatelier.com/CheatSheet). Keyly is a complete reimplementation in Swift with additional features like custom shortcut configs and settings menu.
-
 ## 🚀 Installation
 
 > **1.** Open any terminal app on your Mac (Terminal, iTerm, Warp, etc.)
@@ -28,14 +26,14 @@ curl -fsSL https://raw.githubusercontent.com/hoaiphongdev/keyly/main/scripts/ins
 
 ## Features
 
-- Hold ⌘ for 2 seconds to show shortcuts
-- Extracts real shortcuts from app menu bar via Accessibility API
-- Works with any macOS application
-- Multi-column layout with category grouping
-- Floating window with blur effect
-- Custom shortcut configs via `.keyly` files
-- Settings menu (Reload, Open Config, Accessibility Settings, Check for Updates, Quit)
-- Automatic updates via Sparkle
+- **Customizable Trigger**: Hold ⌘ for specified duration or press multiple times
+- **Real-time Search**: Search shortcuts with instant filtering
+- **Group System**: Organize shortcuts with descriptions and multi-column layouts
+- **Custom Templates**: Create `.keyly` files for any application
+- **Runtime Settings**: Configure via `~/.config/keyly/setting.conf`
+- **Multiple Close Options**: Press ESC or click outside to close
+- **Dynamic UI**: Responsive layout that adapts to content
+- **Global Shortcuts**: System-wide shortcuts from templates
 
 ## Requirements
 
@@ -55,26 +53,59 @@ On first launch, go to **System Settings → Privacy & Security → Accessibilit
 
 1. Run the app - you'll see a ⌘ icon in the menu bar
 2. Open any application
-3. Hold the **Command (⌘)** key for 2 seconds
+3. Hold the **Command (⌘)** key for 0.5 seconds (default)
 4. A window will appear showing all keyboard shortcuts
-5. Release ⌘ to hide the window
+5. **Close the window by**:
+   - Press **ESC** key
+   - **Click outside** the window
+   - Use the configured super key again
 
-## Custom Shortcuts
+## Configuration
 
-Create `.keyly` files in `~/.config/keyly/` to add custom shortcuts:
+### Settings (`~/.config/keyly/setting.conf`)
+
+Configure app behavior:
+
+```ini
+# Super key configuration
+super_key=cmd
+trigger_type=hold
+hold_duration=0.5
+
+# UI settings
+screen_width_ratio=0.7
+```
+
+**Options:**
+- `super_key`: Key combination (e.g., `cmd`, `cmd+shift`, `ctrl+alt`)
+- `trigger_type`: `hold` or `press`
+- `hold_duration`: Hold time in seconds
+- `screen_width_ratio`: Window width ratio (0.1-1.0)
+
+### Custom Templates (`~/.config/keyly/templates/`)
+
+Create `.keyly` files for any application:
 
 ```
 # Sheet Name: My Shortcuts
 # App: /Applications/Safari.app
+# Hide Default: false
 
+# Group: Navigation - Web browsing shortcuts - Size: 2
 [Navigation]
 CMD+L       Open Location
 CMD+T       New Tab
 CMD+SHIFT+T Reopen Last Tab
 
 [Bookmarks]
+> Bookmark management
 CMD+D       Add Bookmark
 ```
+
+**Template Features:**
+- `# Hide Default: true` - Hide system menu shortcuts
+- `# Group: Name - Description - Size: 2` - Multi-column groups
+- `> Description` - Category descriptions
 
 ## Community Templates
 

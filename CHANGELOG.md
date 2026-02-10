@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.0] - 2026-02-09
+
+### Added
+- **Runtime Settings Management**: Load configuration from `~/.config/keyly/setting.conf`
+- **Customizable Super Key Combinations**: Support for any key combination (e.g., `cmd+a`, `ctrl+shift+x`, `fn`)
+- **Multiple Trigger Types**: `hold` (duration-based) and `press` (count-based)
+- **Search Functionality**: Real-time search with debouncing and minimum UI dimensions
+- **Group System**: Organize shortcuts with descriptions and custom sizes (1-N columns)
+- **Global Shortcuts**: System-wide shortcuts from `global.keyly` template
+- **Click-Outside-to-Close**: Modal closes when clicking outside or pressing ESC
+- **Settings Auto-Reload**: Configuration changes detected and applied automatically
+
+### Changed
+- **Dynamic Window Sizing**: Width scales with content, respects screen ratio limits
+- **Group Display Order**: Default shortcuts first, then file order (not alphabetical)
+- **UI Color System**: Clean black background with white text variants
+- **Search UI**: Minimum 500x300px to prevent ugly small windows
+- **Group Containers**: Support multi-column spanning with proper content scaling
+
+### Fixed
+- **Super Key Detection**: Corrected guard logic preventing panel display
+- **Window Positioning**: Content properly centered with dynamic grid offset
+- **Group Descriptions**: Multi-line text wrapping with proper width constraints
+- **Search Performance**: Debounced filtering with async UI updates
+- **Color Contrast**: High contrast text on solid backgrounds
+
+### Technical
+- **New Architecture**: Separated `AppConstants`, `WindowConstants`, `SettingsConstants`
+- **Enhanced Models**: Added `groupSizes`, `groupDescriptions` to `ShortcutSheet`
+- **Performance**: Optimized search filtering and UI rebuilding
+- **Code Quality**: 1700+ lines added, comprehensive error handling
+
 ## [1.5.0] - 2025-01-04
 
 ### Changed

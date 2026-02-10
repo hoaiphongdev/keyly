@@ -45,7 +45,6 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
     private let bannerHeight = WindowConstants.bannerHeight
 
     convenience init() {
-        // Start with minimum width, will be resized dynamically based on content
         let initialWidth = WindowConstants.columnWidth + WindowConstants.padding * 2
 
         let window = KeylyPanel(
@@ -169,7 +168,7 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
         let label = NSTextField(labelWithString: labelText)
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = NSFont.systemFont(ofSize: 12, weight: .medium)
-        label.textColor = .white
+        label.textColor = WindowConstants.Colors.primaryTextColor
 
         banner.addSubview(icon)
         banner.addSubview(label)
@@ -277,18 +276,14 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
     private func setupUI() {
         guard let window = window else { return }
 
-        let visualEffect = NSVisualEffectView(frame: window.contentView!.bounds)
-        visualEffect.material = .hudWindow
-        visualEffect.state = .active
-        visualEffect.blendingMode = .behindWindow
-        visualEffect.wantsLayer = true
-        visualEffect.layer?.cornerRadius = 12
-        visualEffect.layer?.masksToBounds = true
-        visualEffect.autoresizingMask = [.width, .height]
+        let solidView = NSView(frame: window.contentView!.bounds)
+        solidView.wantsLayer = true
+        solidView.layer?.backgroundColor = NSColor.black.cgColor
+        solidView.layer?.cornerRadius = 12
+        solidView.layer?.masksToBounds = true
+        solidView.autoresizingMask = [.width, .height]
 
-        // Removed gradient overlay to eliminate flash animation
-
-        containerView = visualEffect
+        containerView = solidView
         window.contentView?.addSubview(containerView)
 
         scrollView = NSScrollView(frame: .zero)
@@ -427,7 +422,7 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
         settingsButton.bezelStyle = .inline
         settingsButton.isBordered = false
         settingsButton.image = NSImage(systemSymbolName: "gearshape.fill", accessibilityDescription: "Settings")
-        settingsButton.contentTintColor = NSColor.white.withAlphaComponent(0.6)
+        settingsButton.contentTintColor = WindowConstants.Colors.settingsButtonTint
         settingsButton.target = self
         settingsButton.action = #selector(showSettingsMenu)
 
@@ -445,7 +440,7 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
         escLabel = NSTextField(labelWithString: "Press ESC to close")
         escLabel.translatesAutoresizingMaskIntoConstraints = false
         escLabel.font = NSFont.systemFont(ofSize: 11)
-        escLabel.textColor = NSColor.white.withAlphaComponent(0.6)
+        escLabel.textColor = WindowConstants.Colors.escLabelColor
         escLabel.alignment = .left
 
         containerView.addSubview(escLabel)
@@ -457,7 +452,6 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
     }
 
     private func setupClickOutsideMonitoring() {
-        // Global monitor for clicks outside the app
         clickOutsideMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
             guard let self = self, let window = self.window, window.isVisible else { return }
 
@@ -471,16 +465,14 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
             }
         }
 
-        // Local monitor for clicks in other windows of the same app
         localClickMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
             guard let self = self, let window = self.window, window.isVisible else { return event }
 
-            // If click is in a different window, close our panel
             if let eventWindow = event.window, eventWindow != window {
                 DispatchQueue.main.async {
                     self.close()
                 }
-                return event // Don't consume the event
+                return event
             }
 
             return event
@@ -612,9 +604,20 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
         let availableWidth = newWindowWidth - padding * 2
 
         let sortedGroups = groupedByGroup.keys.sorted { group1, group2 in
-            if group1 == "default" { return false }
-            if group2 == "default" { return true }
-            return group1 < group2
+            if group1 == "default" { return true }
+            if group2 == "default" { return false }
+
+            let firstIndex1 = shortcuts.firstIndex { shortcut in
+                let group = shortcut.group?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false ? shortcut.group! : "default"
+                return group == group1
+            } ?? Int.max
+
+            let firstIndex2 = shortcuts.firstIndex { shortcut in
+                let group = shortcut.group?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false ? shortcut.group! : "default"
+                return group == group2
+            } ?? Int.max
+
+            return firstIndex1 < firstIndex2
         }
 
         var currentColumn = 0
@@ -712,14 +715,14 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
 
         let header = NSTextField(labelWithString: title)
         header.font = NSFont.systemFont(ofSize: 12, weight: .bold)
-        header.textColor = .white
+        header.textColor = WindowConstants.Colors.primaryTextColor
         column.addArrangedSubview(header)
 
         if let desc = description, !desc.isEmpty {
             let descLabel = NSTextField()
             descLabel.stringValue = desc
             descLabel.font = NSFont.systemFont(ofSize: 10)
-            descLabel.textColor = NSColor.white.withAlphaComponent(0.5)
+            descLabel.textColor = WindowConstants.Colors.categoryDescriptionTextColor
             descLabel.backgroundColor = .clear
             descLabel.isBordered = false
             descLabel.isEditable = false
@@ -758,10 +761,10 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
         container.translatesAutoresizingMaskIntoConstraints = false
         container.wantsLayer = true
 
-        container.layer?.backgroundColor = NSColor.black.withAlphaComponent(0.1).cgColor
+        container.layer?.backgroundColor = WindowConstants.Colors.containerBackgroundColor.cgColor
         container.layer?.cornerRadius = 8
         container.layer?.borderWidth = 1
-        container.layer?.borderColor = NSColor.white.withAlphaComponent(0.1).cgColor
+        container.layer?.borderColor = WindowConstants.Colors.containerBorderColor.cgColor
 
         let stackView = NSStackView()
         stackView.orientation = .vertical
@@ -771,14 +774,14 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
 
         let groupHeader = NSTextField(labelWithString: groupName)
         groupHeader.font = NSFont.systemFont(ofSize: 13, weight: .bold)
-        groupHeader.textColor = .white
+        groupHeader.textColor = WindowConstants.Colors.groupHeaderTextColor
         stackView.addArrangedSubview(groupHeader)
 
         if let groupDesc = groupDescriptions[groupName], !groupDesc.isEmpty {
             let descLabel = NSTextField()
             descLabel.stringValue = groupDesc
             descLabel.font = NSFont.systemFont(ofSize: 10)
-            descLabel.textColor = NSColor.white.withAlphaComponent(0.6)
+            descLabel.textColor = WindowConstants.Colors.groupDescriptionTextColor
             descLabel.backgroundColor = .clear
             descLabel.isBordered = false
             descLabel.isEditable = false
@@ -804,14 +807,14 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
             if sortedCategories.count > 1 {
                 let categoryHeader = NSTextField(labelWithString: category)
                 categoryHeader.font = NSFont.systemFont(ofSize: 11, weight: .medium)
-                categoryHeader.textColor = NSColor.white.withAlphaComponent(0.8)
+                categoryHeader.textColor = WindowConstants.Colors.categoryHeaderTextColor
                 stackView.addArrangedSubview(categoryHeader)
 
                 if let desc = categoryDescriptions[category], !desc.isEmpty {
                     let descLabel = NSTextField()
                     descLabel.stringValue = desc
                     descLabel.font = NSFont.systemFont(ofSize: 9)
-                    descLabel.textColor = NSColor.white.withAlphaComponent(0.5)
+                    descLabel.textColor = WindowConstants.Colors.categoryDescriptionTextColor
                     descLabel.backgroundColor = .clear
                     descLabel.isBordered = false
                     descLabel.isEditable = false
@@ -820,9 +823,9 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
                     descLabel.usesSingleLineMode = false
                     descLabel.maximumNumberOfLines = 0
                     descLabel.translatesAutoresizingMaskIntoConstraints = false
-                    
+
                     stackView.addArrangedSubview(descLabel)
-                    
+
                     NSLayoutConstraint.activate([
                         descLabel.widthAnchor.constraint(equalToConstant: max(columnWidth - 16, containerWidth - 16))
                     ])
@@ -856,18 +859,18 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
 
         let modifiersLabel = NSTextField(labelWithString: modifiers)
         modifiersLabel.font = NSFont.systemFont(ofSize: 11, weight: .regular)
-        modifiersLabel.textColor = NSColor.white.withAlphaComponent(0.55)
+        modifiersLabel.textColor = WindowConstants.Colors.modifiersTextColor
         modifiersLabel.alignment = .right
         modifiersLabel.translatesAutoresizingMaskIntoConstraints = false
 
         let keyLabel = NSTextField(labelWithString: key)
         keyLabel.font = NSFont.systemFont(ofSize: 11, weight: .semibold)
-        keyLabel.textColor = NSColor(calibratedRed: 0.4, green: 0.85, blue: 1.0, alpha: 1.0)
+        keyLabel.textColor = WindowConstants.Colors.keyTextColor
         keyLabel.translatesAutoresizingMaskIntoConstraints = false
 
         let actionLabel = NSTextField(wrappingLabelWithString: item.action)
         actionLabel.font = NSFont.systemFont(ofSize: 11)
-        actionLabel.textColor = NSColor.white.withAlphaComponent(0.85)
+        actionLabel.textColor = WindowConstants.Colors.actionTextColor
         actionLabel.translatesAutoresizingMaskIntoConstraints = false
         actionLabel.maximumNumberOfLines = 2
         actionLabel.preferredMaxLayoutWidth = availableWidth - 95
@@ -925,7 +928,6 @@ final class FlippedView: NSView {
 // MARK: - NSWindowDelegate
 extension ShortcutsWindow {
     func windowDidResignKey(_ notification: Notification) {
-        // Close when window loses focus (user clicked elsewhere)
         if !isSearchFocused {
             close()
         }
@@ -944,7 +946,6 @@ extension ShortcutsWindow: NSSearchFieldDelegate {
     func controlTextDidBeginEditing(_ obj: Notification) {
         if obj.object as? NSSearchField == searchField {
             isSearchFocused = true
-            // Update border color when focused
             searchField.layer?.borderColor = NSColor.controlAccentColor.cgColor
             searchField.layer?.borderWidth = 1.5
         }
@@ -953,7 +954,6 @@ extension ShortcutsWindow: NSSearchFieldDelegate {
     func controlTextDidEndEditing(_ obj: Notification) {
         if obj.object as? NSSearchField == searchField {
             isSearchFocused = false
-            // Reset border color when unfocused
             searchField.layer?.borderColor = NSColor.separatorColor.cgColor
             searchField.layer?.borderWidth = 1
         }

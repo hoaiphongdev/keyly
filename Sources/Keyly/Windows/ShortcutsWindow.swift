@@ -278,7 +278,7 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
 
         let solidView = NSView(frame: window.contentView!.bounds)
         solidView.wantsLayer = true
-        solidView.layer?.backgroundColor = NSColor.black.cgColor
+        solidView.layer?.backgroundColor = WindowConstants.Colors.windowBackgroundColor.cgColor
         solidView.layer?.cornerRadius = 12
         solidView.layer?.masksToBounds = true
         solidView.autoresizingMask = [.width, .height]
@@ -817,8 +817,8 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
         column.translatesAutoresizingMaskIntoConstraints = false
 
         let header = NSTextField(labelWithString: title)
-        header.font = NSFont.systemFont(ofSize: 12, weight: .bold)
-        header.textColor = WindowConstants.Colors.primaryTextColor
+        header.font = NSFont.systemFont(ofSize: WindowConstants.FontSizes.categoryHeader, weight: .semibold)
+        header.textColor = WindowConstants.Colors.categoryHeaderTextColor
         column.addArrangedSubview(header)
 
         if let desc = description, !desc.isEmpty {
@@ -910,7 +910,7 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
         let container = NSView()
         container.translatesAutoresizingMaskIntoConstraints = false
         container.wantsLayer = true
-        container.layer?.backgroundColor = WindowConstants.Colors.containerBackgroundColor.cgColor
+        container.layer?.backgroundColor = NSColor.clear.cgColor
         container.layer?.cornerRadius = 8
         container.layer?.borderWidth = 1
         container.layer?.borderColor = WindowConstants.Colors.containerBorderColor.cgColor
@@ -923,7 +923,7 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
         headerStack.translatesAutoresizingMaskIntoConstraints = false
 
         let groupHeader = NSTextField(labelWithString: groupName)
-        groupHeader.font = NSFont.systemFont(ofSize: 13, weight: .bold)
+        groupHeader.font = NSFont.systemFont(ofSize: WindowConstants.FontSizes.groupHeader, weight: .bold)
         groupHeader.textColor = WindowConstants.Colors.groupHeaderTextColor
         headerStack.addArrangedSubview(groupHeader)
 

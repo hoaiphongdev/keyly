@@ -25,27 +25,34 @@ struct WindowConstants {
         static let readyBannerColor = NSColor.systemGreen.withAlphaComponent(0.2)
         static let updateBannerColor = NSColor.systemBlue.withAlphaComponent(0.2)
 
-        static let settingsButtonTint = NSColor.white.withAlphaComponent(0.7)
-        static let escLabelColor = NSColor.white.withAlphaComponent(0.6)
+        /// Main window background (dark gray, less harsh than pure black)
+        static let windowBackgroundColor = NSColor(white: 0.11, alpha: 1)
+        /// Card/container background (slightly elevated so cards are visible)
+        static let containerBackgroundColor = NSColor(white: 0.16, alpha: 1)
+        static let containerBorderColor = NSColor.white.withAlphaComponent(0.15)
 
-        static let primaryTextColor = NSColor.white
-        static let secondaryTextColor = NSColor.white
+        static let settingsButtonTint = NSColor.white.withAlphaComponent(0.75)
+        static let escLabelColor = NSColor.white.withAlphaComponent(0.5)
+
+        static let primaryTextColor = NSColor.white.withAlphaComponent(0.95)
+        static let secondaryTextColor = NSColor.white.withAlphaComponent(0.85)
         static let tertiaryTextColor = NSColor.white.withAlphaComponent(0.6)
 
-        static let modifiersTextColor = NSColor.white
-        static let keyTextColor = NSColor.white
+        static let modifiersTextColor = NSColor.white.withAlphaComponent(0.9)
+        static let keyTextColor = NSColor.white.withAlphaComponent(0.9)
         static let actionTextColor = NSColor.white.withAlphaComponent(0.7)
 
-        static let containerBackgroundColor = NSColor.black
-        static let containerBorderColor = NSColor.white.withAlphaComponent(0.2)
-
+        /// Group title (top-level, e.g. "Neovim") — larger, brighter
         static let groupHeaderTextColor = NSColor.white
-        static let groupDescriptionTextColor = NSColor.white.withAlphaComponent(0.6)
-        static let categoryHeaderTextColor = NSColor.white
-        static let categoryDescriptionTextColor = NSColor.white.withAlphaComponent(0.6)
+        static let groupDescriptionTextColor = NSColor.white.withAlphaComponent(0.55)
+        /// Category title (inside group or standalone, e.g. "Basic Movement") — smaller, muted
+        static let categoryHeaderTextColor = NSColor.white.withAlphaComponent(0.75)
+        static let categoryDescriptionTextColor = NSColor.white.withAlphaComponent(0.5)
     }
 
     struct FontSizes {
+        static let groupHeader: CGFloat = 14
+        static let categoryHeader: CGFloat = 11
         static let medium: CGFloat = 12
         static let small: CGFloat = 11
         static let tiny: CGFloat = 10

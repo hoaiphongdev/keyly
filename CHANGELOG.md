@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.3] - 2026-02-17
+
+### Changed
+- **Shortcuts as-is**: Shortcut text shows exactly as in template (no normalization/uppercasing).
+- **UI reskin**: Dark gray window background; group 14pt bold vs category 11pt muted; group containers transparent with border only.
+
 ## [1.7.2] - 2026-02-10
 
 ### Fixed

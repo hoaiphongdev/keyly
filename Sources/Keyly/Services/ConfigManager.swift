@@ -205,47 +205,9 @@ final class ConfigManager {
             return nil
         }
 
-        let shortcut = looksLikeKeyboardShortcut(rawShortcutOrCommand)
-            ? normalizeShortcut(rawShortcutOrCommand)
-            : rawShortcutOrCommand
+        let shortcut = rawShortcutOrCommand
 
         return ShortcutItem(category: category, action: action, shortcut: shortcut, group: group)
-    }
-
-    private func looksLikeKeyboardShortcut(_ raw: String) -> Bool {
-        let lower = raw.lowercased()
-        let modifierKeywords = ["cmd", "ctrl", "alt", "opt", "shift", "super", "meta", "fn",
-                                "command", "control", "option",
-                                "⌘", "⌃", "⌥", "⇧", "⇪"]
-        return modifierKeywords.contains(where: { lower.contains($0) })
-            || (raw.count <= 3 && !raw.contains(" "))
-    }
-
-    private func normalizeShortcut(_ raw: String) -> String {
-        guard !raw.isEmpty else {
-            print("[Keyly] Warning: Empty shortcut string")
-            return raw
-        }
-
-        var result = raw.uppercased()
-
-        for (patterns, symbol) in ShortcutMapping.modifiersWithSeparator {
-            for pattern in patterns {
-                result = result.replacingOccurrences(of: pattern, with: symbol)
-            }
-        }
-
-        for (patterns, symbol) in ShortcutMapping.modifiersDirect {
-            for pattern in patterns {
-                result = result.replacingOccurrences(of: pattern, with: symbol)
-            }
-        }
-
-        for (key, symbol) in ShortcutMapping.specialKeys {
-            result = result.replacingOccurrences(of: key, with: symbol)
-        }
-
-        return result
     }
 
     func startWatching() {

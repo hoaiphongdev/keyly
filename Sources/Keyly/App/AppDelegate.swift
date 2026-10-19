@@ -2,6 +2,7 @@ import Cocoa
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem?
+    private var updateMenuItem: NSMenuItem?
     private var flagsMonitor: Any?
     private var keyDownMonitor: Any?
     private var localKeyDownMonitor: Any?
@@ -21,11 +22,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         requestAccessibilityPermissions()
         setupConfigManager()
 
-        // MARK: - Update feature temporarily disabled
-        // _ = UpdateManager.shared
-        // DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-        //     UpdateManager.shared.checkForUpdatesInBackground()
-        // }
+        setupUpdater()
 
         if isDevMode {
             setupDevMode()
@@ -101,7 +98,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
         if let button = statusItem?.button {
-            button.image = NSImage(systemSymbolName: "k.square.fill", accessibilityDescription: "Keyly")
+            button.image = statusBarIcon()
             button.action = #selector(statusBarClicked)
             button.target = self
         }
@@ -109,14 +106,53 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let menu = NSMenu()
         menu.addItem(NSMenuItem(title: "About Keyly", action: #selector(showAbout), keyEquivalent: ""))
 
-        // MARK: - Update feature temporarily disabled
-        // let checkUpdatesItem = NSMenuItem(title: "Check for Updates...", action: #selector(checkForUpdates), keyEquivalent: "")
-        // checkUpdatesItem.target = self
-        // menu.addItem(checkUpdatesItem)
+        let updateItem = NSMenuItem(title: "", action: #selector(checkForUpdates), keyEquivalent: "")
+        updateItem.target = self
+        updateItem.isHidden = true
+        menu.addItem(updateItem)
+        updateMenuItem = updateItem
+
+        let checkUpdatesItem = NSMenuItem(title: "Check for Updates...", action: #selector(checkForUpdates), keyEquivalent: "")
+        checkUpdatesItem.target = self
+        menu.addItem(checkUpdatesItem)
 
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Quit", action: #selector(quitApp), keyEquivalent: "q"))
         statusItem?.menu = menu
+    }
+
+    private func setupUpdater() {
+        Updater.shared.onPendingUpdateChanged = { [weak self] version in
+            self?.showPendingUpdate(version)
+        }
+        Updater.shared.start()
+    }
+
+    private func showPendingUpdate(_ version: String?) {
+        updateMenuItem?.title = "Update to \(version ?? "")…"
+        updateMenuItem?.isHidden = version == nil
+        statusItem?.button?.image = version == nil ? statusBarIcon() : statusBarIconWithBadge()
+    }
+
+    private func statusBarIcon() -> NSImage? {
+        NSImage(systemSymbolName: "k.square.fill", accessibilityDescription: "Keyly")
+    }
+
+    private func statusBarIconWithBadge() -> NSImage? {
+        guard let base = statusBarIcon() else { return nil }
+        let size = base.size
+        let image = NSImage(size: size, flipped: false) { rect in
+            base.draw(in: rect)
+            NSColor.labelColor.set()
+            rect.fill(using: .sourceAtop)
+            let dot = size.width * 0.42
+            let dotRect = NSRect(x: rect.maxX - dot, y: rect.maxY - dot, width: dot, height: dot)
+            NSColor.systemRed.setFill()
+            NSBezierPath(ovalIn: dotRect).fill()
+            return true
+        }
+        image.accessibilityDescription = "Keyly — update available"
+        return image
     }
 
     private func requestAccessibilityPermissions() {
@@ -494,14 +530,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc private func checkForUpdates() {
-        if UpdateManager.shared.canCheckForUpdates {
-            UpdateManager.shared.checkForUpdates()
+        if Updater.shared.canCheckForUpdates {
+            Updater.shared.checkForUpdates()
         } else {
             let alert = NSAlert()
             alert.messageText = "Check for Updates"
             alert.informativeText = isDevMode
                 ? "Update checking is disabled in dev mode."
-                : "You're running the latest version!"
+                : "An update check is already in progress."
             alert.alertStyle = .informational
             alert.addButton(withTitle: "OK")
             alert.window.level = .floating

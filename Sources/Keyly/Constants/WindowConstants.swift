@@ -7,7 +7,6 @@ struct WindowConstants {
     static let rowSpacing: CGFloat = 12
     static let padding: CGFloat = 16
     static let footerHeight: CGFloat = 32
-    static let bannerHeight: CGFloat = 48
     static let searchBarHeight: CGFloat = 32
 
     static let defaultScreenSize = NSSize(width: 1200, height: 800)
@@ -23,7 +22,6 @@ struct WindowConstants {
 
     struct Colors {
         static let readyBannerColor = NSColor.systemGreen.withAlphaComponent(0.2)
-        static let updateBannerColor = NSColor.systemBlue.withAlphaComponent(0.2)
 
         /// Main window background (dark gray, less harsh than pure black)
         static let windowBackgroundColor = NSColor(white: 0.11, alpha: 1)
@@ -61,7 +59,6 @@ struct WindowConstants {
     struct Spacing {
         static let iconSize: CGFloat = 18
         static let settingsButtonSize: CGFloat = 24
-        static let spinnerSize: CGFloat = 16
         static let columnSpacing: CGFloat = 5
         static let buttonSpacing: CGFloat = 8
         static let edgeSpacing: CGFloat = 8

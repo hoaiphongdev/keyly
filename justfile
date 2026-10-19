@@ -17,6 +17,8 @@ build:
 build-release:
     swift build -c release
 
+alias run := dev
+
 # Run dev mode (shows shortcut window, no keyboard monitoring)
 dev:
     swift build

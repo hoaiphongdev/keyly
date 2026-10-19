@@ -11,3 +11,7 @@ DerivedData/
 *.dSYM
 
 sparkle_eddsa_private_key.txt
+
+# Python
+__pycache__/
+*.pyc

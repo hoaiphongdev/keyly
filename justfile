@@ -55,7 +55,7 @@ release version:
     @test -n "{{version}}" || (echo "❌ Version required. Example: just release 1.8.0" && exit 1)
     @./scripts/release-notes.sh {{version}} > /dev/null
     @test -z "$(git status --porcelain)" || (echo "❌ Working tree is not clean. Commit first." && exit 1)
-    git tag keyly-{{version}}
+    git tag -m "Keyly {{version}}" keyly-{{version}}
     git push origin keyly-{{version}}
     @echo "🚀 Tag pushed. Follow the build: gh run watch"
 

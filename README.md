@@ -1,6 +1,6 @@
 # Keyly
 
-macOS menu bar app that displays keyboard shortcuts for the currently active application when you hold the ⌘ (Command) key.
+macOS menu bar app that displays keyboard shortcuts for the currently active application when you double-tap the ⇪ Caps Lock key.
 
 ## 🚀 Installation
 
@@ -14,7 +14,7 @@ curl -fsSL https://raw.githubusercontent.com/hoaiphongdev/keyly/main/scripts/ins
 
 > **3.** Follow the on-screen instructions to grant Accessibility permission
 >
-> **4.** Done! Hold `⌘ Command` for 2 seconds to show shortcuts
+> **4.** Done! Double-tap `⇪ Caps Lock` to show shortcuts
 
 ## Screenshots
 
@@ -26,7 +26,7 @@ curl -fsSL https://raw.githubusercontent.com/hoaiphongdev/keyly/main/scripts/ins
 
 ## Features
 
-- **Customizable Trigger**: Hold ⌘ for specified duration or press multiple times
+- **Customizable Trigger**: Double-tap ⇪ Caps Lock (default), or hold/press any key combination
 - **Real-time Search**: Search shortcuts with instant filtering
 - **Group System**: Organize shortcuts into groups with descriptions
 - **Custom Templates**: Create `.keyly` files for any application
@@ -53,7 +53,7 @@ On first launch, go to **System Settings → Privacy & Security → Accessibilit
 
 1. Run the app - you'll see a ⌘ icon in the menu bar
 2. Open any application
-3. Hold the **Command (⌘)** key for 0.5 seconds (default)
+3. Double-tap the **Caps Lock (⇪)** key (default)
 4. A window will appear showing all keyboard shortcuts
 5. **Close the window by**:
    - Press **ESC** key
@@ -68,18 +68,19 @@ Configure app behavior:
 
 ```ini
 # Super key configuration
-super_key=cmd
-trigger_type=hold
-hold_duration=0.5
+super_key=capslock
+trigger_type=press
+press_count=2
 
 # UI settings
 screen_width_ratio=0.7
 ```
 
 **Options:**
-- `super_key`: Key combination (e.g., `cmd`, `cmd+shift`, `ctrl+alt`)
-- `trigger_type`: `hold` or `press`
-- `hold_duration`: Hold time in seconds
+- `super_key`: `capslock` (default) or key combination (e.g., `cmd`, `cmd+shift`, `ctrl+alt`)
+- `trigger_type`: `hold` or `press` (`capslock` always uses `press`)
+- `hold_duration`: Hold time in seconds (for `hold`)
+- `press_count`: Number of taps (for `press`)
 - `screen_width_ratio`: Window width ratio (0.1-1.0)
 
 ### Custom Templates (`~/.config/keyly/templates/`)

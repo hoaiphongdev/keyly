@@ -422,10 +422,11 @@ final class ConfigManager {
         # Place this file at ~/.config/keyly/setting.conf
 
         # Super key configuration - can be single key or combinations:
-        # Single keys: cmd, ctrl, alt, shift, fn, space, a, b, c, f1, etc.
+        # Single keys: capslock, cmd, ctrl, alt, shift, fn, space, a, b, c, f1, etc.
         # Combinations: cmd+a, ctrl+shift+x, alt+space, fn+f12, etc.
-        super_key=cmd+a
-        trigger_type=hold
+        # capslock only supports trigger_type=press
+        super_key=capslock
+        trigger_type=press
 
         # Hold settings (used when trigger_type = hold)
         hold_duration=0.5

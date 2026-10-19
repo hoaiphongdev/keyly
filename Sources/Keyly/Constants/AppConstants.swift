@@ -18,6 +18,7 @@ struct AppConstants {
         static let shiftLeft: UInt16 = 56
         static let shiftRight: UInt16 = 60
         static let fn: UInt16 = 63
+        static let capsLock: UInt16 = 57
         
         static let a: UInt16 = 0
         static let s: UInt16 = 1

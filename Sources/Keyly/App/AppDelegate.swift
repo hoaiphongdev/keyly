@@ -12,6 +12,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var holdCancelled = false
     private var superKeyPressCount = 0
     private var lastSuperKeyPressTime: TimeInterval = 0
+    private var isCapsLockOn = NSEvent.modifierFlags.contains(.capsLock)
 
     private let shortcutExtractor = ShortcutExtractor()
     private let isDevMode = ProcessInfo.processInfo.environment["KEYLY_DEV"] == "1"
@@ -395,6 +396,33 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 flags.contains(.capsLock) ? "caps" : nil
             ].compactMap { $0 }
             print("[Keyly] Flags changed: \(flagsDebug)")
+        }
+
+        if superKey.isCapsLock {
+            guard event.keyCode == AppConstants.KeyCodes.capsLock else { return }
+
+            // Count only real toggles so a release event (if any) is not a second tap
+            let capsLockOn = flags.contains(.capsLock)
+            guard capsLockOn != isCapsLockOn else { return }
+            isCapsLockOn = capsLockOn
+
+            let currentTime = CACurrentMediaTime()
+            if currentTime - lastSuperKeyPressTime < AppConstants.doubleClickTimeInterval {
+                superKeyPressCount += 1
+            } else {
+                superKeyPressCount = 1
+            }
+            lastSuperKeyPressTime = currentTime
+
+            if isDevMode {
+                print("[Keyly] Caps Lock press count: \(superKeyPressCount)/\(settings.press.count)")
+            }
+
+            if superKeyPressCount >= settings.press.count {
+                showShortcuts()
+                superKeyPressCount = 0
+            }
+            return
         }
 
         // Only handle modifier-only combinations here

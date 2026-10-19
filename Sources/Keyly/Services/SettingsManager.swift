@@ -19,6 +19,11 @@ struct SuperKeySettings {
     var hasModifiers: Bool {
         return !modifiers.isEmpty
     }
+
+    // Caps Lock only toggles, so it is always counted as presses (no hold)
+    var isCapsLock: Bool {
+        return keyComponents == ["capslock"]
+    }
 }
 
 struct HoldSettings {
@@ -63,7 +68,7 @@ final class SettingsManager {
 
     private func loadSettings() -> KeylySettings {
         let defaultSettings = KeylySettings(
-            superKey: SuperKeySettings(key: "cmd", triggerType: "hold"),
+            superKey: SuperKeySettings(key: "capslock", triggerType: "press"),
             hold: HoldSettings(duration: SettingsConstants.defaultHoldDuration),
             press: PressSettings(count: SettingsConstants.defaultPressCount),
             ui: UISettings(screenWidthRatio: 0.7)
@@ -126,7 +131,9 @@ final class SettingsManager {
 
     private func mergeSettings(defaults: KeylySettings, userConfig: [String: String]) -> KeylySettings {
         let superKeyKey = validateSuperKey(userConfig["super_key"], default: defaults.superKey.key)
-        let triggerType = validateTriggerType(userConfig["trigger_type"], default: defaults.superKey.triggerType)
+        // Keep "hold" as the fallback for users who set their own super_key without a trigger_type
+        let defaultTriggerType = superKeyKey == defaults.superKey.key ? defaults.superKey.triggerType : "hold"
+        let triggerType = validateTriggerType(userConfig["trigger_type"], default: defaultTriggerType)
 
         let superKey = SuperKeySettings(key: superKeyKey, triggerType: triggerType)
 

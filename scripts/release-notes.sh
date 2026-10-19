@@ -8,6 +8,9 @@ if [[ -z "$VERSION" ]]; then
     exit 1
 fi
 
+# Prereleases (1.8.0-rc1) reuse the notes of the version they lead to.
+VERSION="${VERSION%%-*}"
+
 NOTES=$(awk -v v="$VERSION" '
     index($0, "## [" v "]") == 1 { found = 1; next }
     found && /^## \[/ { exit }

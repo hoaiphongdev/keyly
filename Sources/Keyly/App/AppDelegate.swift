@@ -90,7 +90,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             shortcutsWindow = ShortcutsWindow()
         }
 
-        shortcutsWindow?.displayShortcuts(shortcuts, appName: app.localizedName ?? "Unknown", categoryDescriptions: categoryDescriptions, groupDescriptions: groupDescriptions)
+        shortcutsWindow?.displayShortcuts(shortcuts, appName: app.localizedName ?? "Unknown", appIcon: app.icon, categoryDescriptions: categoryDescriptions, groupDescriptions: groupDescriptions)
         shortcutsWindow?.showWindow(nil)
         shortcutsWindow?.window?.orderFrontRegardless()
     }
@@ -177,6 +177,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         localKeyDownMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             if event.keyCode == AppConstants.escapeKeyCode && self?.shortcutsWindow?.window?.isVisible == true {
+                // First ESC clears an active search, the next one closes
+                if self?.shortcutsWindow?.clearSearch() == true {
+                    return nil
+                }
                 if self?.isDevMode == true {
                     print("[Keyly] ESC key pressed, closing shortcuts window")
                 }
@@ -528,7 +532,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             shortcutsWindow = ShortcutsWindow()
         }
 
-        shortcutsWindow?.displayShortcuts(shortcuts, appName: frontmostApp.localizedName ?? "Unknown App", categoryDescriptions: categoryDescriptions, groupDescriptions: groupDescriptions)
+        shortcutsWindow?.displayShortcuts(shortcuts, appName: frontmostApp.localizedName ?? "Unknown App", appIcon: frontmostApp.icon, categoryDescriptions: categoryDescriptions, groupDescriptions: groupDescriptions)
         shortcutsWindow?.showWindow(nil)
         shortcutsWindow?.window?.orderFrontRegardless()
     }

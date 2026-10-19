@@ -143,32 +143,27 @@ curl -sL https://raw.githubusercontent.com/hoaiphongdev/keyly/main/scripts/insta
 
 ## Auto-Update
 
-Keyly uses [Sparkle](https://sparkle-project.org/) for automatic updates. Updates are checked daily and can also be triggered manually via:
+Keyly uses [Sparkle](https://sparkle-project.org/) for automatic updates. It checks for a new release every 6 hours. When one is available, the menu bar icon gets a red dot, a **"Update to x.y.z…"** menu item appears and you get a notification. You can also check manually via:
 - Menu bar icon → Check for Updates...
 - Settings button → Check for Updates...
 
+Updates keep your Accessibility permission: every release is signed with the same certificate.
+
+> **Upgrading from 1.7.3 or older?** Those versions have no updater. Run the install command above once more, then grant Accessibility again (the signing changed). After that, updates arrive automatically.
+
 ### For Developers: Release Process
 
-1. **Generate EdDSA keys** (one-time setup):
+1. **One-time setup**: create the signing certificate and Sparkle EdDSA keys, then add the GitHub secrets the scripts print (`KEYLY_CERT_P12_BASE64`, `KEYLY_CERT_PASSWORD`, `SPARKLE_PRIVATE_KEY`):
    ```bash
-   swift build  # Fetch Sparkle
-   ./scripts/generate-keys.sh
-   # Save the public key to sparkle_eddsa_public_key.txt
+   just setup-signing
    ```
+   Back up `~/.keyly-signing`. Replacing the certificate resets every user's Accessibility permission, and losing the EdDSA key means installed copies can no longer verify updates. Never change both in the same release.
 
-2. **Build release**:
+2. **Release**: add a `## [x.y.z]` section to `CHANGELOG.md`, commit, then:
    ```bash
-   just release 1.0.0
+   just release 1.8.0
    ```
-
-3. **Sign the DMG**:
-   ```bash
-   ./scripts/sign-update.sh .build/Keyly.dmg
-   ```
-
-4. **Update appcast.xml** with the signature and upload to GitHub Pages
-
-5. **Create GitHub Release** and upload `Keyly.dmg`
+   This pushes the tag `keyly-1.8.0`. GitHub Actions builds and signs `Keyly.dmg`, generates `appcast.xml`, and publishes both to the release. Tags with a suffix (`keyly-1.8.0-rc1`) become prereleases that the app ignores.
 
 ## License
 

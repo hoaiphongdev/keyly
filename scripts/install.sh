@@ -40,7 +40,7 @@ if [ -z "$MOUNT_POINT" ]; then
 fi
 
 echo "📂 Copying app to /Applications..."
-cp -r "$MOUNT_POINT/Keyly.app" /Applications/
+ditto "$MOUNT_POINT/Keyly.app" /Applications/Keyly.app
 
 echo "🔓 Removing quarantine attribute..."
 xattr -cr /Applications/Keyly.app

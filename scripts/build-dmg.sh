@@ -49,12 +49,13 @@ cp "$BUILD_DIR/$APP_NAME" "$APP_BUNDLE/Contents/MacOS/"
 
 # Copy Sparkle.framework
 if [ -d "$BUILD_DIR/Sparkle.framework" ]; then
-    cp -R "$BUILD_DIR/Sparkle.framework" "$APP_BUNDLE/Contents/Frameworks/"
+    ditto "$BUILD_DIR/Sparkle.framework" "$APP_BUNDLE/Contents/Frameworks/Sparkle.framework"
     # Fix rpath to find framework in Frameworks folder
     install_name_tool -add_rpath "@executable_path/../Frameworks" "$APP_BUNDLE/Contents/MacOS/$APP_NAME" 2>/dev/null || true
     echo "   ✅ Sparkle.framework copied"
 else
-    echo "   ⚠️ Sparkle.framework not found in $BUILD_DIR"
+    echo "❌ Sparkle.framework not found in $BUILD_DIR"
+    exit 1
 fi
 
 if [ -d "$BUILD_DIR/Keyly_Keyly.bundle" ]; then
@@ -106,22 +107,30 @@ cat > "$APP_BUNDLE/Contents/Info.plist" << EOF
     
     <!-- Sparkle Auto-Update Configuration -->
     <key>SUFeedURL</key>
-    <string>https://hoaiphongdev.github.io/keyly/appcast.xml</string>
+    <string>https://github.com/hoaiphongdev/keyly/releases/latest/download/appcast.xml</string>
     <key>SUEnableAutomaticChecks</key>
     <true/>
     <key>SUScheduledCheckInterval</key>
-    <integer>86400</integer>
+    <integer>21600</integer>
     <key>SUPublicEDKey</key>
     <string>$EDDSA_PUBLIC_KEY</string>
 </dict>
 </plist>
 EOF
 
+if [ -z "$EDDSA_PUBLIC_KEY" ]; then
+    echo "❌ sparkle_eddsa_public_key.txt is missing. Run ./scripts/generate-keys.sh"
+    exit 1
+fi
+
+echo "🔏 Signing app..."
+./scripts/sign-app.sh "$APP_BUNDLE"
+
 echo "💿 Creating DMG..."
 
 rm -rf "$DMG_DIR"
 mkdir -p "$DMG_DIR"
-cp -r "$APP_BUNDLE" "$DMG_DIR/"
+ditto "$APP_BUNDLE" "$DMG_DIR/$APP_NAME.app"
 
 rm -f ".build/$DMG_NAME"
 

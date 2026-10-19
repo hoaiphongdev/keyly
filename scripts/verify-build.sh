@@ -42,8 +42,14 @@ if [ ! -d "/tmp/keyly_verify_mount/Keyly.app" ]; then
     exit 1
 fi
 
+codesign --verify --deep --strict /tmp/keyly_verify_mount/Keyly.app || {
+    hdiutil detach /tmp/keyly_verify_mount -quiet
+    echo "❌ Keyly.app inside the DMG has a broken signature"
+    exit 1
+}
+
 hdiutil detach /tmp/keyly_verify_mount -quiet
-echo "   ✅ DMG mounts successfully"
+echo "   ✅ DMG mounts successfully, signature valid"
 
 APP_SIZE=$(du -sh "$APP_BUNDLE" | awk '{print $1}')
 DMG_SIZE=$(du -sh "$DMG_FILE" | awk '{print $1}')

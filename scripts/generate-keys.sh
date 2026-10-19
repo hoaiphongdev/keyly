@@ -1,39 +1,32 @@
 #!/bin/bash
-# Generate EdDSA key pair for Sparkle updates
-
-set -e
+# Generate the EdDSA key pair Sparkle uses to verify updates. Run ONCE.
+# The private key also stays in your login Keychain (Sparkle's default).
+set -euo pipefail
 
 SPARKLE_BIN=".build/artifacts/sparkle/Sparkle/bin"
 PUBLIC_KEY_FILE="sparkle_eddsa_public_key.txt"
-PRIVATE_KEY_FILE="sparkle_eddsa_private_key.txt"
-
-echo "Generating EdDSA key pair for Sparkle..."
+OUT_DIR="${1:-$HOME/.keyly-signing}"
+PRIVATE_KEY_FILE="$OUT_DIR/sparkle_eddsa_private_key.txt"
 
 if [ ! -d "$SPARKLE_BIN" ]; then
     echo "❌ Sparkle not found. Run 'swift build' first to fetch dependencies."
     exit 1
 fi
 
-# Generate keys (or get existing) and print public key
-OUTPUT=$("$SPARKLE_BIN/generate_keys" 2>&1)
-echo "$OUTPUT"
-
-# Extract public key
-PUBLIC_KEY=$(echo "$OUTPUT" | grep -A1 "SUPublicEDKey" | grep "<string>" | sed 's/.*<string>\(.*\)<\/string>.*/\1/')
-
-if [ -n "$PUBLIC_KEY" ]; then
-    echo "$PUBLIC_KEY" > "$PUBLIC_KEY_FILE"
-    echo ""
-    echo "✅ Public key saved to: $PUBLIC_KEY_FILE"
-else
-    echo "❌ Could not extract public key."
+if [ -f "$PRIVATE_KEY_FILE" ]; then
+    echo "❌ $PRIVATE_KEY_FILE already exists. Refusing to overwrite."
     exit 1
 fi
 
-# Export private key to file
-echo ""
-echo "🔑 Exporting private key..."
-"$SPARKLE_BIN/generate_keys" -x "$PRIVATE_KEY_FILE"
+"$SPARKLE_BIN/generate_keys" --account keyly
+"$SPARKLE_BIN/generate_keys" --account keyly -p > "$PUBLIC_KEY_FILE"
+echo "✅ Public key saved to: $PUBLIC_KEY_FILE (commit this)"
+
+mkdir -p "$OUT_DIR"
+chmod 700 "$OUT_DIR"
+"$SPARKLE_BIN/generate_keys" --account keyly -x "$PRIVATE_KEY_FILE"
+chmod 600 "$PRIVATE_KEY_FILE"
 echo "✅ Private key saved to: $PRIVATE_KEY_FILE"
 echo ""
-echo "⚠️  $PRIVATE_KEY_FILE is gitignored. Keep it safe!"
+echo "GitHub secret SPARKLE_PRIVATE_KEY = cat $PRIVATE_KEY_FILE | pbcopy"
+echo "⚠️  Back it up. Losing it means installed copies can no longer verify updates."

@@ -1,0 +1,81 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "keyly-*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read version from tag
+        id: version
+        run: |
+          VERSION="${GITHUB_REF_NAME#keyly-}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          # keyly-1.8.0-rc1 → prerelease, so releases/latest (and the app's feed) ignore it
+          if [[ "$VERSION" == *-* ]]; then echo "prerelease=--prerelease" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Check CHANGELOG entry
+        run: ./scripts/release-notes.sh "${{ steps.version.outputs.version }}" > release-notes.md
+
+      - name: Install create-dmg
+        run: brew install create-dmg
+
+      - name: Import signing certificate
+        env:
+          KEYLY_CERT_P12_BASE64: ${{ secrets.KEYLY_CERT_P12_BASE64 }}
+          KEYLY_CERT_PASSWORD: ${{ secrets.KEYLY_CERT_PASSWORD }}
+        run: |
+          if [[ -z "$KEYLY_CERT_P12_BASE64" || -z "$KEYLY_CERT_PASSWORD" ]]; then
+            echo "❌ Signing secrets are missing" >&2
+            exit 1
+          fi
+          KEYCHAIN="$RUNNER_TEMP/signing.keychain-db"
+          KEYCHAIN_PASSWORD=$(openssl rand -base64 24)
+          echo "$KEYLY_CERT_P12_BASE64" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security import "$RUNNER_TEMP/cert.p12" -k "$KEYCHAIN" -P "$KEYLY_CERT_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN" > /dev/null
+          security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | tr -d '"')
+          rm "$RUNNER_TEMP/cert.p12"
+          # The cert is self-signed and deliberately not trusted, so `find-identity -v` hides it: sign by hash.
+          IDENTITY=$(security find-identity -p codesigning "$KEYCHAIN" | grep -o '[0-9A-F]\{40\}' | head -1)
+          if [[ -z "$IDENTITY" ]]; then
+            echo "❌ No code signing identity found in the imported certificate" >&2
+            exit 1
+          fi
+          echo "KEYLY_SIGN_IDENTITY=$IDENTITY" >> "$GITHUB_ENV"
+
+      - name: Build and sign DMG
+        run: ./scripts/build-dmg.sh "${{ steps.version.outputs.version }}"
+
+      - name: Verify build
+        run: ./scripts/verify-build.sh
+
+      - name: Generate appcast
+        env:
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+        run: ./scripts/make-appcast.sh "${{ steps.version.outputs.version }}"
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            .build/Keyly.dmg .build/appcast/appcast.xml \
+            --title "Keyly ${{ steps.version.outputs.version }}" \
+            --notes-file release-notes.md \
+            ${{ steps.version.outputs.prerelease }}
+
+      - name: Remove signing keychain
+        if: always()
+        run: security delete-keychain "$RUNNER_TEMP/signing.keychain-db" 2>/dev/null || true

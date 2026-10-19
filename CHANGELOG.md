@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.8.0] - 2026-10-19
+
+### Added
+- **Auto-update**: Keyly checks for new versions every 6 hours (Sparkle). When one is out, the menu bar icon gets a red dot, an "Update to x.y.z…" menu item appears and you get a notification. One click installs and relaunches.
+- **Check for Updates…**: Available in the menu bar menu and the shortcuts window settings menu.
+
+### Changed
+- **Stable signing**: Releases are signed with one fixed certificate, so the Accessibility permission survives updates.
+- **Upgrading from 1.7.3 or older**: Run the install command once more and grant Accessibility again. Updates are automatic after that.
+
+### Removed
+- **Old update banner**: Replaced by the Sparkle updater.
+
 ## [1.7.3] - 2026-02-17
 
 ### Changed

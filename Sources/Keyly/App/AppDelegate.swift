@@ -12,6 +12,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var holdCancelled = false
     private var superKeyPressCount = 0
     private var lastSuperKeyPressTime: TimeInterval = 0
+    private var isCapsLockOn = NSEvent.modifierFlags.contains(.capsLock)
 
     private let shortcutExtractor = ShortcutExtractor()
     private let isDevMode = ProcessInfo.processInfo.environment["KEYLY_DEV"] == "1"
@@ -42,6 +43,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         ConfigManager.shared.onSettingsReloaded = { [weak self] in
             self?.settings = SettingsManager.shared.getSettings()
+            // Caps Lock may have toggled while it was not the trigger
+            self?.isCapsLockOn = NSEvent.modifierFlags.contains(.capsLock)
         }
     }
 
@@ -89,7 +92,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             shortcutsWindow = ShortcutsWindow()
         }
 
-        shortcutsWindow?.displayShortcuts(shortcuts, appName: app.localizedName ?? "Unknown", categoryDescriptions: categoryDescriptions, groupDescriptions: groupDescriptions)
+        shortcutsWindow?.displayShortcuts(shortcuts, appName: app.localizedName ?? "Unknown", appIcon: app.icon, categoryDescriptions: categoryDescriptions, groupDescriptions: groupDescriptions)
         shortcutsWindow?.showWindow(nil)
         shortcutsWindow?.window?.orderFrontRegardless()
     }
@@ -176,6 +179,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         localKeyDownMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             if event.keyCode == AppConstants.escapeKeyCode && self?.shortcutsWindow?.window?.isVisible == true {
+                // First ESC clears an active search, the next one closes
+                if self?.shortcutsWindow?.clearSearch() == true {
+                    return nil
+                }
                 if self?.isDevMode == true {
                     print("[Keyly] ESC key pressed, closing shortcuts window")
                 }
@@ -224,27 +231,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func keyCodeToString(_ keyCode: UInt16) -> String {
-        let keyMap: [UInt16: String] = [
-            0: "a", 1: "s", 2: "d", 3: "f", 4: "h", 5: "g", 6: "z", 7: "x", 8: "c", 9: "v",
-            11: "b", 12: "q", 13: "w", 14: "e", 15: "r", 17: "t", 16: "y", 32: "u", 34: "i", 31: "o",
-            35: "p", 33: "[", 30: "]", 36: "return", 38: "l", 40: "k", 37: ";", 41: "'", 42: "\\",
-            43: ",", 47: ".", 44: "/", 49: "space", 39: "`",
-
-            29: "0", 18: "1", 19: "2", 20: "3", 21: "4", 23: "5", 22: "6", 26: "7", 28: "8", 25: "9",
-
-            122: "f1", 120: "f2", 99: "f3", 118: "f4", 96: "f5", 97: "f6", 98: "f7", 100: "f8",
-            101: "f9", 109: "f10", 103: "f11", 111: "f12",
-
-            54: "cmd", 55: "cmd", 59: "ctrl", 62: "ctrl", 58: "alt", 61: "alt", 56: "shift", 60: "shift",
-            63: "fn",
-
-            126: "up", 125: "down", 123: "left", 124: "right",
-
-            51: "delete", 117: "forward_delete", 53: "escape", 48: "tab", 76: "enter",
-            116: "page_up", 121: "page_down", 115: "home", 119: "end"
-        ]
-
-        return keyMap[keyCode] ?? "key_\(keyCode)"
+        AppConstants.KeyCodes.names[keyCode] ?? "key_\(keyCode)"
     }
 
     private func checkModifierFlags(_ flags: NSEvent.ModifierFlags, matches modifiers: [String]) -> Bool {
@@ -397,6 +384,35 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             print("[Keyly] Flags changed: \(flagsDebug)")
         }
 
+        if superKey.isCapsLock {
+            guard event.keyCode == AppConstants.KeyCodes.capsLock else { return }
+
+            // Count only real toggles so a release event (if any) is not a second tap
+            let capsLockOn = flags.contains(.capsLock)
+            guard capsLockOn != isCapsLockOn else { return }
+            isCapsLockOn = capsLockOn
+
+            let currentTime = CACurrentMediaTime()
+            if currentTime - lastSuperKeyPressTime < AppConstants.doubleClickTimeInterval {
+                superKeyPressCount += 1
+            } else {
+                superKeyPressCount = 1
+            }
+            lastSuperKeyPressTime = currentTime
+
+            if isDevMode {
+                print("[Keyly] Caps Lock press count: \(superKeyPressCount)/\(settings.press.count)")
+            }
+
+            if superKeyPressCount >= settings.press.count {
+                // A cancelled hold from a previous key+key trigger must not block Caps Lock
+                holdCancelled = false
+                showShortcuts()
+                superKeyPressCount = 0
+            }
+            return
+        }
+
         // Only handle modifier-only combinations here
         if superKey.mainKey == nil && superKey.hasModifiers {
             let isSuperKeyDown = isSuperKeyComboPressed(flags)
@@ -500,7 +516,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             shortcutsWindow = ShortcutsWindow()
         }
 
-        shortcutsWindow?.displayShortcuts(shortcuts, appName: frontmostApp.localizedName ?? "Unknown App", categoryDescriptions: categoryDescriptions, groupDescriptions: groupDescriptions)
+        shortcutsWindow?.displayShortcuts(shortcuts, appName: frontmostApp.localizedName ?? "Unknown App", appIcon: frontmostApp.icon, categoryDescriptions: categoryDescriptions, groupDescriptions: groupDescriptions)
         shortcutsWindow?.showWindow(nil)
         shortcutsWindow?.window?.orderFrontRegardless()
     }

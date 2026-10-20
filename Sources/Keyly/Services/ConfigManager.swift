@@ -62,8 +62,10 @@ final class ConfigManager {
 
         let fileManager = FileManager.default
 
-        guard let files = try? fileManager.contentsOfDirectory(at: templatesDirectory, includingPropertiesForKeys: nil) else {
-            return
+        // templates/ is the documented home; .keyly files placed directly in ~/.config/keyly/
+        // (older docs and install-templates.sh put them there) are loaded too.
+        let files = [templatesDirectory, configDirectory].flatMap { directory in
+            (try? fileManager.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)) ?? []
         }
 
         for file in files where file.pathExtension == "keyly" {
@@ -193,19 +195,9 @@ final class ConfigManager {
     }
 
     private func parseShortcutLine(_ line: String, category: String, group: String? = nil) -> ShortcutItem? {
-        let parts = line.components(separatedBy: "|")
-        guard parts.count == 2 else {
+        guard let (shortcut, action) = ShortcutLineParser.parse(line) else {
             return nil
         }
-
-        let rawShortcutOrCommand = parts[0].trimmingCharacters(in: .whitespaces)
-        let action = parts[1].trimmingCharacters(in: .whitespaces)
-
-        guard !rawShortcutOrCommand.isEmpty, !action.isEmpty else {
-            return nil
-        }
-
-        let shortcut = rawShortcutOrCommand
 
         return ShortcutItem(category: category, action: action, shortcut: shortcut, group: group)
     }
@@ -422,10 +414,11 @@ final class ConfigManager {
         # Place this file at ~/.config/keyly/setting.conf
 
         # Super key configuration - can be single key or combinations:
-        # Single keys: cmd, ctrl, alt, shift, fn, space, a, b, c, f1, etc.
+        # Single keys: capslock, cmd, ctrl, alt, shift, fn, space, a, b, c, f1, etc.
         # Combinations: cmd+a, ctrl+shift+x, alt+space, fn+f12, etc.
-        super_key=cmd+a
-        trigger_type=hold
+        # capslock only supports trigger_type=press
+        super_key=capslock
+        trigger_type=press
 
         # Hold settings (used when trigger_type = hold)
         hold_duration=0.5

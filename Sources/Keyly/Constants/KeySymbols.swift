@@ -30,20 +30,17 @@ enum KeySymbol {
 }
 
 enum ShortcutMapping {
-    static let modifiersWithSeparator: [(patterns: [String], symbol: String)] = [
-        (["CMD+", "COMMAND+", "CMD-", "COMMAND-"], Modifier.command),
-        (["CTRL+", "CONTROL+", "CTRL-", "CONTROL-"], Modifier.control),
-        (["OPT+", "OPTION+", "ALT+", "OPT-", "OPTION-", "ALT-"], Modifier.option),
-        (["SHIFT+", "SHIFT-"], Modifier.shift),
+    /// Written modifier names accepted in `.keyly` files, longest first so "CMD" doesn't shadow "COMMAND".
+    static let modifierNames: [(names: [String], symbol: String)] = [
+        (["COMMAND", "CMD", "⌘"], Modifier.command),
+        (["CONTROL", "CTRL", "⌃"], Modifier.control),
+        (["OPTION", "OPT", "ALT", "⌥"], Modifier.option),
+        (["SHIFT", "⇧"], Modifier.shift),
     ]
-    
-    static let modifiersDirect: [(patterns: [String], symbol: String)] = [
-        (["CMD", "COMMAND"], Modifier.command),
-        (["CTRL", "CONTROL"], Modifier.control),
-        (["OPT", "OPTION", "ALT"], Modifier.option),
-        (["SHIFT"], Modifier.shift),
-    ]
-    
+
+    /// macOS menu order for modifier glyphs.
+    static let modifierOrder = [Modifier.control, Modifier.option, Modifier.shift, Modifier.command]
+
     static let specialKeys: [String: String] = [
         "ENTER": KeySymbol.enter,
         "RETURN": KeySymbol.enter,

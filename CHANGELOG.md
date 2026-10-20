@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.9.0] - 2026-10-20
+
+### Added
+- **Double-tap ⇪ Caps Lock**: The new default trigger. Your own `super_key` in `setting.conf` keeps working; an unknown key name now falls back to Caps Lock with a warning.
+- **Instant search**: Start typing in the shortcuts window to filter by action, menu or key, with matches highlighted. The first ESC clears the search, the next one closes the window.
+
+### Changed
+- **Reskinned shortcuts window**: Keycap-style shortcuts, cleaner groups and a layout that fits small MacBook screens.
+- **Templates folder**: `install-templates.sh` installs into `~/.config/keyly/templates/` and accepts names with or without `.keyly`. Files placed directly in `~/.config/keyly/` are still loaded.
+
+### Fixed
+- **Custom shortcuts and bundled templates load again**: Lines written as `CMD+SHIFT+T    Description` (tab or 2+ spaces) are read alongside `⇧⌘T | Description`, and written modifiers (`CMD`, `SHIFT`, `OPT`, `CTRL`, `ENTER`…) are shown as ⌘⇧⌥⌃⏎.
+- **Caps Lock trigger after a live config change**: No longer ignored after switching from a key-combination trigger, and the first double-tap isn't lost.
+- **Grouped rows**: The widest row inside a group card is no longer cut off.
+
 ## [1.8.0] - 2026-10-19
 
 ### Added

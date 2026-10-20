@@ -4,7 +4,7 @@ set -e
 REPO="hoaiphongdev/keyly"
 BRANCH="main"
 TEMPLATES_PATH="templates"
-CONFIG_DIR="$HOME/.config/keyly"
+CONFIG_DIR="$HOME/.config/keyly/templates"
 
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -15,7 +15,7 @@ usage() {
     echo "Usage: $0 -t <template> [-n <name>] [-f]"
     echo ""
     echo "Options:"
-    echo "  -t    Template name (required)"
+    echo "  -t    Template name, with or without .keyly (required)"
     echo "  -n    Save as name (optional)"
     echo "  -f    Force replace if exists"
     echo ""
@@ -43,6 +43,8 @@ if [ -z "$TEMPLATE" ]; then
     echo -e "${RED}Error: Template name is required${NC}"
     usage
 fi
+
+[[ "$TEMPLATE" != *.keyly ]] && TEMPLATE="$TEMPLATE.keyly"
 
 if [ -z "$NAME" ]; then
     NAME="$TEMPLATE"

@@ -162,6 +162,19 @@ final class SettingsManager {
             return defaultValue
         }
 
+        let components = SuperKeySettings(key: value, triggerType: "").keyComponents
+        let knownKeys = Set(AppConstants.KeyCodes.names.values).union(SettingsConstants.validModifierKeys)
+        let unknown = components.filter { !knownKeys.contains($0) && $0 != "capslock" }
+
+        if !unknown.isEmpty {
+            print("[Keyly] Warning: Unknown key '\(unknown.joined(separator: "+"))' in super_key '\(value)', using default '\(defaultValue)'")
+            return defaultValue
+        }
+        if components.contains("capslock") && components.count > 1 {
+            print("[Keyly] Warning: capslock can't be combined with other keys in super_key '\(value)', using default '\(defaultValue)'")
+            return defaultValue
+        }
+
         return value
     }
 

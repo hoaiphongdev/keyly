@@ -431,7 +431,10 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
         let wantedColumns = max(blocks.map(\.columnSpan).max() ?? 1, blocks.count)
         numColumns = max(1, min(wantedColumns, maxPossibleColumns))
 
-        let widestRow = rowViews.map(\.model.requiredWidth).max() ?? minColumnWidth
+        // Rows inside a group card lose the card's padding on both sides
+        let widestRow = rowViews.map { row in
+            row.model.requiredWidth + (row.model.item.group != nil ? WindowConstants.Group.padding * 2 : 0)
+        }.max() ?? minColumnWidth
         let fittingColumnWidth = (maxGridWidth - CGFloat(numColumns - 1) * columnSpacing) / CGFloat(numColumns)
         // `min` last: on very small screens fitting wins over the preferred minimum, so nothing overflows
         gridColumnWidth = floor(min(max(widestRow, minColumnWidth), fittingColumnWidth))

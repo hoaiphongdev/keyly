@@ -51,14 +51,14 @@ On first launch, go to **System Settings → Privacy & Security → Accessibilit
 
 ## Usage
 
-1. Run the app - you'll see a ⌘ icon in the menu bar
+1. Run the app - you'll see a **K** icon in the menu bar
 2. Open any application
 3. Double-tap the **Caps Lock (⇪)** key (default)
 4. A window will appear showing all keyboard shortcuts
-5. **Close the window by**:
+5. **Start typing** to search; the first **ESC** clears the search
+6. **Close the window by**:
    - Press **ESC** key
    - **Click outside** the window
-   - Use the configured super key again
 
 ## Configuration
 
@@ -77,7 +77,7 @@ screen_width_ratio=0.7
 ```
 
 **Options:**
-- `super_key`: `capslock` (default) or key combination (e.g., `cmd`, `cmd+shift`, `ctrl+alt`)
+- `super_key`: `capslock` (default) or key combination (e.g., `cmd`, `cmd+shift`, `ctrl+alt`); unknown key names fall back to the default
 - `trigger_type`: `hold` or `press` (`capslock` always uses `press`)
 - `hold_duration`: Hold time in seconds (for `hold`)
 - `press_count`: Number of taps (for `press`)
@@ -111,14 +111,20 @@ tool start | Start new session
 tool attach <name> | Attach to session
 ```
 
-**Syntax:** `key/command | description` — each line split by `|`
+**Syntax:** each line is `shortcut  description`, in one of two forms:
+
+- `⇧⌘T | Reopen last tab` — split on `|`; use this when the left side contains spaces
+- `CMD+SHIFT+T    Reopen last tab` — split on the first tab or run of 2+ spaces (or the first space)
+
+Written modifiers are converted to symbols: `CMD`/`COMMAND` → ⌘, `CTRL`/`CONTROL` → ⌃, `OPT`/`OPTION`/`ALT` → ⌥, `SHIFT` → ⇧, plus named keys such as `ENTER`, `TAB`, `ESC`, `SPACE`, `DELETE` and arrows. Files placed directly in `~/.config/keyly/` are loaded too.
 
 **Template Features:**
 - `# Hide Default: true` — Hide system menu shortcuts
 - `# Group: Name - Description` — Group shortcuts with optional description
 - `[Category]` — Category header
 - `> Description` — Category description
-- Lines without valid `|` format are ignored
+- `global.keyly` — shortcuts shown for every app
+- Lines without a shortcut and a description are ignored
 
 ## Community Templates
 

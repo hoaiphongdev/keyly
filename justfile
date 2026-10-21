@@ -20,6 +20,10 @@ build-release:
 test:
     DEVELOPER_DIR="${DEVELOPER_DIR:-/Applications/Xcode.app/Contents/Developer}" swift test
 
+verify-app:
+    swift build
+    swift scripts/verify-app.swift "$PWD"
+
 alias run := dev
 
 # Run dev mode (shows shortcut window, no keyboard monitoring)

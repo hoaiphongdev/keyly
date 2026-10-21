@@ -25,6 +25,8 @@ All notable changes to this project will be documented in this file.
 - **Symlinked `templates/` folder** (dotfiles setups): its sheets load and reload on save.
 - **Opening a config file in VS Code** works when Keyly is launched from Finder, where `code` in `/usr/local/bin` or `/opt/homebrew/bin` wasn't found before.
 - **A missed key release** no longer blocks the next key + modifier trigger.
+- **Open window keeps its search** when something unrelated changes in `~/.config/keyly` (Finder's `.DS_Store`, editor swap files).
+- **UTF-16 config files** (with a byte order mark) are read correctly.
 
 ## [1.9.0] - 2026-10-20
 

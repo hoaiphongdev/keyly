@@ -74,14 +74,14 @@
 
 [Markdown Syntax]
 > Type these followed by space:
-# + space       Heading 1
-## + space      Heading 2
-### + space     Heading 3
+\# + space      Heading 1
+\## + space     Heading 2
+\### + space    Heading 3
 * + space       Bulleted list
 - + space       Bulleted list
 1. + space      Numbered list
 [] + space      To-do checkbox
-> + space       Toggle list
+\> + space      Toggle list
 " + space       Quote block
 ---             Divider
 

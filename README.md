@@ -155,9 +155,9 @@ hold_duration = 400ms
 
 | Key                  | Values                                                                                     |
 | -------------------- | ------------------------------------------------------------------------------------------ |
-| `super_key`          | `capslock` (default), a modifier such as `cmd`, or a combination: `ctrl+k`, `Command + Shift + K`, `⌃⌥Space`. Names: `cmd`/`command`/`⌘`, `ctrl`/`control`/`⌃`, `alt`/`opt`/`option`/`⌥`, `shift`/`⇧`, `fn` |
+| `super_key`          | `capslock` (default), a modifier such as `cmd`, or a combination: `ctrl+k`, `Command + Shift + K`, `⌃⌥Space`. Names: `cmd`/`command`/`⌘`, `ctrl`/`control`/`⌃`, `alt`/`opt`/`option`/`⌥`, `shift`/`⇧`, `fn`; `enter` is Return, `del` is ⌫. `fn` can't be combined with arrows, F keys, Home/End or Page Up/Down, since macOS reports fn for those keys on its own |
 | `trigger_type`       | `press` or `hold`. Default `press` for `capslock` (which can only be pressed), `hold` for any other key |
-| `press_count`        | Taps in a row for `press`, `1`–`4` (default `2`, each within half a second of the last)   |
+| `press_count`        | Taps in a row for `press`, `1`–`4` (default `2`, each within half a second of the last). With a modifier alone such as `cmd`, a tap counts when you let go, and any other key in between cancels it, so ⌘C never opens Keyly |
 | `hold_duration`      | How long to hold for `hold`: `0.5`, `0.5s` or `500ms`, between `0.1s` and `3s` (default `0.5`) |
 | `screen_width_ratio` | Widest the window gets, as a share of the screen: `0.1`–`1.0` or `70%` (default `0.7`)    |
 

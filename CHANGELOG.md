@@ -12,6 +12,9 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - **Forgiving settings**: Names and values ignore case; quotes and trailing `# comments` are fine; `super_key` takes `command`, `option`, `control` and ⌘⌃⌥⇧ symbols; `hold_duration` takes `500ms`; numbers out of range are clamped (`hold_duration` 0.1–3s, `press_count` 1–4) instead of being accepted or reset. Typos get a "did you mean".
 - **`setting.conf` is created on first launch**, with every option commented out.
+- **Modifier-only triggers count on release**: With `super_key = cmd` and `trigger_type = press`, a tap counts when ⌘ is let go and any other key or modifier in between cancels it, so ⌘C or ⌘⇧ never open Keyly, even with `press_count = 1`.
+- **`super_key` names**: `enter` means Return and `del` means ⌫, as in sheets. `fn` can't be combined with arrows, F keys, Home/End or Page Up/Down, because macOS reports fn for those keys on its own.
+- **Same file in two folders**: When `templates/` and `~/.config/keyly/` both have a file with the same name, the one saved last is used and the other is listed in the ⚙︎ menu.
 - **Faster, steadier reloads**: Config files are parsed off the main thread, the reload waits for the last save, and a file that can't be read mid-save keeps its previous version.
 
 ### Fixed
@@ -19,6 +22,9 @@ All notable changes to this project will be documented in this file.
 - **Holding ⌘ then pressing ⌘C** cancels the hold, and typing in between no longer counts toward a double tap.
 - **Evernote, Notion and Illustrator templates**: Markdown shortcuts (`#`, `##`, `>`) were read as comments or descriptions.
 - **`⌘+click`** keeps its `+`.
+- **Symlinked `templates/` folder** (dotfiles setups): its sheets load and reload on save.
+- **Opening a config file in VS Code** works when Keyly is launched from Finder, where `code` in `/usr/local/bin` or `/opt/homebrew/bin` wasn't found before.
+- **A missed key release** no longer blocks the next key + modifier trigger.
 
 ## [1.9.0] - 2026-10-20
 

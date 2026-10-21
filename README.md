@@ -2,16 +2,19 @@
   <img src="Sources/Keyly/Resources/keyly.png" alt="Keyly" width="168">
 </p>
 
+<h1 align="center">Keyly</h1>
+
 <h3 align="center">Every shortcut of the app in front of you, one double-tap away.</h3>
 
 <p align="center">
-  Double-tap <kbd>⇪ Caps Lock</kbd> and Keyly shows all keyboard shortcuts of the active macOS app.<br>
-  Free, open source, lives in your menu bar.
+  Keyly is a free, open-source <b>keyboard shortcut viewer for macOS</b>, an alternative to CheatSheet and KeyCue.<br>
+  Double-tap <kbd>⇪ Caps Lock</kbd> and it shows all keyboard shortcuts of the active app, right from your menu bar.
 </p>
 
 <p align="center">
   <a href="https://github.com/hoaiphongdev/keyly/releases/latest"><img src="https://img.shields.io/github/v/release/hoaiphongdev/keyly?style=flat-square&color=ec4899&label=release" alt="Latest release"></a>
   <img src="https://img.shields.io/badge/macOS-12%2B-111111?style=flat-square&logo=apple" alt="macOS 12+">
+  <img src="https://img.shields.io/badge/Apple_silicon-M1%2B-111111?style=flat-square" alt="Apple silicon">
   <img src="https://img.shields.io/badge/Swift-5.9-F05138?style=flat-square&logo=swift&logoColor=white" alt="Swift 5.9">
   <a href="LICENSE"><img src="https://img.shields.io/github/license/hoaiphongdev/keyly?style=flat-square&color=111111" alt="MIT License"></a>
 </p>
@@ -20,7 +23,8 @@
   <a href="https://keyly-docs.com"><b>Docs</b></a> ·
   <a href="#install"><b>Install</b></a> ·
   <a href="#custom-shortcuts"><b>Custom shortcuts</b></a> ·
-  <a href="templates"><b>Templates</b></a> ·
+  <a href="https://keyly-docs.com/templates/"><b>Templates</b></a> ·
+  <a href="https://keyly-docs.com/compare/"><b>Compare</b></a> ·
   <a href="CHANGELOG.md"><b>Changelog</b></a>
 </p>
 
@@ -31,6 +35,8 @@
 ---
 
 ## Install
+
+Requires macOS 12 or later on a Mac with Apple silicon (M1 or newer).
 
 Open any terminal (Terminal, iTerm, Warp…) and run:
 

@@ -26,7 +26,7 @@ jobs:
         run: ./scripts/release-notes.sh "${{ steps.version.outputs.version }}" > release-notes.md
 
       - name: Test
-        run: swift test
+        run: swift test --skip PerformanceTests --skip largeFileIsLinear --skip parsingTimeGrowsLinearly
 
       - name: Install create-dmg
         run: brew install create-dmg

@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [1.10.0] - 2026-10-21
 
 ### Added
 - **Config problems in the ⚙︎ menu**: A line or value Keyly can't read is listed under "⚠︎ config problems"; click one to open the file at that line. Problems are also logged to Console.app (`com.keyly`).

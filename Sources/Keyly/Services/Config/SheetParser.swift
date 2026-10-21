@@ -46,7 +46,8 @@ enum SheetParser {
             let line = rawLine.trimmingCharacters(in: .whitespaces)
             if line.isEmpty { continue }
 
-            if line.hasPrefix("\\") {
+            // `\#` escapes; a lone `\` is the backslash key (`\   Line Segment`)
+            if line.hasPrefix("\\"), let next = line.dropFirst().first, "#[>\\".contains(next) {
                 addShortcut(String(line.dropFirst()), at: lineNumber)
                 continue
             }

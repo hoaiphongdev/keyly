@@ -35,6 +35,8 @@ import Testing
         let notion = try shortcuts("notion.keyly")
         #expect(["# + Space", "## + Space", "### + Space", "> + Space"].allSatisfy(notion.contains))
         #expect(try shortcuts("illustrator.keyly").contains(">"))
+        #expect(try shortcuts("illustrator.keyly").contains("\\"))
+        #expect(try shortcuts("lightroom-classic.keyly").filter { $0 == "\\" }.count == 2)
     }
 }
 

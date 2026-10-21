@@ -41,9 +41,11 @@ import Testing
         \\## + space  Heading 2
         \\[x]         Checklist
         \\>           Quote block
+        \\            Line segment
+        \\\\           Literal backslash
         """)
         #expect(result.diagnostics.isEmpty)
-        #expect(result.sheet.shortcuts.map(\.shortcut) == ["#", "## + Space", "[x]", ">"])
+        #expect(result.sheet.shortcuts.map(\.shortcut) == ["#", "## + Space", "[x]", ">", "\\", "\\"])
         #expect(result.sheet.categoryDescriptions.isEmpty)
     }
 

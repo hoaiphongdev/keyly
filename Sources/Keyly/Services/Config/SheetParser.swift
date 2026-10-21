@@ -1,13 +1,5 @@
 import Foundation
 
-/// Parses a `.keyly` file in one pass. A line it can't read is skipped with a diagnostic;
-/// the rest of the sheet still loads.
-///
-/// - `# App: …`, `# Sheet Name: …`, `# Hide Default: …`, `# Group: …` — directives (any case)
-/// - `# anything else` — comment
-/// - `[Category]` — start a category, `> text` — its description
-/// - `\#`, `\[`, `\>` — a shortcut whose key starts with that character
-/// - anything else — a shortcut line, see `ShortcutLineParser`
 enum SheetParser {
     static let maxDiagnosticsPerFile = 20
 
@@ -46,7 +38,6 @@ enum SheetParser {
             let line = rawLine.trimmingCharacters(in: .whitespaces)
             if line.isEmpty { continue }
 
-            // `\#` escapes; a lone `\` is the backslash key (`\   Line Segment`)
             if line.hasPrefix("\\"), let next = line.dropFirst().first, "#[>\\".contains(next) {
                 addShortcut(String(line.dropFirst()), at: lineNumber)
                 continue
@@ -74,7 +65,7 @@ enum SheetParser {
                         if let description { groupDescriptions[groupName] = description }
                     }
                 default:
-                    break // a comment that happens to contain a colon
+                    break
                 }
                 continue
             }
@@ -98,7 +89,7 @@ enum SheetParser {
         }
 
         if !isGlobal && app == nil {
-            report(nil, "No # App: line, so this sheet isn't shown. Add one like \"# App: Figma\"")
+            diagnostics.insert(ConfigDiagnostic(line: nil, message: "No # App: line, so this sheet isn't shown. Add one like \"# App: Figma\""), at: 0)
         }
         if skippedDiagnostics > 0 {
             diagnostics.append(ConfigDiagnostic(line: nil, message: "\(skippedDiagnostics) more problem(s) not listed"))
@@ -115,7 +106,6 @@ enum SheetParser {
         return (sheet, diagnostics)
     }
 
-    /// `# App: Figma` → ("app", "Figma"). Names are matched without case.
     private static func directive(in line: String) -> (String, String)? {
         let body = line.drop { $0 == "#" }
         guard let colon = body.firstIndex(of: ":") else { return nil }

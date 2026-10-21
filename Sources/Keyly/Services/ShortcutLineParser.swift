@@ -27,7 +27,6 @@ enum ShortcutLineParser {
         return nonEmpty(String(trimmed[..<separator.lowerBound]), String(trimmed[separator.upperBound...]))
     }
 
-    /// The first tab or run of 2+ whitespace characters, found in one pass
     private static func columnGap(in text: String) -> Range<String.Index>? {
         var index = text.startIndex
         while index < text.endIndex {
@@ -85,7 +84,6 @@ enum ShortcutLineParser {
 
         let orderedModifiers = ShortcutMapping.modifierOrder.filter(modifiers.contains).joined()
         if let namedKey { return orderedModifiers + namedKey }
-        // A word that isn't a key name ("⌘+click") keeps its "+" so it still reads as a combination
         return key.count == 1 ? orderedModifiers + key.uppercased() : orderedModifiers + "+" + key
     }
 

@@ -10,13 +10,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var shortcutsWindow: ShortcutsWindow?
     private var isSuperKeyPressed = false
     private var holdCancelled = false
+    private var waitingForModifierRelease = false
     private var superKeyPressCount = 0
     private var lastSuperKeyPressTime: TimeInterval = 0
     private var isCapsLockOn = NSEvent.modifierFlags.contains(.capsLock)
 
     private let shortcutExtractor = ShortcutExtractor()
     private let isDevMode = ProcessInfo.processInfo.environment["KEYLY_DEV"] == "1"
-    /// Copied from the config on load so key events never reach into it
     private var trigger = KeylySettings.defaults.trigger
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -204,8 +204,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    // MARK: - Trigger
-
     private func handleFlagsChanged(_ event: NSEvent) {
         let flags = event.modifierFlags
 
@@ -232,30 +230,50 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
 
+        // Only handle modifier-only combinations here
         if trigger.isModifierOnly {
-            let isDown = trigger.matchesModifiers(flags)
-            if isDown && !isSuperKeyPressed {
+            let pressed = trigger.relevantModifiers(flags)
+            if pressed.isEmpty { waitingForModifierRelease = false }
+
+            if !pressed.subtracting(trigger.modifiers).isEmpty {
+                interruptModifierTrigger(flags)
+            } else if waitingForModifierRelease {
+                return
+            } else if pressed == trigger.modifiers && !isSuperKeyPressed {
                 triggerWentDown()
-            } else if !isDown && isSuperKeyPressed {
+            } else if pressed != trigger.modifiers && isSuperKeyPressed {
                 triggerWentUp()
             }
         } else if isSuperKeyPressed && !trigger.matchesModifiers(flags) {
-            // Letting go of a modifier ends a key + modifier hold
             triggerWentUp()
         }
     }
 
     private func handleKeyDown(_ event: NSEvent) {
         if trigger.keyCode != nil && trigger.matchesKey(event.keyCode, flags: event.modifierFlags) {
-            // Key repeat while the trigger is held is ignored
-            if !isSuperKeyPressed { triggerWentDown() }
+            guard !event.isARepeat else { return }
+            if isSuperKeyPressed { triggerWentUp() }
+            triggerWentDown()
             return
         }
 
-        // Any other key in between means it wasn't the trigger: ⌘C while holding ⌘ cancels the
-        // hold, and ⌘C ⌘V is not a double ⌘
+        if trigger.isModifierOnly {
+            interruptModifierTrigger(event.modifierFlags)
+        } else {
+            superKeyPressCount = 0
+            if isSuperKeyPressed { cancelHold() }
+        }
+    }
+
+    private func interruptModifierTrigger(_ flags: NSEvent.ModifierFlags) {
         superKeyPressCount = 0
-        if isSuperKeyPressed { cancelHold() }
+        if isSuperKeyPressed {
+            cancelHold()
+            triggerWentUp()
+        }
+        if !trigger.relevantModifiers(flags).isEmpty {
+            waitingForModifierRelease = true
+        }
     }
 
     private func handleKeyUp(_ event: NSEvent) {
@@ -281,7 +299,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         stopHoldTimer()
     }
 
-    /// Counts taps that follow each other within the double-click interval
     private func registerPress() {
         guard case .press(let count) = trigger.kind else { return }
 
@@ -299,7 +316,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         if superKeyPressCount >= count {
             superKeyPressCount = 0
-            // A cancelled hold from an earlier trigger must not block this one
+            // A cancelled hold from a previous key+key trigger must not block Caps Lock
             holdCancelled = false
             showShortcuts()
         }
@@ -314,6 +331,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         stopHoldTimer()
         isSuperKeyPressed = false
         holdCancelled = false
+        waitingForModifierRelease = false
         superKeyPressCount = 0
         // Caps Lock may have toggled while it was not the trigger
         isCapsLockOn = NSEvent.modifierFlags.contains(.capsLock)

@@ -1,37 +1,37 @@
 import Cocoa
 
-/// The key that opens Keyly, resolved once when settings load so key events only compare integers.
 struct Trigger: Equatable {
     enum Kind: Equatable {
         case press(count: Int)
         case hold(seconds: Double)
     }
 
-    /// Human-readable form, e.g. "⌃K" or "⇪"
-    let label: String
-    /// The non-modifier key, nil for Caps Lock and modifier-only triggers
-    let keyCode: UInt16?
-    let modifiers: NSEvent.ModifierFlags
-    let isCapsLock: Bool
+    let key: KeyCombo
     let kind: Kind
 
-    /// fn is set automatically by arrow and F keys, so it only counts when the trigger asks for it
-    private var comparedModifiers: NSEvent.ModifierFlags {
-        modifiers.contains(.function) ? [.command, .control, .option, .shift, .function] : [.command, .control, .option, .shift]
+    var label: String { key.label }
+    var keyCode: UInt16? { key.keyCode }
+    var modifiers: NSEvent.ModifierFlags { key.modifiers }
+    // Caps Lock only toggles, so it is always counted as presses (no hold)
+    var isCapsLock: Bool { key.isCapsLock }
+    var isModifierOnly: Bool { key.keyCode == nil && !key.isCapsLock }
+
+    func relevantModifiers(_ flags: NSEvent.ModifierFlags) -> NSEvent.ModifierFlags {
+        let compared: NSEvent.ModifierFlags = modifiers.contains(.function)
+            ? [.command, .control, .option, .shift, .function]
+            : [.command, .control, .option, .shift]
+        return flags.intersection(compared)
     }
 
-    var isModifierOnly: Bool { keyCode == nil && !isCapsLock }
-
-    /// Exactly the trigger's modifiers are down, no more and no fewer
     func matchesModifiers(_ flags: NSEvent.ModifierFlags) -> Bool {
-        flags.intersection(comparedModifiers) == modifiers
+        relevantModifiers(flags) == modifiers
     }
 
     func matchesKey(_ keyCode: UInt16, flags: NSEvent.ModifierFlags) -> Bool {
         keyCode == self.keyCode && matchesModifiers(flags)
     }
 
-    static let capsLock = Trigger(label: "⇪", keyCode: nil, modifiers: [], isCapsLock: true, kind: .press(count: SettingsParser.defaultPressCount))
+    static let capsLock = Trigger(key: .capsLock, kind: .press(count: SettingsParser.defaultPressCount))
 }
 
 struct KeylySettings: Equatable {
@@ -41,9 +41,6 @@ struct KeylySettings: Equatable {
     static let defaults = KeylySettings(trigger: .capsLock, screenWidthRatio: SettingsParser.defaultScreenWidthRatio)
 }
 
-/// Reads `setting.conf`. Forgiving on input, so a typo never stops Keyly from opening:
-/// names and values ignore case, quotes and trailing `# comments`, numbers are clamped to a
-/// usable range, and anything unreadable falls back to its default with a diagnostic.
 enum SettingsParser {
     static let fileName = "setting.conf"
 
@@ -63,7 +60,6 @@ enum SettingsParser {
         for (index, rawLine) in ConfigText.lines(text).enumerated() {
             let lineNumber = index + 1
             let line = stripComment(rawLine).trimmingCharacters(in: .whitespaces)
-            // Blank lines and ini-style [section] headers carry nothing
             if line.isEmpty || (line.hasPrefix("[") && line.hasSuffix("]")) { continue }
 
             guard let separator = line.firstIndex(where: { $0 == "=" || $0 == ":" }) else {
@@ -91,7 +87,6 @@ enum SettingsParser {
             diagnostics.append(ConfigDiagnostic(line: values[name]?.line, message: message))
         }
 
-        // super_key
         var key = KeyCombo.capsLock
         if let (value, _) = values["super_key"] {
             switch KeyCombo.parse(value) {
@@ -100,7 +95,7 @@ enum SettingsParser {
             }
         }
 
-        // trigger_type: a custom key without one keeps the old default, hold
+        // Keep "hold" as the fallback for users who set their own super_key without a trigger_type
         var wantsHold = !key.isCapsLock
         if let (value, _) = values["trigger_type"] {
             switch value.lowercased() {
@@ -137,24 +132,20 @@ enum SettingsParser {
             kind = .press(count: count)
         }
 
-        // screen_width_ratio: 0.7 or 70%
         var ratio = defaultScreenWidthRatio
         if let (value, _) = values["screen_width_ratio"] {
             let isPercent = value.hasSuffix("%")
             if let number = Double(isPercent ? String(value.dropLast()).trimmingCharacters(in: .whitespaces) : value), number.isFinite {
+                // Clamp between 0.1 and 1.0 to prevent overUI on 14inch and negative values
                 ratio = clamp(isPercent ? number / 100 : number, to: screenWidthRatioRange) { report("screen_width_ratio", "screen_width_ratio \(value) is outside 0.1–1.0, using \(format($0))") }
             } else {
                 report("screen_width_ratio", "screen_width_ratio \"\(value)\" isn't a number like 0.7, using \(format(ratio))")
             }
         }
 
-        let trigger = Trigger(label: key.label, keyCode: key.keyCode, modifiers: key.modifiers, isCapsLock: key.isCapsLock, kind: kind)
-        return (KeylySettings(trigger: trigger, screenWidthRatio: ratio), diagnostics)
+        return (KeylySettings(trigger: Trigger(key: key, kind: kind), screenWidthRatio: ratio), diagnostics)
     }
 
-    // MARK: - Helpers
-
-    /// `press_count = 2  # two taps` → `press_count = 2`. Only a `#` after whitespace starts a comment.
     private static func stripComment(_ line: Substring) -> Substring {
         if line.trimmingCharacters(in: .whitespaces).hasPrefix("#") { return "" }
         var previous: Character = " "
@@ -165,7 +156,6 @@ enum SettingsParser {
         return line
     }
 
-    /// `Hold Duration`, `hold-duration` and `HOLD_DURATION` all mean hold_duration
     private static func normalizeName(_ raw: Substring) -> String {
         raw.trimmingCharacters(in: .whitespaces)
             .lowercased()
@@ -178,7 +168,6 @@ enum SettingsParser {
         return String(value.dropFirst().dropLast()).trimmingCharacters(in: .whitespaces)
     }
 
-    /// `0.5`, `0.5s`, `500ms`, `1 sec`
     static func parseSeconds(_ value: String) -> Double? {
         let lower = value.lowercased()
         let units: [(suffix: String, scale: Double)] = [("ms", 0.001), ("seconds", 1), ("second", 1), ("secs", 1), ("sec", 1), ("s", 1)]
@@ -200,7 +189,6 @@ enum SettingsParser {
     }
 }
 
-/// A key combination written in `super_key`: `capslock`, `cmd`, `ctrl+k`, `Command + Shift + K`, `⌃⌥K`.
 struct KeyCombo: Equatable {
     let label: String
     let keyCode: UInt16?
@@ -233,7 +221,6 @@ struct KeyCombo: Equatable {
         "spacebar": "space", "↑": "up", "↓": "down", "←": "left", "→": "right",
     ]
 
-    /// Main-key name → key code, without the modifier names that share the table
     private static let keyCodes: [String: UInt16] = {
         var codes: [String: UInt16] = ["-": 27, "=": 24]
         for (code, name) in AppConstants.KeyCodes.names where modifierAliases[name] == nil {
@@ -247,15 +234,18 @@ struct KeyCombo: Equatable {
     ]
 
     static func parse(_ raw: String) -> Result<KeyCombo, ParseError> {
-        // Glyphs need no "+": ⌃⌥K → ⌃ + ⌥ + K
         var spaced = raw
         for glyph in ["⌘", "⌃", "⌥", "⇧", "⇪"] {
             spaced = spaced.replacingOccurrences(of: glyph, with: "+\(glyph)+")
         }
-        let tokens = spaced.split(separator: "+")
+        let parts = spaced.split(separator: "+", omittingEmptySubsequences: false)
             .map { $0.trimmingCharacters(in: .whitespaces).lowercased().replacingOccurrences(of: " ", with: "_") }
-            .filter { !$0.isEmpty }
 
+        let written = raw.trimmingCharacters(in: .whitespaces)
+        if written.hasSuffix("+") || written.contains("++") {
+            return .failure(ParseError(message: "super_key can't use the + key or end with +"))
+        }
+        let tokens = parts.filter { !$0.isEmpty }
         guard !tokens.isEmpty else { return .failure(ParseError(message: "super_key is empty")) }
 
         var modifiers: NSEvent.ModifierFlags = []

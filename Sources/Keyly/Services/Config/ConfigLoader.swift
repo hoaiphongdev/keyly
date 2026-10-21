@@ -1,17 +1,13 @@
 import Cocoa
 
-/// Everything read from `~/.config/keyly`, built off the main thread and swapped in at once.
-/// The key path and the overlay only read from it; they never touch the file system.
 struct ConfigSnapshot {
     var settings = KeylySettings.defaults
-    /// App sheets in load order
     var sheets: [ShortcutSheet] = []
     var globalSheets: [ShortcutSheet] = []
     var diagnostics: [ConfigDiagnostic] = []
     var sheetsByBundleId: [String: [Int]] = [:]
     var sheetsByName: [String: [Int]] = [:]
 
-    /// Sheets for the frontmost app, by bundle id first, then by app name
     func sheets(for app: NSRunningApplication) -> [ShortcutSheet] {
         var indexes = app.bundleIdentifier.flatMap { sheetsByBundleId[$0] } ?? []
         for key in AppResolver.nameKeys(for: app) {
@@ -25,13 +21,10 @@ enum ConfigLoader {
     static let fileExtension = "keyly"
     static let globalFileName = AppConstants.globalTemplateFileName
 
-    /// - Parameter previous: used when a file can't be read right now (e.g. mid-save),
-    ///   so a bad moment never wipes a sheet that was working
     static func load(configDirectory: URL, templatesDirectory: URL, previous: ConfigSnapshot) -> ConfigSnapshot {
         var snapshot = ConfigSnapshot()
         var diagnostics: [ConfigDiagnostic] = []
 
-        // Settings
         let settingsFile = configDirectory.appendingPathComponent(SettingsParser.fileName)
         switch ConfigText.read(settingsFile) {
         case .text(let text):
@@ -45,11 +38,14 @@ enum ConfigLoader {
             diagnostics.append(diagnostic)
         }
 
-        // Sheets: templates/ first; a file with the same name directly in ~/.config/keyly replaces it
+        // templates/ is the documented home; .keyly files placed directly in ~/.config/keyly/
+        // (older docs and install-templates.sh put them there) are loaded too.
         var filesByName: [String: URL] = [:]
         for directory in [templatesDirectory, configDirectory] {
             for file in sheetFiles(in: directory) {
-                filesByName[file.lastPathComponent.lowercased()] = file
+                let name = file.lastPathComponent.lowercased()
+                if let existing = filesByName[name], modificationDate(existing) >= modificationDate(file) { continue }
+                filesByName[name] = file
             }
         }
 
@@ -91,7 +87,10 @@ enum ConfigLoader {
         return snapshot
     }
 
-    /// `.keyly` files in one folder (any case), without hidden files such as `._name.keyly`
+    private static func modificationDate(_ file: URL) -> Date {
+        (try? file.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? .distantPast
+    }
+
     private static func sheetFiles(in directory: URL) -> [URL] {
         let files = (try? FileManager.default.contentsOfDirectory(
             at: directory,

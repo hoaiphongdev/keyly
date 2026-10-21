@@ -18,7 +18,6 @@ enum EditorType: String, CaseIterable {
 final class ConfigManager {
     static let shared = ConfigManager()
 
-    /// Read on the main thread only; replaced as a whole after each reload
     private(set) var snapshot = ConfigSnapshot()
     private var fileWatcher: FileWatcher?
     private let loadQueue = DispatchQueue(label: "com.keyly.config", qos: .utility)
@@ -54,14 +53,12 @@ final class ConfigManager {
         snapshot.sheets(for: app)
     }
 
-    /// First load at launch, synchronous so the trigger is known before keys are monitored
     func loadInitial() {
         ensureDirectories()
         createDefaultSettingsIfNeeded()
         publish(loadSnapshot(previous: snapshot))
     }
 
-    /// Parses on a background queue and swaps the result in on the main thread
     func reload() {
         let previous = snapshot
         loadQueue.async { [weak self] in
@@ -94,8 +91,8 @@ final class ConfigManager {
     }
 
     func startWatching() {
-        // Recursive, so templates/ is covered too
-        fileWatcher = FileWatcher(paths: [configDirectory.path]) { [weak self] in
+        let paths = [configDirectory.path, templatesDirectory.resolvingSymlinksInPath().path]
+        fileWatcher = FileWatcher(paths: Array(Set(paths))) { [weak self] in
             self?.reload()
         }
         fileWatcher?.start()
@@ -112,7 +109,6 @@ final class ConfigManager {
         open(configDirectory, line: nil)
     }
 
-    /// Opens a config file in the preferred editor, at the line with the problem when the editor supports it
     func openFile(_ file: URL, line: Int?) {
         open(file, line: line)
     }
@@ -187,10 +183,6 @@ final class ConfigManager {
         }
     }
 
-    // MARK: - Starter files
-
-    /// setting.conf is written at launch when missing, every line commented out: the defaults
-    /// apply and every option is right there to uncomment. An existing file is never touched.
     private func createDefaultSettingsIfNeeded() {
         let file = configDirectory.appendingPathComponent(SettingsParser.fileName)
         guard !FileManager.default.fileExists(atPath: file.path) else { return }
@@ -220,10 +212,10 @@ final class ConfigManager {
 
     """
 
-    /// Example sheets for "Open Config Folder", each written only if missing
     private func createExamplesIfNeeded() {
         createDefaultSettingsIfNeeded()
 
+        // Create example template
         let exampleTemplateFile = templatesDirectory.appendingPathComponent("example.keyly")
         if !FileManager.default.fileExists(atPath: exampleTemplateFile.path) {
             let exampleContent = """

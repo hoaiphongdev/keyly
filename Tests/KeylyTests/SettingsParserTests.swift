@@ -49,7 +49,6 @@ import Testing
         ComboCase(value: "opt+esc", modifiers: .option, keyCode: AppConstants.KeyCodes.escape),
         ComboCase(value: "ctrl+page up", modifiers: .control, keyCode: AppConstants.KeyCodes.pageUp),
         ComboCase(value: "shift+f12", modifiers: .shift, keyCode: AppConstants.KeyCodes.f12),
-        ComboCase(value: "cmd+", modifiers: .command, keyCode: nil),
     ])
     func superKeyForms(_ combo: ComboCase) {
         let result = parse("super_key = \(combo.value)")
@@ -59,7 +58,7 @@ import Testing
         #expect(result.diagnostics.isEmpty)
     }
 
-    @Test(arguments: ["hyper", "cmd+a+b", "capslock+cmd", "⌘+💥", "++"])
+    @Test(arguments: ["hyper", "cmd+a+b", "capslock+cmd", "⌘+💥", "++", "cmd+", "cmd++", "+"])
     func badSuperKeyFallsBackToCapsLock(_ value: String) {
         let result = parse("super_key = \(value)\ntrigger_type = hold")
         #expect(result.settings.trigger == .capsLock)

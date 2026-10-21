@@ -4,35 +4,33 @@ final class ShortcutExtractor {
     
     func getShortcuts(for app: NSRunningApplication, mergeCustom: Bool = true) -> [ShortcutItem] {
         var shortcuts: [ShortcutItem] = []
-
+        
         let sheets = mergeCustom ? ConfigManager.shared.sheets(for: app) : []
-        // An explicit "# Hide Default: true" in any sheet for the app wins
         let shouldHideDefaults = sheets.contains { $0.hideDefaultShortcuts }
-
+        
         if !shouldHideDefaults {
             let appElement = AXUIElementCreateApplication(app.processIdentifier)
-
+            
             var menuBar: AnyObject?
             let result = AXUIElementCopyAttributeValue(appElement, kAXMenuBarAttribute as CFString, &menuBar)
-
+            
             if result == .success, let menuBarElement = menuBar, CFGetTypeID(menuBarElement) == AXUIElementGetTypeID() {
                 shortcuts = extractShortcutsFromMenuBar(menuBarElement as! AXUIElement)
             }
         }
-
+        
         if mergeCustom {
-            // Global first, then the app's sheets in file order, then the menu bar
             let custom = (ConfigManager.shared.globalSheets + sheets).flatMap(\.shortcuts)
             shortcuts = custom + shortcuts
         }
-
+        
         if shortcuts.isEmpty && !shouldHideDefaults {
             shortcuts = getDefaultShortcuts()
         }
-
+        
         return shortcuts
     }
-
+    
     func getCategoryDescriptions(for app: NSRunningApplication) -> [String: String] {
         var descriptions: [String: String] = [:]
         for sheet in ConfigManager.shared.globalSheets + ConfigManager.shared.sheets(for: app) {
@@ -40,7 +38,7 @@ final class ShortcutExtractor {
         }
         return descriptions
     }
-
+    
     func getGroupDescriptions(for app: NSRunningApplication) -> [String: String] {
         var descriptions: [String: String] = [:]
         for sheet in ConfigManager.shared.globalSheets + ConfigManager.shared.sheets(for: app) {
@@ -48,7 +46,7 @@ final class ShortcutExtractor {
         }
         return descriptions
     }
-
+    
     private func extractShortcutsFromMenuBar(_ menuBar: AXUIElement) -> [ShortcutItem] {
         var shortcuts: [ShortcutItem] = []
         

@@ -1,15 +1,11 @@
 import Cocoa
 
-/// Which app a sheet belongs to. Matched by bundle id when the `# App:` value leads to one,
-/// otherwise by app name, so a sheet still matches an app installed in ~/Applications, in
-/// Setapp or under a newer year ("Adobe Photoshop 2024" → any "Adobe Photoshop").
 struct AppTarget: Equatable {
     let bundleId: String?
     let nameKey: String?
 }
 
 enum AppResolver {
-    /// `# App:` accepts `/Applications/Figma.app`, `com.figma.Desktop` or `Figma`
     static func resolve(_ raw: String) -> AppTarget {
         let value = raw.trimmingCharacters(in: .whitespaces)
 
@@ -22,12 +18,11 @@ enum AppResolver {
         }
 
         if looksLikeBundleId(value) {
-            return AppTarget(bundleId: value, nameKey: nil)
+            return AppTarget(bundleId: value, nameKey: nameKey(value))
         }
         return AppTarget(bundleId: nil, nameKey: nameKey(value))
     }
 
-    /// Lookup keys for a running app: its bundle id and the names it can be written as
     static func nameKeys(for app: NSRunningApplication) -> [String] {
         let names = [app.bundleURL?.lastPathComponent, app.localizedName].compactMap { $0 }
         var keys: [String] = []
@@ -37,7 +32,6 @@ enum AppResolver {
         return keys
     }
 
-    /// "Adobe Photoshop 2024.app" → "adobe photoshop"
     static func nameKey(_ name: String) -> String {
         var key = name.trimmingCharacters(in: .whitespaces).lowercased()
         if key.hasSuffix(".app") { key.removeLast(4) }
@@ -49,7 +43,6 @@ enum AppResolver {
         return key.trimmingCharacters(in: .whitespaces)
     }
 
-    /// "com.figma.Desktop" yes, "Sublime Text" and "Notion.app" no
     private static func looksLikeBundleId(_ value: String) -> Bool {
         let parts = value.split(separator: ".", omittingEmptySubsequences: false)
         return parts.count >= 2

@@ -49,6 +49,11 @@ import Testing
         #expect(result.sheet.categoryDescriptions.isEmpty)
     }
 
+    @Test func missingAppIsListedFirstEvenPastTheCap() {
+        let result = parse(String(repeating: "nope\n", count: 50))
+        #expect(result.diagnostics.first?.message.contains("No # App: line") == true)
+    }
+
     @Test func missingAppIsReported() {
         let result = parse("CMD+K  Do it")
         #expect(result.sheet.app == nil)
@@ -125,7 +130,8 @@ import Testing
 
 @Suite struct AppResolverTests {
     @Test func forms() {
-        #expect(AppResolver.resolve("com.figma.Desktop") == AppTarget(bundleId: "com.figma.Desktop", nameKey: nil))
+        #expect(AppResolver.resolve("com.figma.Desktop") == AppTarget(bundleId: "com.figma.Desktop", nameKey: "com.figma.desktop"))
+        #expect(AppResolver.resolve("draw.io") == AppTarget(bundleId: "draw.io", nameKey: "draw.io"))
         #expect(AppResolver.resolve("Figma") == AppTarget(bundleId: nil, nameKey: "figma"))
         #expect(AppResolver.resolve("Notion.app") == AppTarget(bundleId: nil, nameKey: "notion"))
         #expect(AppResolver.resolve("/Nowhere/Adobe Photoshop 2024/Adobe Photoshop 2024.app") == AppTarget(bundleId: nil, nameKey: "adobe photoshop"))

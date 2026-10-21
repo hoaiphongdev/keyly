@@ -639,6 +639,7 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
         if !diagnostics.isEmpty {
             let problemsItem = NSMenuItem(title: "⚠︎ \(diagnostics.count) config problem\(diagnostics.count == 1 ? "" : "s")", action: nil, keyEquivalent: "")
             let problemsMenu = NSMenu()
+            problemsMenu.autoenablesItems = false
             for diagnostic in diagnostics {
                 let item = NSMenuItem(title: diagnostic.summary, action: #selector(openDiagnostic(_:)), keyEquivalent: "")
                 item.target = self

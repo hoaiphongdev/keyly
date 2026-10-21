@@ -2,7 +2,6 @@ import Foundation
 import Testing
 @testable import Keyly
 
-/// Every template shipped in templates/ must load without a single diagnostic
 @Suite struct TemplateTests {
     static let templatesDirectory = URL(fileURLWithPath: #filePath)
         .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
@@ -67,9 +66,21 @@ import Testing
         #expect(snapshot.sheetsByBundleId["com.example.a"].map { $0.map { snapshot.sheets[$0].shortcuts[0].action } } == ["From user"])
         #expect(snapshot.sheetsByName["some app"]?.count == 1)
         #expect(snapshot.globalSheets.first?.shortcuts.first?.action == "Quit")
-        // c.keyly has no app, setting.conf has an unknown name
         #expect(snapshot.diagnostics.count == 2)
         #expect(snapshot.diagnostics.allSatisfy { $0.file != nil })
+    }
+
+    @Test func newerCopyOfTheSameFileWins() throws {
+        let folder = try makeFolder()
+        defer { try? FileManager.default.removeItem(at: folder.config) }
+
+        let old = folder.config.appendingPathComponent("a.keyly")
+        try "# App: com.example.a\nCMD+A  Old copy".write(to: old, atomically: true, encoding: .utf8)
+        try FileManager.default.setAttributes([.modificationDate: Date(timeIntervalSinceNow: -3600)], ofItemAtPath: old.path)
+        try "# App: com.example.a\nCMD+A  Updated template".write(to: folder.templates.appendingPathComponent("a.keyly"), atomically: true, encoding: .utf8)
+
+        let snapshot = ConfigLoader.load(configDirectory: folder.config, templatesDirectory: folder.templates, previous: ConfigSnapshot())
+        #expect(snapshot.sheets.map { $0.shortcuts[0].action } == ["Updated template"])
     }
 
     @Test func unreadableFileKeepsThePreviousVersion() throws {
@@ -80,7 +91,6 @@ import Testing
         try "# App: com.example.a\nCMD+A  Works".write(to: file, atomically: true, encoding: .utf8)
         let first = ConfigLoader.load(configDirectory: folder.config, templatesDirectory: folder.templates, previous: ConfigSnapshot())
 
-        // Too big to read: the sheet that worked a moment ago stays
         try Data(count: ConfigText.maxFileSize + 1).write(to: file)
         let second = ConfigLoader.load(configDirectory: folder.config, templatesDirectory: folder.templates, previous: first)
 

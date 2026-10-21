@@ -103,7 +103,7 @@ curl -sL https://raw.githubusercontent.com/hoaiphongdev/keyly/main/scripts/insta
 
 ## Custom shortcuts
 
-Drop `.keyly` files in `~/.config/keyly/templates/` (files directly in `~/.config/keyly/` load too, and replace a template with the same name). Changes apply as soon as you save.
+Drop `.keyly` files in `~/.config/keyly/templates/` (files directly in `~/.config/keyly/` load too; when both folders have the same file name, the one saved last is used). Changes apply as soon as you save.
 
 ```keyly
 # Sheet Name: Safari Extras

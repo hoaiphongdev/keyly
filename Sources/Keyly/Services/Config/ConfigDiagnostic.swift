@@ -1,8 +1,6 @@
 import Foundation
 import os
 
-/// A problem found while reading a config file. Never fatal: the line or value is skipped
-/// and the rest of the config keeps working.
 struct ConfigDiagnostic: Equatable {
     var file: URL?
     let line: Int?
@@ -14,7 +12,6 @@ struct ConfigDiagnostic: Equatable {
         self.message = message
     }
 
-    /// "figma.keyly line 12: …"
     var summary: String {
         let place = [file?.lastPathComponent, line.map { "line \($0)" }].compactMap { $0 }.joined(separator: " ")
         return place.isEmpty ? message : "\(place): \(message)"
@@ -38,19 +35,13 @@ enum ConfigLog {
     }
 }
 
-/// Turns raw file bytes into lines without ever failing.
 enum ConfigText {
-    /// Files above this size are skipped; no shortcut sheet comes close
     static let maxFileSize = 1_000_000
 
-    /// Invalid UTF-8 becomes U+FFFD instead of dropping the file; a leading BOM is removed
     static func decode(_ data: Data) -> String {
-        var text = String(decoding: data, as: UTF8.self)
-        if text.hasPrefix("\u{FEFF}") { text.removeFirst() }
-        return text
+        String(decoding: data, as: UTF8.self)
     }
 
-    /// LF, CRLF and CR all end a line, so line numbers match what editors show
     static func lines(_ text: String) -> [Substring] {
         let body = text.hasPrefix("\u{FEFF}") ? text.dropFirst() : Substring(text)
         return body.split(omittingEmptySubsequences: false, whereSeparator: \.isNewline)
@@ -76,7 +67,6 @@ enum ConfigText {
 }
 
 extension String {
-    /// Edit distance, used to suggest the closest name for a typo
     func distance(to other: String) -> Int {
         let a = Array(self), b = Array(other)
         if a.isEmpty { return b.count }

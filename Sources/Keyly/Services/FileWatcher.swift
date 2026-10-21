@@ -5,7 +5,6 @@ final class FileWatcher {
     private let paths: [String]
     private let callback: () -> Void
     private var pendingCallback: DispatchWorkItem?
-    /// Editors save in several steps; reload once things are quiet so the final write is read
     private let debounceInterval: TimeInterval = 0.3
     
     init(paths: [String], callback: @escaping () -> Void) {
@@ -51,7 +50,6 @@ final class FileWatcher {
         streamRef = nil
     }
     
-    /// Runs on the main run loop; each event pushes the reload back until events stop
     private func handleEvents() {
         pendingCallback?.cancel()
         let work = DispatchWorkItem { [weak self] in

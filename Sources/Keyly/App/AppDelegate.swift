@@ -16,7 +16,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private let shortcutExtractor = ShortcutExtractor()
     private let isDevMode = ProcessInfo.processInfo.environment["KEYLY_DEV"] == "1"
-    private var settings: KeylySettings?
+    /// Copied from the config on load so key events never reach into it
+    private var trigger = KeylySettings.defaults.trigger
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         setupStatusBar()
@@ -32,9 +33,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func setupConfigManager() {
-        settings = SettingsManager.shared.getSettings()
-
-        ConfigManager.shared.loadAllSheets()
+        ConfigManager.shared.loadInitial()
+        trigger = ConfigManager.shared.settings.trigger
         ConfigManager.shared.startWatching()
         ConfigManager.shared.onConfigReloaded = { [weak self] in
             if self?.shortcutsWindow?.window?.isVisible == true {
@@ -42,9 +42,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
         ConfigManager.shared.onSettingsReloaded = { [weak self] in
-            self?.settings = SettingsManager.shared.getSettings()
-            // Caps Lock may have toggled while it was not the trigger
-            self?.isCapsLockOn = NSEvent.modifierFlags.contains(.capsLock)
+            guard let self else { return }
+            self.trigger = ConfigManager.shared.settings.trigger
+            self.resetTriggerState()
+            if self.isDevMode { self.printTrigger() }
         }
     }
 
@@ -54,27 +55,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func setupDevMode() {
         print("[Keyly] Dev mode enabled - use configured key combination to show shortcuts")
+        printTrigger()
+    }
 
-        let currentSettings = settings ?? SettingsManager.shared.getSettings()
-        let superKey = currentSettings.superKey
-
-        print("[Keyly] === Super Key Configuration ===")
-        print("[Keyly] Super key: '\(superKey.key)'")
-        print("[Keyly] Components: \(superKey.keyComponents)")
-        print("[Keyly] Modifiers: \(superKey.modifiers)")
-        print("[Keyly] Main key: \(superKey.mainKey ?? "none")")
-        print("[Keyly] Has modifiers: \(superKey.hasModifiers)")
-        print("[Keyly] Trigger type: \(superKey.triggerType)")
-
-        switch superKey.triggerType {
-        case "hold":
-            print("[Keyly] Hold duration: \(currentSettings.hold.duration) seconds")
-        case "press":
-            print("[Keyly] Press count: \(currentSettings.press.count)")
-        default:
-            print("[Keyly] Unknown trigger type, using hold with duration: \(currentSettings.hold.duration) seconds")
+    private func printTrigger() {
+        switch trigger.kind {
+        case .press(let count):
+            print("[Keyly] Trigger: \(trigger.label) pressed \(count)×")
+        case .hold(let seconds):
+            print("[Keyly] Trigger: \(trigger.label) held \(seconds)s")
         }
-        print("[Keyly] ================================")
     }
 
     @objc private func activeAppDidChange(_ notification: Notification) {
@@ -214,163 +204,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    private func cancelHoldIfNeeded() {
-        holdCancelled = true
-        stopHoldTimer()
-    }
-
-    private func isModifierKey(_ keyCode: UInt16) -> Bool {
-        let modifierKeyCodes: Set<UInt16> = [
-            AppConstants.KeyCodes.cmdLeft, AppConstants.KeyCodes.cmdRight,
-            AppConstants.KeyCodes.ctrlLeft, AppConstants.KeyCodes.ctrlRight,
-            AppConstants.KeyCodes.altLeft, AppConstants.KeyCodes.altRight,
-            AppConstants.KeyCodes.shiftLeft, AppConstants.KeyCodes.shiftRight,
-            AppConstants.KeyCodes.fn
-        ]
-        return modifierKeyCodes.contains(keyCode)
-    }
-
-    private func keyCodeToString(_ keyCode: UInt16) -> String {
-        AppConstants.KeyCodes.names[keyCode] ?? "key_\(keyCode)"
-    }
-
-    private func checkModifierFlags(_ flags: NSEvent.ModifierFlags, matches modifiers: [String]) -> Bool {
-        for modifier in modifiers {
-            let hasModifier: Bool
-            switch modifier {
-            case "cmd", "meta": hasModifier = flags.contains(.command)
-            case "ctrl": hasModifier = flags.contains(.control)
-            case "alt": hasModifier = flags.contains(.option)
-            case "shift": hasModifier = flags.contains(.shift)
-            case "fn": hasModifier = flags.contains(.function)
-            default: hasModifier = false
-            }
-
-            if isDevMode {
-                print("[Keyly] Checking modifier '\(modifier)': hasModifier=\(hasModifier)")
-            }
-
-            if !hasModifier {
-                if isDevMode {
-                    print("[Keyly] Missing required modifier: \(modifier)")
-                }
-                return false
-            }
-        }
-        return true
-    }
-
-    private func isSuperKeyComboPressed(_ flags: NSEvent.ModifierFlags, keyCode: UInt16? = nil) -> Bool {
-        guard let settings = settings else { return flags.contains(.command) }
-
-        let superKey = settings.superKey
-
-        if !checkModifierFlags(flags, matches: superKey.modifiers) {
-            return false
-        }
-
-        if let mainKey = superKey.mainKey, let keyCode = keyCode {
-            let pressedKey = keyCodeToString(keyCode)
-            return pressedKey == mainKey
-        }
-
-        if superKey.mainKey == nil {
-            return checkModifierFlags(flags, matches: superKey.modifiers)
-        }
-
-        return true
-    }
-
-    private func handleKeyDown(_ event: NSEvent) {
-        guard let settings = settings else { return }
-
-        let superKey = settings.superKey
-
-        if isSuperKeyComboPressed(event.modifierFlags, keyCode: event.keyCode) {
-            if !isSuperKeyPressed {
-                isSuperKeyPressed = true
-                holdCancelled = false
-
-                if isDevMode {
-                    let keyString = keyCodeToString(event.keyCode)
-                    print("[Keyly] Super key combo detected: \(superKey.key) (keyCode: \(event.keyCode) = \(keyString))")
-                    print("[Keyly] Trigger type: \(superKey.triggerType)")
-                }
-
-                let currentTime = CACurrentMediaTime()
-
-                switch superKey.triggerType {
-                case "hold":
-                    if isDevMode {
-                        print("[Keyly] Starting hold timer for \(settings.hold.duration) seconds")
-                    }
-                    startHoldTimer()
-
-                case "press":
-                    if currentTime - lastSuperKeyPressTime < AppConstants.doubleClickTimeInterval {
-                        superKeyPressCount += 1
-                    } else {
-                        superKeyPressCount = 1
-                    }
-                    lastSuperKeyPressTime = currentTime
-
-                    if isDevMode {
-                        print("[Keyly] Press count: \(superKeyPressCount)/\(settings.press.count)")
-                    }
-
-                    if superKeyPressCount >= settings.press.count {
-                        if isDevMode {
-                            print("[Keyly] Press count reached, showing shortcuts")
-                        }
-                        showShortcuts()
-                        superKeyPressCount = 0
-                    }
-
-                default:
-                    if isDevMode {
-                        print("[Keyly] Unknown trigger type, defaulting to hold")
-                    }
-                    startHoldTimer()
-                }
-            }
-        } else if isSuperKeyPressed {
-            cancelHoldIfNeeded()
-        }
-    }
-
-    private func handleKeyUp(_ event: NSEvent) {
-        guard let settings = settings else { return }
-
-        let superKey = settings.superKey
-
-        let wasComboPressed = isSuperKeyComboPressed(event.modifierFlags, keyCode: event.keyCode)
-        let isStillPressed = isSuperKeyComboPressed(event.modifierFlags)
-
-        if isSuperKeyPressed && (!wasComboPressed || !isStillPressed) {
-            isSuperKeyPressed = false
-
-            if isDevMode {
-                print("[Keyly] Super key released")
-            }
-
-            switch superKey.triggerType {
-            case "hold":
-                if isDevMode {
-                    print("[Keyly] Hold released - stopping timer")
-                }
-                stopHoldTimer()
-
-            default:
-                break
-            }
-        }
-    }
+    // MARK: - Trigger
 
     private func handleFlagsChanged(_ event: NSEvent) {
-        guard let settings = settings else { return }
-
         let flags = event.modifierFlags
-        let superKey = settings.superKey
 
         if isDevMode {
             let flagsDebug = [
@@ -384,107 +221,108 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             print("[Keyly] Flags changed: \(flagsDebug)")
         }
 
-        if superKey.isCapsLock {
+        if trigger.isCapsLock {
             guard event.keyCode == AppConstants.KeyCodes.capsLock else { return }
 
             // Count only real toggles so a release event (if any) is not a second tap
             let capsLockOn = flags.contains(.capsLock)
             guard capsLockOn != isCapsLockOn else { return }
             isCapsLockOn = capsLockOn
-
-            let currentTime = CACurrentMediaTime()
-            if currentTime - lastSuperKeyPressTime < AppConstants.doubleClickTimeInterval {
-                superKeyPressCount += 1
-            } else {
-                superKeyPressCount = 1
-            }
-            lastSuperKeyPressTime = currentTime
-
-            if isDevMode {
-                print("[Keyly] Caps Lock press count: \(superKeyPressCount)/\(settings.press.count)")
-            }
-
-            if superKeyPressCount >= settings.press.count {
-                // A cancelled hold from a previous key+key trigger must not block Caps Lock
-                holdCancelled = false
-                showShortcuts()
-                superKeyPressCount = 0
-            }
+            registerPress()
             return
         }
 
-        // Only handle modifier-only combinations here
-        if superKey.mainKey == nil && superKey.hasModifiers {
-            let isSuperKeyDown = isSuperKeyComboPressed(flags)
-
-            if isDevMode {
-                print("[Keyly] Checking modifier-only combo: expected=\(superKey.modifiers), isSuperKeyDown=\(isSuperKeyDown)")
+        if trigger.isModifierOnly {
+            let isDown = trigger.matchesModifiers(flags)
+            if isDown && !isSuperKeyPressed {
+                triggerWentDown()
+            } else if !isDown && isSuperKeyPressed {
+                triggerWentUp()
             }
-
-            if isSuperKeyDown && !isSuperKeyPressed {
-                isSuperKeyPressed = true
-                holdCancelled = false
-
-                if isDevMode {
-                    print("[Keyly] Modifier-only super key combo detected: \(superKey.key)")
-                }
-
-                let currentTime = CACurrentMediaTime()
-
-                switch superKey.triggerType {
-                case "hold":
-                    if isDevMode {
-                        print("[Keyly] Starting modifier hold timer")
-                    }
-                    startHoldTimer()
-
-                case "press":
-                    if currentTime - lastSuperKeyPressTime < AppConstants.doubleClickTimeInterval {
-                        superKeyPressCount += 1
-                    } else {
-                        superKeyPressCount = 1
-                    }
-                    lastSuperKeyPressTime = currentTime
-
-                    if isDevMode {
-                        print("[Keyly] Modifier press count: \(superKeyPressCount)/\(settings.press.count)")
-                    }
-
-                    if superKeyPressCount >= settings.press.count {
-                        if isDevMode {
-                            print("[Keyly] Modifier press count reached, showing shortcuts")
-                        }
-                        showShortcuts()
-                        superKeyPressCount = 0
-                    }
-
-                default:
-                    if isDevMode {
-                        print("[Keyly] Unknown modifier trigger type, defaulting to hold")
-                    }
-                    startHoldTimer()
-                }
-
-            } else if !isSuperKeyDown && isSuperKeyPressed {
-                isSuperKeyPressed = false
-
-                switch superKey.triggerType {
-                case "hold":
-                    stopHoldTimer()
-
-                default:
-                    break
-                }
-            }
+        } else if isSuperKeyPressed && !trigger.matchesModifiers(flags) {
+            // Letting go of a modifier ends a key + modifier hold
+            triggerWentUp()
         }
     }
 
-    private func startHoldTimer() {
+    private func handleKeyDown(_ event: NSEvent) {
+        if trigger.keyCode != nil && trigger.matchesKey(event.keyCode, flags: event.modifierFlags) {
+            // Key repeat while the trigger is held is ignored
+            if !isSuperKeyPressed { triggerWentDown() }
+            return
+        }
+
+        // Any other key in between means it wasn't the trigger: ⌘C while holding ⌘ cancels the
+        // hold, and ⌘C ⌘V is not a double ⌘
+        superKeyPressCount = 0
+        if isSuperKeyPressed { cancelHold() }
+    }
+
+    private func handleKeyUp(_ event: NSEvent) {
+        if isSuperKeyPressed && event.keyCode == trigger.keyCode {
+            triggerWentUp()
+        }
+    }
+
+    private func triggerWentDown() {
+        isSuperKeyPressed = true
+        holdCancelled = false
+
+        switch trigger.kind {
+        case .hold(let seconds):
+            startHoldTimer(seconds)
+        case .press:
+            registerPress()
+        }
+    }
+
+    private func triggerWentUp() {
+        isSuperKeyPressed = false
+        stopHoldTimer()
+    }
+
+    /// Counts taps that follow each other within the double-click interval
+    private func registerPress() {
+        guard case .press(let count) = trigger.kind else { return }
+
+        let currentTime = CACurrentMediaTime()
+        if currentTime - lastSuperKeyPressTime < AppConstants.doubleClickTimeInterval {
+            superKeyPressCount += 1
+        } else {
+            superKeyPressCount = 1
+        }
+        lastSuperKeyPressTime = currentTime
+
+        if isDevMode {
+            print("[Keyly] Press count: \(superKeyPressCount)/\(count)")
+        }
+
+        if superKeyPressCount >= count {
+            superKeyPressCount = 0
+            // A cancelled hold from an earlier trigger must not block this one
+            holdCancelled = false
+            showShortcuts()
+        }
+    }
+
+    private func cancelHold() {
+        holdCancelled = true
+        stopHoldTimer()
+    }
+
+    private func resetTriggerState() {
+        stopHoldTimer()
+        isSuperKeyPressed = false
+        holdCancelled = false
+        superKeyPressCount = 0
+        // Caps Lock may have toggled while it was not the trigger
+        isCapsLockOn = NSEvent.modifierFlags.contains(.capsLock)
+    }
+
+    private func startHoldTimer(_ seconds: Double) {
         superKeyHoldTimer?.invalidate()
 
-        let holdDuration = settings?.hold.duration ?? AppConstants.defaultHoldDuration
-
-        superKeyHoldTimer = Timer.scheduledTimer(withTimeInterval: holdDuration, repeats: false) { [weak self] _ in
+        superKeyHoldTimer = Timer.scheduledTimer(withTimeInterval: seconds, repeats: false) { [weak self] _ in
             guard let self = self else { return }
             guard self.isSuperKeyPressed, !self.holdCancelled else {
                 if self.isDevMode {

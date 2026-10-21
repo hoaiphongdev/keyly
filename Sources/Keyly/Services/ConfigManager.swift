@@ -18,9 +18,10 @@ enum EditorType: String, CaseIterable {
 final class ConfigManager {
     static let shared = ConfigManager()
 
-    private(set) var customSheets: [ShortcutSheet] = []
-    private(set) var globalShortcuts: [ShortcutItem] = []
+    /// Read on the main thread only; replaced as a whole after each reload
+    private(set) var snapshot = ConfigSnapshot()
     private var fileWatcher: FileWatcher?
+    private let loadQueue = DispatchQueue(label: "com.keyly.config", qos: .utility)
 
     private let editorPreferenceKey = "KeylyPreferredEditor"
 
@@ -39,175 +40,62 @@ final class ConfigManager {
         }
     }
 
-    var configDirectory: URL {
-        let home = FileManager.default.homeDirectoryForCurrentUser
-        let keylyDir = home.appendingPathComponent(".config/keyly", isDirectory: true)
-
-        try? FileManager.default.createDirectory(at: keylyDir, withIntermediateDirectories: true)
-
-        return keylyDir
-    }
+    let configDirectory = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".config/keyly", isDirectory: true)
 
     var templatesDirectory: URL {
-        let templatesDir = configDirectory.appendingPathComponent("templates", isDirectory: true)
-
-        try? FileManager.default.createDirectory(at: templatesDir, withIntermediateDirectories: true)
-
-        return templatesDir
+        configDirectory.appendingPathComponent("templates", isDirectory: true)
     }
 
-    func loadAllSheets() {
-        customSheets.removeAll()
-        globalShortcuts.removeAll()
+    var settings: KeylySettings { snapshot.settings }
+    var diagnostics: [ConfigDiagnostic] { snapshot.diagnostics }
+    var globalSheets: [ShortcutSheet] { snapshot.globalSheets }
 
-        let fileManager = FileManager.default
-
-        // templates/ is the documented home; .keyly files placed directly in ~/.config/keyly/
-        // (older docs and install-templates.sh put them there) are loaded too.
-        let files = [templatesDirectory, configDirectory].flatMap { directory in
-            (try? fileManager.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)) ?? []
-        }
-
-        for file in files where file.pathExtension == "keyly" {
-            if file.lastPathComponent == AppConstants.globalTemplateFileName {
-                loadGlobalShortcuts(from: file)
-            } else {
-                if let sheet = parseSheetFile(at: file) {
-                    customSheets.append(sheet)
-                }
-            }
-        }
-
-        print("[Keyly] Loaded \(customSheets.count) custom sheet(s)")
-        print("[Keyly] Loaded \(globalShortcuts.count) global shortcut(s)")
+    func sheets(for app: NSRunningApplication) -> [ShortcutSheet] {
+        snapshot.sheets(for: app)
     }
 
+    /// First load at launch, synchronous so the trigger is known before keys are monitored
+    func loadInitial() {
+        ensureDirectories()
+        createDefaultSettingsIfNeeded()
+        publish(loadSnapshot(previous: snapshot))
+    }
+
+    /// Parses on a background queue and swaps the result in on the main thread
     func reload() {
-        loadAllSheets()
-        SettingsManager.shared.reloadSettings()
-        onConfigReloaded?()
-        onSettingsReloaded?()
+        let previous = snapshot
+        loadQueue.async { [weak self] in
+            guard let self else { return }
+            let next = self.loadSnapshot(previous: previous)
+            DispatchQueue.main.async {
+                let settingsChanged = next.settings != self.snapshot.settings
+                self.publish(next)
+                self.onConfigReloaded?()
+                if settingsChanged { self.onSettingsReloaded?() }
+            }
+        }
     }
 
-    private func parseSheetFile(at url: URL) -> ShortcutSheet? {
-        guard let content = try? String(contentsOf: url, encoding: .utf8) else {
-            print("[Keyly] Warning: Could not read file '\(url.lastPathComponent)'")
-            return nil
-        }
-
-        guard !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            print("[Keyly] Warning: File '\(url.lastPathComponent)' is empty")
-            return nil
-        }
-
-        var name = url.deletingPathExtension().lastPathComponent
-        var appPath = ""
-        var shortcuts: [ShortcutItem] = []
-        var categoryDescriptions: [String: String] = [:]
-        var groupDescriptions: [String: String] = [:]
-        var currentCategory = "General"
-        var currentGroup: String? = nil
-        var hideDefaultShortcuts = false
-
-        let lines = content.components(separatedBy: .newlines)
-
-        for line in lines {
-            let trimmed = line.trimmingCharacters(in: .whitespaces)
-
-            if trimmed.isEmpty { continue }
-
-            if trimmed.hasPrefix("# Sheet Name:") {
-                name = trimmed.replacingOccurrences(of: "# Sheet Name:", with: "").trimmingCharacters(in: .whitespaces)
-                continue
-            }
-
-            if trimmed.hasPrefix("# App:") {
-                appPath = trimmed.replacingOccurrences(of: "# App:", with: "").trimmingCharacters(in: .whitespaces)
-                continue
-            }
-
-            if trimmed.hasPrefix("# Hide Default:") {
-                let hideValue = trimmed.replacingOccurrences(of: "# Hide Default:", with: "").trimmingCharacters(in: .whitespaces).lowercased()
-                hideDefaultShortcuts = ["true", "1", "yes", "on"].contains(hideValue)
-                continue
-            }
-
-            if trimmed.hasPrefix("# Group:") {
-                let groupInfo = trimmed.replacingOccurrences(of: "# Group:", with: "").trimmingCharacters(in: .whitespaces)
-                let resetKeywords = ["", "none", "empty"]
-
-                if resetKeywords.contains(groupInfo.lowercased()) {
-                    currentGroup = nil
-                    currentCategory = "General"
-                } else {
-                    let components = groupInfo.components(separatedBy: " - ")
-                    let groupName = components[0].trimmingCharacters(in: .whitespaces)
-                    if !groupName.isEmpty {
-                        currentGroup = groupName
-                        currentCategory = "General"
-
-                        if components.count >= 2 {
-                            let description = components
-                                .dropFirst()
-                                .map { $0.trimmingCharacters(in: .whitespaces) }
-                                .first { !$0.isEmpty && !$0.hasPrefix("Size:") }
-                            if let description {
-                                groupDescriptions[groupName] = description
-                            }
-                        }
-                    }
-                }
-                continue
-            }
-
-            if trimmed.hasPrefix("#") { continue }
-
-            if trimmed.hasPrefix("[") && trimmed.hasSuffix("]") {
-                let categoryName = String(trimmed.dropFirst().dropLast()).trimmingCharacters(in: .whitespaces)
-                if !categoryName.isEmpty {
-                    currentCategory = categoryName
-                } else {
-                    print("[Keyly] Warning: Empty category name in '\(url.lastPathComponent)', using 'General'")
-                    currentCategory = "General"
-                }
-                continue
-            }
-
-            if trimmed.hasPrefix(">") {
-                let desc = String(trimmed.dropFirst()).trimmingCharacters(in: .whitespaces)
-                if !desc.isEmpty {
-                    categoryDescriptions[currentCategory] = desc
-                }
-                continue
-            }
-
-            if let shortcut = parseShortcutLine(trimmed, category: currentCategory, group: currentGroup) {
-                shortcuts.append(shortcut)
-            }
-        }
-
-        guard !appPath.isEmpty else {
-            print("[Keyly] Warning: Sheet '\(name)' has no app path defined")
-            return nil
-        }
-
-        return ShortcutSheet(name: name, appPath: appPath, shortcuts: shortcuts, categoryDescriptions: categoryDescriptions, sourceFile: url, hideDefaultShortcuts: hideDefaultShortcuts, groupDescriptions: groupDescriptions)
+    private func loadSnapshot(previous: ConfigSnapshot) -> ConfigSnapshot {
+        let start = CFAbsoluteTimeGetCurrent()
+        let next = ConfigLoader.load(configDirectory: configDirectory, templatesDirectory: templatesDirectory, previous: previous)
+        let milliseconds = Int((CFAbsoluteTimeGetCurrent() - start) * 1000)
+        ConfigLog.info("Loaded \(next.sheets.count) sheet(s), \(next.globalSheets.count) global, trigger \(next.settings.trigger.label) in \(milliseconds) ms")
+        return next
     }
 
-    private func parseShortcutLine(_ line: String, category: String, group: String? = nil) -> ShortcutItem? {
-        guard let (shortcut, action) = ShortcutLineParser.parse(line) else {
-            return nil
-        }
+    private func publish(_ next: ConfigSnapshot) {
+        snapshot = next
+        ConfigLog.report(next.diagnostics)
+    }
 
-        return ShortcutItem(category: category, action: action, shortcut: shortcut, group: group)
+    private func ensureDirectories() {
+        try? FileManager.default.createDirectory(at: templatesDirectory, withIntermediateDirectories: true)
     }
 
     func startWatching() {
-        let watchPaths = [
-            templatesDirectory.path,
-            configDirectory.path
-        ]
-        fileWatcher = FileWatcher(paths: watchPaths) { [weak self] in
+        // Recursive, so templates/ is covered too
+        fileWatcher = FileWatcher(paths: [configDirectory.path]) { [weak self] in
             self?.reload()
         }
         fileWatcher?.start()
@@ -218,84 +106,24 @@ final class ConfigManager {
         fileWatcher = nil
     }
 
-    func sheets(for bundleIdentifier: String) -> [ShortcutSheet] {
-        customSheets.filter { $0.bundleIdentifier == bundleIdentifier }
-    }
-
-    private func loadGlobalShortcuts(from url: URL) {
-        guard let content = try? String(contentsOf: url, encoding: .utf8) else {
-            print("[Keyly] Warning: Could not read global shortcuts file '\(url.lastPathComponent)'")
-            return
-        }
-
-        guard !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            print("[Keyly] Warning: Global shortcuts file '\(url.lastPathComponent)' is empty")
-            return
-        }
-
-        var shortcuts: [ShortcutItem] = []
-        var currentCategory = "Global"
-        var currentGroup: String? = nil
-
-        let lines = content.components(separatedBy: .newlines)
-
-        for line in lines {
-            let trimmed = line.trimmingCharacters(in: .whitespaces)
-
-            if trimmed.isEmpty { continue }
-
-            if trimmed.hasPrefix("# Group:") {
-                let groupInfo = trimmed.replacingOccurrences(of: "# Group:", with: "").trimmingCharacters(in: .whitespaces)
-                if !groupInfo.isEmpty {
-                    let components = groupInfo.components(separatedBy: " - ")
-                    if components.count >= 1 {
-                        let groupName = components[0].trimmingCharacters(in: .whitespaces)
-                        if !groupName.isEmpty {
-                            currentGroup = groupName
-                        } else {
-                            print("[Keyly] Warning: Empty group name in global shortcuts")
-                        }
-                    }
-                } else {
-                    print("[Keyly] Warning: Empty group directive in global shortcuts")
-                }
-                continue
-            }
-
-            if trimmed.hasPrefix("#") { continue }
-
-            if trimmed.hasPrefix("[") && trimmed.hasSuffix("]") {
-                let categoryName = String(trimmed.dropFirst().dropLast()).trimmingCharacters(in: .whitespaces)
-                if !categoryName.isEmpty {
-                    currentCategory = categoryName
-                } else {
-                    print("[Keyly] Warning: Empty category name in global shortcuts, using 'Global'")
-                    currentCategory = "Global"
-                }
-                continue
-            }
-
-            if trimmed.hasPrefix(">") { continue }
-
-            if let shortcut = parseShortcutLine(trimmed, category: currentCategory, group: currentGroup) {
-                shortcuts.append(shortcut)
-            }
-        }
-
-        globalShortcuts = shortcuts
-    }
-
     func openConfigFolder() {
-        createExampleIfNeeded()
+        ensureDirectories()
+        createExamplesIfNeeded()
+        open(configDirectory, line: nil)
+    }
 
-        if let editor = preferredEditor {
-            openWithEditor(editor)
-        } else {
-            showEditorPicker()
+    /// Opens a config file in the preferred editor, at the line with the problem when the editor supports it
+    func openFile(_ file: URL, line: Int?) {
+        open(file, line: line)
+    }
+
+    private func open(_ url: URL, line: Int?) {
+        if let editor = preferredEditor ?? pickEditor() {
+            open(url, line: line, with: editor)
         }
     }
 
-    private func showEditorPicker() {
+    private func pickEditor() -> EditorType? {
         let alert = NSAlert()
         alert.messageText = "Choose Editor"
         alert.informativeText = "Select your preferred editor to open config files. This will be saved and won't be asked again."
@@ -311,34 +139,40 @@ final class ConfigManager {
         let response = alert.runModal()
 
         let index = response.rawValue - NSApplication.ModalResponse.alertFirstButtonReturn.rawValue
-        guard index >= 0 && index < EditorType.allCases.count else { return }
+        guard index >= 0 && index < EditorType.allCases.count else { return nil }
 
         let selectedEditor = EditorType.allCases[index]
         preferredEditor = selectedEditor
-        openWithEditor(selectedEditor)
+        return selectedEditor
     }
 
-    private func openWithEditor(_ editor: EditorType) {
-        let path = configDirectory.path
+    private func open(_ url: URL, line: Int?, with editor: EditorType) {
+        let path = url.path
+        let isFolder = url.hasDirectoryPath
 
         switch editor {
         case .vscode:
             let process = Process()
             process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
-            process.arguments = ["code", path]
+            process.arguments = isFolder || line == nil ? ["code", path] : ["code", "--goto", "\(path):\(line ?? 1)"]
             try? process.run()
 
         case .neovim:
-            let scriptContent = """
-            #!/bin/bash
-            cd '\(path)'
-            nvim .
-            """
-            runTerminalScript(scriptContent)
+            let target = isFolder ? "cd \(shellQuoted(path)) && nvim ." : "nvim \(line.map { "+\($0) " } ?? "")\(shellQuoted(path))"
+            runTerminalScript("#!/bin/bash\n\(target)\n")
 
         case .textEdit:
-            NSWorkspace.shared.open(configDirectory)
+            if isFolder {
+                NSWorkspace.shared.open(url)
+            } else {
+                let textEdit = URL(fileURLWithPath: "/System/Applications/TextEdit.app")
+                NSWorkspace.shared.open([url], withApplicationAt: textEdit, configuration: NSWorkspace.OpenConfiguration())
+            }
         }
+    }
+
+    private func shellQuoted(_ value: String) -> String {
+        "'" + value.replacingOccurrences(of: "'", with: "'\\''") + "'"
     }
 
     private func runTerminalScript(_ content: String) {
@@ -349,84 +183,95 @@ final class ConfigManager {
             try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: tempScript.path)
             NSWorkspace.shared.open(tempScript)
         } catch {
-            print("[Keyly] Failed to open config: \(error)")
+            ConfigLog.logger.error("Failed to open config: \(error.localizedDescription, privacy: .public)")
         }
     }
 
-    private func createExampleIfNeeded() {
-        // Create example template
+    // MARK: - Starter files
+
+    /// setting.conf is written at launch when missing, every line commented out: the defaults
+    /// apply and every option is right there to uncomment. An existing file is never touched.
+    private func createDefaultSettingsIfNeeded() {
+        let file = configDirectory.appendingPathComponent(SettingsParser.fileName)
+        guard !FileManager.default.fileExists(atPath: file.path) else { return }
+        try? Self.defaultSettingsContent.write(to: file, atomically: true, encoding: .utf8)
+    }
+
+    static let defaultSettingsContent = """
+    # Keyly settings
+    # Remove the # in front of a line to change it. Changes apply as soon as you save.
+    # A value Keyly can't read falls back to its default; problems show in the ⚙︎ menu.
+
+    # Key that opens Keyly: capslock, cmd, ctrl+k, cmd+shift+k, option+space, ⌃⌥K …
+    # super_key = capslock
+
+    # press: tap the key press_count times in a row. hold: keep it down for hold_duration.
+    # Caps Lock can only be pressed.
+    # trigger_type = press
+
+    # Taps in a row, 1 to 4
+    # press_count = 2
+
+    # How long to hold, 0.1s to 3s: 0.5, 0.5s or 500ms
+    # hold_duration = 0.5
+
+    # Widest the window gets, as a share of the screen: 0.1 to 1.0, or 70%
+    # screen_width_ratio = 0.7
+
+    """
+
+    /// Example sheets for "Open Config Folder", each written only if missing
+    private func createExamplesIfNeeded() {
+        createDefaultSettingsIfNeeded()
+
         let exampleTemplateFile = templatesDirectory.appendingPathComponent("example.keyly")
-        guard !FileManager.default.fileExists(atPath: exampleTemplateFile.path) else { return }
+        if !FileManager.default.fileExists(atPath: exampleTemplateFile.path) {
+            let exampleContent = """
+            # Sheet Name: Example Shortcuts
+            # App: Safari
+            # Hide Default: false
 
-        let exampleContent = """
-        # Sheet Name: Example Shortcuts
-        # App: /Applications/Safari.app
-        # Hide Default: false
+            [Navigation]
+            CMD+L       Open Location
+            CMD+T       New Tab
+            CMD+W       Close Tab
+            CMD+SHIFT+T Reopen Last Tab
 
-        [Navigation]
-        CMD+L       Open Location
-        CMD+T       New Tab
-        CMD+W       Close Tab
-        CMD+SHIFT+T Reopen Last Tab
+            [Bookmarks]
+            CMD+D       Add Bookmark
+            CMD+OPT+B   Show Bookmarks
 
-        [Bookmarks]
-        CMD+D       Add Bookmark
-        CMD+OPT+B   Show Bookmarks
-
-        [View]
-        CMD++       Zoom In
-        CMD+-       Zoom Out
-        CMD+0       Actual Size
-        """
-
-        try? exampleContent.write(to: exampleTemplateFile, atomically: true, encoding: .utf8)
+            [View]
+            CMD++       Zoom In
+            CMD+-       Zoom Out
+            CMD+0       Actual Size
+            """
+            try? exampleContent.write(to: exampleTemplateFile, atomically: true, encoding: .utf8)
+        }
 
         let globalTemplateFile = templatesDirectory.appendingPathComponent(AppConstants.globalTemplateFileName)
-        guard !FileManager.default.fileExists(atPath: globalTemplateFile.path) else { return }
+        if !FileManager.default.fileExists(atPath: globalTemplateFile.path) {
+            let globalContent = """
+            # Global Shortcuts - Available in all applications
+            # These shortcuts will appear at the top of every app's shortcut list
 
-        let globalContent = """
-        # Global Shortcuts - Available in all applications
-        # These shortcuts will appear at the top of every app's shortcut list
+            [System]
+            > System-wide shortcuts that work everywhere
+            CMD+SPACE       Spotlight Search
+            CMD+TAB         App Switcher
+            CMD+Q           Quit Application
+            CMD+W           Close Window
 
-        [System]
-        > System-wide shortcuts that work everywhere
-        CMD+SPACE       Spotlight Search
-        CMD+TAB         App Switcher
-        CMD+Q           Quit Application
-        CMD+W           Close Window
-
-        [Text Editing]
-        > Universal text editing shortcuts
-        CMD+C           Copy
-        CMD+V           Paste
-        CMD+X           Cut
-        CMD+Z           Undo
-        CMD+A           Select All
-        CMD+F           Find
-        """
-
-        try? globalContent.write(to: globalTemplateFile, atomically: true, encoding: .utf8)
-        let exampleConfigFile = configDirectory.appendingPathComponent("setting.conf")
-        guard !FileManager.default.fileExists(atPath: exampleConfigFile.path) else { return }
-
-        let exampleConfigContent = """
-        # Keyly Configuration File
-        # Place this file at ~/.config/keyly/setting.conf
-
-        # Super key configuration - can be single key or combinations:
-        # Single keys: capslock, cmd, ctrl, alt, shift, fn, space, a, b, c, f1, etc.
-        # Combinations: cmd+a, ctrl+shift+x, alt+space, fn+f12, etc.
-        # capslock only supports trigger_type=press
-        super_key=capslock
-        trigger_type=press
-
-        # Hold settings (used when trigger_type = hold)
-        hold_duration=0.5
-
-        # Press settings (used when trigger_type = press)
-        press_count=2
-        """
-
-        try? exampleConfigContent.write(to: exampleConfigFile, atomically: true, encoding: .utf8)
+            [Text Editing]
+            > Universal text editing shortcuts
+            CMD+C           Copy
+            CMD+V           Paste
+            CMD+X           Cut
+            CMD+Z           Undo
+            CMD+A           Select All
+            CMD+F           Find
+            """
+            try? globalContent.write(to: globalTemplateFile, atomically: true, encoding: .utf8)
+        }
     }
 }

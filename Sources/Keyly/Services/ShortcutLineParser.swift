@@ -23,11 +23,28 @@ enum ShortcutLineParser {
             }
         }
 
-        let separator = trimmed.range(of: #"\t|\s{2,}"#, options: .regularExpression)
-            ?? trimmed.range(of: " ")
-        guard let separator else { return nil }
-
+        guard let separator = columnGap(in: trimmed) ?? trimmed.range(of: " ") else { return nil }
         return nonEmpty(String(trimmed[..<separator.lowerBound]), String(trimmed[separator.upperBound...]))
+    }
+
+    /// The first tab or run of 2+ whitespace characters, found in one pass
+    private static func columnGap(in text: String) -> Range<String.Index>? {
+        var index = text.startIndex
+        while index < text.endIndex {
+            guard text[index].isWhitespace else {
+                index = text.index(after: index)
+                continue
+            }
+            var end = text.index(after: index)
+            while end < text.endIndex && text[end].isWhitespace {
+                end = text.index(after: end)
+            }
+            if text[index] == "\t" || text.distance(from: index, to: end) >= 2 {
+                return index..<end
+            }
+            index = end
+        }
+        return nil
     }
 
     /// Normalizes each space-separated chord ("CMD+K CMD+S" → "⌘K ⌘S").
@@ -44,10 +61,11 @@ enum ShortcutLineParser {
 
         // Consume leading "<modifier>+" / "<modifier>-" tokens; the key itself may be "+" or "-"
         consuming: while !rest.isEmpty {
+            let upper = rest.uppercased()
             for (names, symbol) in ShortcutMapping.modifierNames {
                 for name in names {
                     guard rest.count > name.count,
-                          rest.uppercased().hasPrefix(name) else { continue }
+                          upper.hasPrefix(name) else { continue }
                     let separatorIndex = rest.index(rest.startIndex, offsetBy: name.count)
                     guard rest[separatorIndex] == "+" || rest[separatorIndex] == "-" else { continue }
                     let keyStart = rest.index(after: separatorIndex)
@@ -66,8 +84,9 @@ enum ShortcutLineParser {
         guard !modifiers.isEmpty || namedKey != nil else { return chord }
 
         let orderedModifiers = ShortcutMapping.modifierOrder.filter(modifiers.contains).joined()
-        let displayKey = namedKey ?? (key.count == 1 ? key.uppercased() : key)
-        return orderedModifiers + displayKey
+        if let namedKey { return orderedModifiers + namedKey }
+        // A word that isn't a key name ("⌘+click") keeps its "+" so it still reads as a combination
+        return key.count == 1 ? orderedModifiers + key.uppercased() : orderedModifiers + "+" + key
     }
 
     private static func nonEmpty(_ left: String, _ right: String) -> (String, String)? {

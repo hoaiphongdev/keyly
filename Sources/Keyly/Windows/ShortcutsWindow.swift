@@ -420,8 +420,8 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
         guard let window = window else { return }
 
         let visibleFrame = screen?.visibleFrame ?? NSRect(origin: .zero, size: WindowConstants.defaultScreenSize)
-        let settings = SettingsManager.shared.getSettings()
-        let maxWindowWidth = visibleFrame.width * CGFloat(settings.ui.screenWidthRatio)
+        let settings = ConfigManager.shared.settings
+        let maxWindowWidth = visibleFrame.width * CGFloat(settings.screenWidthRatio)
         let maxGridWidth = maxWindowWidth - padding * 2
 
         let minColumnWidth = visibleFrame.width < WindowConstants.compactScreenWidth
@@ -635,6 +635,22 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
     @objc private func showSettingsMenu() {
         let menu = NSMenu()
 
+        let diagnostics = ConfigManager.shared.diagnostics
+        if !diagnostics.isEmpty {
+            let problemsItem = NSMenuItem(title: "⚠︎ \(diagnostics.count) config problem\(diagnostics.count == 1 ? "" : "s")", action: nil, keyEquivalent: "")
+            let problemsMenu = NSMenu()
+            for diagnostic in diagnostics {
+                let item = NSMenuItem(title: diagnostic.summary, action: #selector(openDiagnostic(_:)), keyEquivalent: "")
+                item.target = self
+                item.representedObject = diagnostic
+                item.isEnabled = diagnostic.file != nil
+                problemsMenu.addItem(item)
+            }
+            problemsItem.submenu = problemsMenu
+            menu.addItem(problemsItem)
+            menu.addItem(NSMenuItem.separator())
+        }
+
         let reloadItem = NSMenuItem(title: "Reload Config", action: #selector(reloadConfig), keyEquivalent: "r")
         reloadItem.target = self
         menu.addItem(reloadItem)
@@ -678,6 +694,12 @@ final class ShortcutsWindow: NSWindowController, NSWindowDelegate {
 
     @objc private func reloadConfig() {
         ConfigManager.shared.reload()
+    }
+
+    @objc private func openDiagnostic(_ sender: NSMenuItem) {
+        guard let diagnostic = sender.representedObject as? ConfigDiagnostic, let file = diagnostic.file else { return }
+        self.close()
+        ConfigManager.shared.openFile(file, line: diagnostic.line)
     }
 
     @objc private func openConfigFolder() {

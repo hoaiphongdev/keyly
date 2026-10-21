@@ -94,6 +94,20 @@ import Testing
         #expect(snapshot.sheets.map(\.target?.bundleId) == ["COM.Example.A"])
     }
 
+    @Test func symlinkedTemplatesFolderLoads() throws {
+        let folder = try makeFolder()
+        defer { try? FileManager.default.removeItem(at: folder.config) }
+
+        let real = folder.config.appendingPathComponent("dotfiles")
+        try FileManager.default.createDirectory(at: real, withIntermediateDirectories: true)
+        try "# App: com.example.a\nCMD+A  Linked".write(to: real.appendingPathComponent("a.keyly"), atomically: true, encoding: .utf8)
+        try FileManager.default.removeItem(at: folder.templates)
+        try FileManager.default.createSymbolicLink(at: folder.templates, withDestinationURL: real)
+
+        let snapshot = ConfigLoader.load(configDirectory: folder.config, templatesDirectory: folder.templates, previous: ConfigSnapshot())
+        #expect(snapshot.sheets.map { $0.shortcuts[0].action } == ["Linked"])
+    }
+
     @Test func unreadableFileKeepsThePreviousVersion() throws {
         let folder = try makeFolder()
         defer { try? FileManager.default.removeItem(at: folder.config) }

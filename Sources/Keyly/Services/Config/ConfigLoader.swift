@@ -95,7 +95,7 @@ enum ConfigLoader {
 
     private static func sheetFiles(in directory: URL) -> [URL] {
         let files = (try? FileManager.default.contentsOfDirectory(
-            at: directory,
+            at: directory.resolvingSymlinksInPath(),
             includingPropertiesForKeys: nil,
             options: [.skipsHiddenFiles]
         )) ?? []

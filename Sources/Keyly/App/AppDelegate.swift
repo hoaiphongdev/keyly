@@ -54,6 +54,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func setupDevMode() {
+        setvbuf(stdout, nil, _IOLBF, 0)
         print("[Keyly] Dev mode enabled - use configured key combination to show shortcuts")
         printTrigger()
     }

@@ -149,19 +149,26 @@ final class ConfigManager {
     }
 
     private func open(_ url: URL, line: Int?, with editor: EditorType) {
-        let path = url.path
         let isFolder = url.hasDirectoryPath
 
         switch editor {
         case .vscode:
             let process = Process()
             process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
-            process.arguments = isFolder || line == nil ? ["code", path] : ["code", "--goto", "\(path):\(line ?? 1)"]
-            try? process.run()
+            process.arguments = Self.vscodeArguments(path: url.path, isFolder: isFolder, line: line)
+            process.environment = Self.editorEnvironment(ProcessInfo.processInfo.environment)
+            process.terminationHandler = { finished in
+                guard finished.terminationStatus == 127 else { return }
+                DispatchQueue.main.async { Self.openInVSCodeApp(url) }
+            }
+            do {
+                try process.run()
+            } catch {
+                Self.openInVSCodeApp(url)
+            }
 
         case .neovim:
-            let target = isFolder ? "cd \(shellQuoted(path)) && nvim ." : "nvim \(line.map { "+\($0) " } ?? "")\(shellQuoted(path))"
-            runTerminalScript("#!/bin/bash\n\(target)\n")
+            runTerminalScript(Self.neovimScript(path: url.path, isFolder: isFolder, line: line))
 
         case .textEdit:
             if isFolder {
@@ -173,7 +180,30 @@ final class ConfigManager {
         }
     }
 
-    private func shellQuoted(_ value: String) -> String {
+    static func vscodeArguments(path: String, isFolder: Bool, line: Int?) -> [String] {
+        guard !isFolder, let line else { return ["code", path] }
+        return ["code", "--goto", "\(path):\(line)"]
+    }
+
+    static func neovimScript(path: String, isFolder: Bool, line: Int?) -> String {
+        let target = isFolder ? "cd \(shellQuoted(path)) && nvim ." : "nvim \(line.map { "+\($0) " } ?? "")\(shellQuoted(path))"
+        return "#!/bin/bash\n\(target)\n"
+    }
+
+    static func editorEnvironment(_ environment: [String: String]) -> [String: String] {
+        var environment = environment
+        let paths = (environment["PATH"] ?? "/usr/bin:/bin:/usr/sbin:/sbin").split(separator: ":").map(String.init)
+        let extra = ["/usr/local/bin", "/opt/homebrew/bin"].filter { !paths.contains($0) }
+        environment["PATH"] = (paths + extra).joined(separator: ":")
+        return environment
+    }
+
+    private static func openInVSCodeApp(_ url: URL) {
+        guard let vscode = NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.microsoft.VSCode") else { return }
+        NSWorkspace.shared.open([url], withApplicationAt: vscode, configuration: NSWorkspace.OpenConfiguration())
+    }
+
+    private static func shellQuoted(_ value: String) -> String {
         "'" + value.replacingOccurrences(of: "'", with: "'\\''") + "'"
     }
 

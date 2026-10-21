@@ -25,6 +25,11 @@ let package = Package(
                 // build-dmg.sh adds @executable_path/../Frameworks for the .app bundle.
                 .unsafeFlags(["-Xlinker", "-rpath", "-Xlinker", "@executable_path"])
             ]
+        ),
+        .testTarget(
+            name: "KeylyTests",
+            dependencies: ["Keyly"],
+            path: "Tests/KeylyTests"
         )
     ]
 )

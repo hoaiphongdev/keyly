@@ -17,6 +17,10 @@ build:
 build-release:
     swift build -c release
 
+# Run tests (swift-testing macros need the Xcode toolchain, not just Command Line Tools)
+test:
+    DEVELOPER_DIR="${DEVELOPER_DIR:-/Applications/Xcode.app/Contents/Developer}" swift test
+
 alias run := dev
 
 # Run dev mode (shows shortcut window, no keyboard monitoring)

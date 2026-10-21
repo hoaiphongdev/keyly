@@ -25,6 +25,9 @@ jobs:
       - name: Check CHANGELOG entry
         run: ./scripts/release-notes.sh "${{ steps.version.outputs.version }}" > release-notes.md
 
+      - name: Test
+        run: swift test
+
       - name: Install create-dmg
         run: brew install create-dmg
 

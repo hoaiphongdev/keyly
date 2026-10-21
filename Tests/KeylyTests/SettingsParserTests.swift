@@ -61,7 +61,7 @@ import Testing
         #expect(result.diagnostics.isEmpty)
     }
 
-    @Test(arguments: ["hyper", "cmd+a+b", "capslock+cmd", "⌘+💥", "++", "cmd+", "cmd++", "+", "ctrl + + k", "fn+up", "fn+f1", "fn+home"])
+    @Test(arguments: ["hyper", "cmd+a+b", "capslock+cmd", "⌘+💥", "++", "cmd+", "cmd++", "+", "ctrl + + k", "fn+up", "fn+f1", "fn+home", "fn+delete", "fn+return"])
     func badSuperKeyFallsBackToCapsLock(_ value: String) {
         let result = parse("super_key = \(value)\ntrigger_type = hold")
         #expect(result.settings.trigger == .capsLock)
@@ -114,6 +114,22 @@ import Testing
     @Test func lineNumbersSurviveCRLF() {
         let result = parse("# a\r\n\r\nsuper_key = nope\r\n")
         #expect(result.diagnostics.first?.line == 3)
+    }
+
+    @Test func utf16FilesAreRead() {
+        let text = "super_key = ctrl+k\n"
+        for encoding in [String.Encoding.utf16LittleEndian, .utf16BigEndian] {
+            var data = Data(encoding == .utf16LittleEndian ? [0xFF, 0xFE] : [0xFE, 0xFF])
+            data.append(text.data(using: encoding)!)
+            let result = parse(ConfigText.decode(data))
+            #expect(result.settings.trigger.label == "⌃K")
+            #expect(result.diagnostics.isEmpty)
+        }
+    }
+
+    @Test func onlyRealLineBreaksCountForLineNumbers() {
+        let result = parse("# a\u{2028}still the comment\u{85}\u{0B}\u{0C}\nsuper_key = nope")
+        #expect(result.diagnostics.first?.line == 2)
     }
 
     @Test func lastValueWins() {

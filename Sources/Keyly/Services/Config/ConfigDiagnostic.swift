@@ -20,7 +20,7 @@ struct ConfigDiagnostic: Equatable {
 
 enum ConfigLog {
     static let logger = Logger(subsystem: "com.keyly", category: "config")
-    private static let isDevMode = ProcessInfo.processInfo.environment["KEYLY_DEV"] == "1"
+    private static let isDevMode = AppConstants.isDevMode
 
     static func report(_ diagnostics: [ConfigDiagnostic]) {
         for diagnostic in diagnostics {
@@ -39,12 +39,15 @@ enum ConfigText {
     static let maxFileSize = 1_000_000
 
     static func decode(_ data: Data) -> String {
-        String(decoding: data, as: UTF8.self)
+        if data.starts(with: [0xFF, 0xFE]) || data.starts(with: [0xFE, 0xFF]), let text = String(data: data, encoding: .utf16) {
+            return text
+        }
+        return String(decoding: data, as: UTF8.self)
     }
 
     static func lines(_ text: String) -> [Substring] {
         let body = text.hasPrefix("\u{FEFF}") ? text.dropFirst() : Substring(text)
-        return body.split(omittingEmptySubsequences: false, whereSeparator: \.isNewline)
+        return body.split(omittingEmptySubsequences: false) { $0 == "\n" || $0 == "\r\n" || $0 == "\r" }
     }
 
     enum ReadResult {

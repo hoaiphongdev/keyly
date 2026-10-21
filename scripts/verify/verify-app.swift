@@ -598,6 +598,37 @@ if group("content") {
     check(eventually { overlayVisible() && overlayTexts().contains("Live two, Y") }, "an open overlay updates when a sheet is saved")
     closeOverlay()
 
+    func searchText() -> String? {
+        var value: String?
+        for window in (attribute(keylyAX, kAXWindowsAttribute) as? [AXUIElement]) ?? [] {
+            walk(window) { element in
+                if ["AXTextField", "AXSearchField"].contains(attribute(element, kAXRoleAttribute) as? String ?? "") {
+                    value = attribute(element, kAXValueAttribute) as? String
+                }
+            }
+        }
+        return value
+    }
+    var searchKept = false
+    for _ in 1...3 where !searchKept {
+        _ = openOverlayTexts()
+        route = .hid
+        _ = interference.take()
+        for code: CGKeyCode in [1, 34, 45] { tap(code) }
+        route = .pid
+        let typed = eventually(2) { searchText() == "sin" }
+        let unrelated = log.count
+        try? Data([1, 2, 3]).write(to: configDir.appendingPathComponent(".DS_Store"))
+        _ = waitLog("Loaded ", after: unrelated, timeout: 2)
+        pause(1)
+        if interference.take() || lostFocus { print("  ↻ search check interrupted, retrying"); continue }
+        searchKept = typed && overlayVisible() && searchText() == "sin"
+        break
+    }
+    check(searchKept, "saving an unrelated file keeps the open overlay and its search")
+    try? fm.removeItem(at: configDir.appendingPathComponent(".DS_Store"))
+    closeOverlay()
+
     let global = templatesDir.appendingPathComponent("global.keyly")
     _ = writeAndReload("[Edit]\n> Universal editing\nCMD+Z  Global undo", to: global)
     items = openOverlayTexts()
@@ -807,6 +838,16 @@ if group("relaunch") {
     let start = log.count
     write("# App: KeylyVerifySink\n[Verify]\nX  Through a symlink", to: realTemplates.appendingPathComponent("linked.keyly"))
     check(waitLog("Loaded 1 sheet(s)", after: start), "edits inside a symlinked templates/ reload", "\(log.since(start)) \(templatesDir.resolvingSymlinksInPath().path)")
+    quitKeyly()
+
+    try? fm.removeItem(at: configDir)
+    let realConfig = work.appendingPathComponent("dotfiles-config")
+    try? fm.createDirectory(at: realConfig.appendingPathComponent("templates"), withIntermediateDirectories: true)
+    try? fm.createSymbolicLink(at: configDir, withDestinationURL: realConfig)
+    _ = launchKeyly()
+    let linkedStart = log.count
+    write("# App: KeylyVerifySink\n[Verify]\nX  Whole folder linked", to: realConfig.appendingPathComponent("templates/linked.keyly"))
+    check(waitLog("Loaded 1 sheet(s)", after: linkedStart), "edits inside a symlinked ~/.config/keyly reload")
     check(keyly?.isRunning == true, "still running at the end")
 }
 

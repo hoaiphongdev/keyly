@@ -1,6 +1,6 @@
 import Cocoa
 
-struct ConfigSnapshot {
+struct ConfigSnapshot: Equatable {
     var settings = KeylySettings.defaults
     var sheets: [ShortcutSheet] = []
     var globalSheets: [ShortcutSheet] = []
@@ -40,17 +40,13 @@ enum ConfigLoader {
 
         // templates/ is the documented home; .keyly files placed directly in ~/.config/keyly/
         // (older docs and install-templates.sh put them there) are loaded too.
-        var filesByName: [String: URL] = [:]
+        var candidatesByName: [String: [URL]] = [:]
         for directory in [templatesDirectory, configDirectory] {
             for file in sheetFiles(in: directory) {
                 let name = file.lastPathComponent.lowercased()
-                guard let existing = filesByName[name] else {
-                    filesByName[name] = file
-                    continue
-                }
-                let (kept, ignored) = modificationDate(existing) >= modificationDate(file) ? (existing, file) : (file, existing)
-                filesByName[name] = kept
-                diagnostics.append(ConfigDiagnostic(file: ignored, line: nil, message: "Not used: the \(kept.lastPathComponent) in \(kept.deletingLastPathComponent().lastPathComponent)/ was saved last and is used instead"))
+                let known = candidatesByName[name] ?? []
+                if known.contains(where: { $0.resolvingSymlinksInPath() == file.resolvingSymlinksInPath() }) { continue }
+                candidatesByName[name] = known + [file]
             }
         }
 
@@ -58,24 +54,35 @@ enum ConfigLoader {
             sheet.sourceFile.map { ($0, sheet) }
         }) { first, _ in first }
 
-        for name in filesByName.keys.sorted() {
-            guard let file = filesByName[name] else { continue }
+        for name in candidatesByName.keys.sorted() {
+            let candidates = (candidatesByName[name] ?? []).sorted { modificationDate($0) > modificationDate($1) }
             let isGlobal = name == globalFileName
 
-            var sheet: ShortcutSheet
-            switch ConfigText.read(file) {
-            case .text(let text):
-                let parsed = SheetParser.parse(text, defaultName: file.deletingPathExtension().lastPathComponent, isGlobal: isGlobal)
-                diagnostics += parsed.diagnostics.map { $0.in(file) }
-                sheet = parsed.sheet
-                sheet.sourceFile = file
-                sheet.target = sheet.app.map(AppResolver.resolve)
-            case .missing:
-                continue
-            case .failed(let diagnostic):
-                diagnostics.append(diagnostic)
-                guard let kept = previousByFile[file] else { continue }
-                sheet = kept
+            var chosen: (file: URL, sheet: ShortcutSheet)?
+            var failures: [ConfigDiagnostic] = []
+            for file in candidates where chosen == nil {
+                switch ConfigText.read(file) {
+                case .text(let text):
+                    let parsed = SheetParser.parse(text, defaultName: file.deletingPathExtension().lastPathComponent, isGlobal: isGlobal)
+                    diagnostics += parsed.diagnostics.map { $0.in(file) }
+                    var sheet = parsed.sheet
+                    sheet.sourceFile = file
+                    sheet.target = sheet.app.map(AppResolver.resolve)
+                    chosen = (file, sheet)
+                case .missing:
+                    continue
+                case .failed(let diagnostic):
+                    failures.append(diagnostic)
+                }
+            }
+            diagnostics += failures
+
+            if chosen == nil, let kept = candidates.lazy.compactMap({ previousByFile[$0] }).first, let file = kept.sourceFile {
+                chosen = (file, kept)
+            }
+            guard let (usedFile, sheet) = chosen else { continue }
+            for other in candidates where other != usedFile && !failures.contains(where: { $0.file == other }) {
+                diagnostics.append(ConfigDiagnostic(file: other, line: nil, message: "Not used: the \(usedFile.lastPathComponent) in \(usedFile.deletingLastPathComponent().lastPathComponent)/ is used instead"))
             }
 
             if isGlobal {

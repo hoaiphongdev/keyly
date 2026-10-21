@@ -71,8 +71,9 @@ final class ConfigManager {
             self.lastLoaded = next
             DispatchQueue.main.async {
                 let settingsChanged = next.settings != self.snapshot.settings
+                let changed = next != self.snapshot
                 self.publish(next)
-                self.onConfigReloaded?()
+                if changed { self.onConfigReloaded?() }
                 if settingsChanged { self.onSettingsReloaded?() }
             }
         }
@@ -97,8 +98,10 @@ final class ConfigManager {
     }
 
     func startWatching() {
-        let paths = [configDirectory.path, templatesDirectory.resolvingSymlinksInPath().path]
-        fileWatcher = FileWatcher(paths: Array(Set(paths))) { [weak self] in
+        let config = configDirectory.resolvingSymlinksInPath().path
+        let templates = templatesDirectory.resolvingSymlinksInPath().path
+        let paths = templates.hasPrefix(config + "/") ? [config] : [config, templates]
+        fileWatcher = FileWatcher(paths: paths) { [weak self] in
             self?.reload()
         }
         fileWatcher?.start()
@@ -284,14 +287,12 @@ final class ConfigManager {
             # These shortcuts will appear at the top of every app's shortcut list
 
             [System]
-            > System-wide shortcuts that work everywhere
             CMD+SPACE       Spotlight Search
             CMD+TAB         App Switcher
             CMD+Q           Quit Application
             CMD+W           Close Window
 
             [Text Editing]
-            > Universal text editing shortcuts
             CMD+C           Copy
             CMD+V           Paste
             CMD+X           Cut

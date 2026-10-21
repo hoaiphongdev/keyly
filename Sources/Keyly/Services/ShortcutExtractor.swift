@@ -2,10 +2,10 @@ import Cocoa
 
 final class ShortcutExtractor {
     
-    func getShortcuts(for app: NSRunningApplication, mergeCustom: Bool = true) -> [ShortcutItem] {
+    func getShortcuts(for app: NSRunningApplication, sheets: [ShortcutSheet], mergeCustom: Bool = true) -> [ShortcutItem] {
         var shortcuts: [ShortcutItem] = []
         
-        let sheets = mergeCustom ? ConfigManager.shared.sheets(for: app) : []
+        let sheets = mergeCustom ? sheets : []
         let shouldHideDefaults = sheets.contains { $0.hideDefaultShortcuts }
         
         if !shouldHideDefaults {
@@ -31,17 +31,17 @@ final class ShortcutExtractor {
         return shortcuts
     }
     
-    func getCategoryDescriptions(for app: NSRunningApplication) -> [String: String] {
+    func getCategoryDescriptions(of sheets: [ShortcutSheet]) -> [String: String] {
         var descriptions: [String: String] = [:]
-        for sheet in ConfigManager.shared.sheets(for: app) {
+        for sheet in sheets {
             descriptions.merge(sheet.categoryDescriptions) { _, new in new }
         }
         return descriptions
     }
     
-    func getGroupDescriptions(for app: NSRunningApplication) -> [String: String] {
+    func getGroupDescriptions(of sheets: [ShortcutSheet]) -> [String: String] {
         var descriptions: [String: String] = [:]
-        for sheet in ConfigManager.shared.sheets(for: app) {
+        for sheet in sheets {
             descriptions.merge(sheet.groupDescriptions) { _, new in new }
         }
         return descriptions

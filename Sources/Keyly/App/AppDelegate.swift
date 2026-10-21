@@ -16,7 +16,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var isCapsLockOn = NSEvent.modifierFlags.contains(.capsLock)
 
     private let shortcutExtractor = ShortcutExtractor()
-    private let isDevMode = ProcessInfo.processInfo.environment["KEYLY_DEV"] == "1"
+    private let isDevMode = AppConstants.isDevMode
     private var trigger = KeylySettings.defaults.trigger
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -75,9 +75,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         guard let app = NSWorkspace.shared.frontmostApplication else { return }
         if app.bundleIdentifier == Bundle.main.bundleIdentifier { return }
 
-        let shortcuts = shortcutExtractor.getShortcuts(for: app)
-        let categoryDescriptions = shortcutExtractor.getCategoryDescriptions(for: app)
-        let groupDescriptions = shortcutExtractor.getGroupDescriptions(for: app)
+        let sheets = ConfigManager.shared.sheets(for: app)
+        let shortcuts = shortcutExtractor.getShortcuts(for: app, sheets: sheets)
+        let categoryDescriptions = shortcutExtractor.getCategoryDescriptions(of: sheets)
+        let groupDescriptions = shortcutExtractor.getGroupDescriptions(of: sheets)
 
         if shortcutsWindow == nil {
             shortcutsWindow = ShortcutsWindow()
@@ -368,9 +369,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         guard isSuperKeyPressed || !holdCancelled else { return }
         guard let frontmostApp = NSWorkspace.shared.frontmostApplication else { return }
 
-        let shortcuts = shortcutExtractor.getShortcuts(for: frontmostApp)
-        let categoryDescriptions = shortcutExtractor.getCategoryDescriptions(for: frontmostApp)
-        let groupDescriptions = shortcutExtractor.getGroupDescriptions(for: frontmostApp)
+        let sheets = ConfigManager.shared.sheets(for: frontmostApp)
+        let shortcuts = shortcutExtractor.getShortcuts(for: frontmostApp, sheets: sheets)
+        let categoryDescriptions = shortcutExtractor.getCategoryDescriptions(of: sheets)
+        let groupDescriptions = shortcutExtractor.getGroupDescriptions(of: sheets)
 
         if shortcutsWindow == nil {
             shortcutsWindow = ShortcutsWindow()

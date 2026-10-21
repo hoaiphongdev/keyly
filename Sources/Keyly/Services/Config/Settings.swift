@@ -249,7 +249,7 @@ struct KeyCombo: Equatable {
 
     private static let fnImpliedKeyCodes: Set<UInt16> = [
         122, 120, 99, 118, 96, 97, 98, 100, 101, 109, 103, 111,
-        123, 124, 125, 126, 115, 119, 116, 121, 117,
+        123, 124, 125, 126, 115, 119, 116, 121, 117, 51, 36,
     ]
 
     private static let modifierGlyphs: [(NSEvent.ModifierFlags, String)] = [
@@ -290,7 +290,7 @@ struct KeyCombo: Equatable {
         }
 
         if modifiers.contains(.function), let mainKey, fnImpliedKeyCodes.contains(mainKey.code) {
-            return .failure(ParseError(message: "fn can't be combined with \(mainKey.name): macOS reports fn for that key on its own"))
+            return .failure(ParseError(message: "fn can't be combined with \(mainKey.name): macOS turns that combination into another key"))
         }
 
         if hasCapsLock {

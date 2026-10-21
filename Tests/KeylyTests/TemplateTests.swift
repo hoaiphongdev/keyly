@@ -108,6 +108,45 @@ import Testing
         #expect(snapshot.sheets.map { $0.shortcuts[0].action } == ["Linked"])
     }
 
+    @Test func unreadableNewerCopyFallsBackToTheOlderOne() throws {
+        let folder = try makeFolder()
+        defer { try? FileManager.default.removeItem(at: folder.config) }
+
+        let older = folder.templates.appendingPathComponent("a.keyly")
+        try "# App: com.example.a\nCMD+A  Older but fine".write(to: older, atomically: true, encoding: .utf8)
+        try FileManager.default.setAttributes([.modificationDate: Date(timeIntervalSinceNow: -3600)], ofItemAtPath: older.path)
+        try Data(count: ConfigText.maxFileSize + 1).write(to: folder.config.appendingPathComponent("a.keyly"))
+
+        let snapshot = ConfigLoader.load(configDirectory: folder.config, templatesDirectory: folder.templates, previous: ConfigSnapshot())
+        #expect(snapshot.sheets.map { $0.shortcuts[0].action } == ["Older but fine"])
+        #expect(snapshot.diagnostics.map(\.message) == ["File is larger than 1 MB, skipped"])
+    }
+
+    @Test func aSymlinkToTheSameFileIsNotADuplicate() throws {
+        let folder = try makeFolder()
+        defer { try? FileManager.default.removeItem(at: folder.config) }
+
+        let real = folder.templates.appendingPathComponent("vim.keyly")
+        try "# App: com.example.vim\nX  Once".write(to: real, atomically: true, encoding: .utf8)
+        try FileManager.default.createSymbolicLink(at: folder.config.appendingPathComponent("vim.keyly"), withDestinationURL: real)
+
+        let snapshot = ConfigLoader.load(configDirectory: folder.config, templatesDirectory: folder.templates, previous: ConfigSnapshot())
+        #expect(snapshot.sheets.count == 1)
+        #expect(snapshot.diagnostics.isEmpty)
+    }
+
+    @Test func reloadingUnchangedFilesGivesAnEqualSnapshot() throws {
+        let folder = try makeFolder()
+        defer { try? FileManager.default.removeItem(at: folder.config) }
+
+        try "# App: com.example.a\nCMD+A  Same".write(to: folder.templates.appendingPathComponent("a.keyly"), atomically: true, encoding: .utf8)
+        try "super_key = cmd".write(to: folder.config.appendingPathComponent("setting.conf"), atomically: true, encoding: .utf8)
+        let first = ConfigLoader.load(configDirectory: folder.config, templatesDirectory: folder.templates, previous: ConfigSnapshot())
+        try Data().write(to: folder.config.appendingPathComponent(".DS_Store"))
+        let second = ConfigLoader.load(configDirectory: folder.config, templatesDirectory: folder.templates, previous: first)
+        #expect(first == second)
+    }
+
     @Test func unreadableFileKeepsThePreviousVersion() throws {
         let folder = try makeFolder()
         defer { try? FileManager.default.removeItem(at: folder.config) }

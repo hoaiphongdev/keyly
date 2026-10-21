@@ -1,6 +1,6 @@
 import Foundation
 
-struct ShortcutSheet {
+struct ShortcutSheet: Equatable {
     let name: String
     let app: String?
     let shortcuts: [ShortcutItem]

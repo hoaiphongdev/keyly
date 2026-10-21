@@ -47,7 +47,7 @@ F5              Switch note list view
 ⇧⌘J             Open Tag filter
 ⌘[              Move back
 ⌘]              Move forward
-⌘|              Focus on note list
+⇧⌘\              Focus on note list
 ⌥F10            Focus on formatting bar
 ⌥⌘←             Collapse note list
 ⌥⌘→             Expand note list

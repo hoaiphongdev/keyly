@@ -66,7 +66,8 @@ import Testing
         #expect(snapshot.sheetsByBundleId["com.example.a"].map { $0.map { snapshot.sheets[$0].shortcuts[0].action } } == ["From user"])
         #expect(snapshot.sheetsByName["some app"]?.count == 1)
         #expect(snapshot.globalSheets.first?.shortcuts.first?.action == "Quit")
-        #expect(snapshot.diagnostics.count == 2)
+        #expect(snapshot.diagnostics.count == 3)
+        #expect(snapshot.diagnostics.contains { $0.file?.lastPathComponent == "a.keyly" && $0.message.contains("Not used") })
         #expect(snapshot.diagnostics.allSatisfy { $0.file != nil })
     }
 
@@ -81,6 +82,16 @@ import Testing
 
         let snapshot = ConfigLoader.load(configDirectory: folder.config, templatesDirectory: folder.templates, previous: ConfigSnapshot())
         #expect(snapshot.sheets.map { $0.shortcuts[0].action } == ["Updated template"])
+        #expect(snapshot.diagnostics.map { $0.file?.resolvingSymlinksInPath().path } == [old.resolvingSymlinksInPath().path])
+    }
+
+    @Test func bundleIdsIgnoreCase() throws {
+        let folder = try makeFolder()
+        defer { try? FileManager.default.removeItem(at: folder.config) }
+
+        try "# App: COM.Example.A\nCMD+A  Works".write(to: folder.templates.appendingPathComponent("a.keyly"), atomically: true, encoding: .utf8)
+        let snapshot = ConfigLoader.load(configDirectory: folder.config, templatesDirectory: folder.templates, previous: ConfigSnapshot())
+        #expect(snapshot.sheetsByBundleId["com.example.a"] == [0])
     }
 
     @Test func unreadableFileKeepsThePreviousVersion() throws {

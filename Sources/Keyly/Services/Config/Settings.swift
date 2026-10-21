@@ -216,13 +216,13 @@ struct KeyCombo: Equatable {
         "⏎": "return", "↩": "return",
         "⇥": "tab",
         "backspace": "delete", "⌫": "delete",
-        "del": "forward_delete", "⌦": "forward_delete",
+        "del": "delete", "enter": "return", "fwd_delete": "forward_delete", "⌦": "forward_delete",
         "pageup": "page_up", "pgup": "page_up", "pagedown": "page_down", "pgdn": "page_down",
         "spacebar": "space", "↑": "up", "↓": "down", "←": "left", "→": "right",
     ]
 
     private static let keyCodes: [String: UInt16] = {
-        var codes: [String: UInt16] = ["-": 27, "=": 24]
+        var codes: [String: UInt16] = ["-": 27, "=": 24, "keypad_enter": 76]
         for (code, name) in AppConstants.KeyCodes.names where modifierAliases[name] == nil {
             codes[name] = code
         }

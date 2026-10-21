@@ -9,7 +9,7 @@ struct ConfigSnapshot {
     var sheetsByName: [String: [Int]] = [:]
 
     func sheets(for app: NSRunningApplication) -> [ShortcutSheet] {
-        var indexes = app.bundleIdentifier.flatMap { sheetsByBundleId[$0] } ?? []
+        var indexes = app.bundleIdentifier.flatMap { sheetsByBundleId[$0.lowercased()] } ?? []
         for key in AppResolver.nameKeys(for: app) {
             indexes += sheetsByName[key] ?? []
         }
@@ -44,8 +44,13 @@ enum ConfigLoader {
         for directory in [templatesDirectory, configDirectory] {
             for file in sheetFiles(in: directory) {
                 let name = file.lastPathComponent.lowercased()
-                if let existing = filesByName[name], modificationDate(existing) >= modificationDate(file) { continue }
-                filesByName[name] = file
+                guard let existing = filesByName[name] else {
+                    filesByName[name] = file
+                    continue
+                }
+                let (kept, ignored) = modificationDate(existing) >= modificationDate(file) ? (existing, file) : (file, existing)
+                filesByName[name] = kept
+                diagnostics.append(ConfigDiagnostic(file: ignored, line: nil, message: "Not used: a newer \(kept.lastPathComponent) is in \(kept.deletingLastPathComponent().lastPathComponent)/"))
             }
         }
 
@@ -78,7 +83,7 @@ enum ConfigLoader {
             } else if let target = sheet.target {
                 let index = snapshot.sheets.count
                 snapshot.sheets.append(sheet)
-                if let bundleId = target.bundleId { snapshot.sheetsByBundleId[bundleId, default: []].append(index) }
+                if let bundleId = target.bundleId { snapshot.sheetsByBundleId[bundleId.lowercased(), default: []].append(index) }
                 if let nameKey = target.nameKey { snapshot.sheetsByName[nameKey, default: []].append(index) }
             }
         }
@@ -88,7 +93,7 @@ enum ConfigLoader {
     }
 
     private static func modificationDate(_ file: URL) -> Date {
-        (try? file.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? .distantPast
+        (try? file.resolvingSymlinksInPath().resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? .distantPast
     }
 
     private static func sheetFiles(in directory: URL) -> [URL] {

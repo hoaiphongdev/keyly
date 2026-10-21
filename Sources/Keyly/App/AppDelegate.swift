@@ -236,7 +236,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             if pressed.isEmpty { waitingForModifierRelease = false }
 
             if !pressed.subtracting(trigger.modifiers).isEmpty {
-                interruptModifierTrigger(flags)
+                interruptModifierTrigger(waitForRelease: true)
             } else if waitingForModifierRelease {
                 return
             } else if pressed == trigger.modifiers && !isSuperKeyPressed {
@@ -258,20 +258,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         if trigger.isModifierOnly {
-            interruptModifierTrigger(event.modifierFlags)
+            interruptModifierTrigger(waitForRelease: isSuperKeyPressed)
         } else {
             superKeyPressCount = 0
             if isSuperKeyPressed { cancelHold() }
         }
     }
 
-    private func interruptModifierTrigger(_ flags: NSEvent.ModifierFlags) {
+    private func interruptModifierTrigger(waitForRelease: Bool) {
         superKeyPressCount = 0
         if isSuperKeyPressed {
             cancelHold()
             triggerWentUp()
         }
-        if !trigger.relevantModifiers(flags).isEmpty {
+        if waitForRelease {
             waitingForModifierRelease = true
         }
     }

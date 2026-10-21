@@ -21,6 +21,7 @@ final class ConfigManager {
     private(set) var snapshot = ConfigSnapshot()
     private var fileWatcher: FileWatcher?
     private let loadQueue = DispatchQueue(label: "com.keyly.config", qos: .utility)
+    private var lastLoaded = ConfigSnapshot()
 
     private let editorPreferenceKey = "KeylyPreferredEditor"
 
@@ -56,14 +57,18 @@ final class ConfigManager {
     func loadInitial() {
         ensureDirectories()
         createDefaultSettingsIfNeeded()
-        publish(loadSnapshot(previous: snapshot))
+        let first = loadQueue.sync {
+            lastLoaded = loadSnapshot(previous: lastLoaded)
+            return lastLoaded
+        }
+        publish(first)
     }
 
     func reload() {
-        let previous = snapshot
         loadQueue.async { [weak self] in
             guard let self else { return }
-            let next = self.loadSnapshot(previous: previous)
+            let next = self.loadSnapshot(previous: self.lastLoaded)
+            self.lastLoaded = next
             DispatchQueue.main.async {
                 let settingsChanged = next.settings != self.snapshot.settings
                 self.publish(next)
@@ -82,8 +87,9 @@ final class ConfigManager {
     }
 
     private func publish(_ next: ConfigSnapshot) {
+        let diagnosticsChanged = next.diagnostics != snapshot.diagnostics
         snapshot = next
-        ConfigLog.report(next.diagnostics)
+        if diagnosticsChanged { ConfigLog.report(next.diagnostics) }
     }
 
     private func ensureDirectories() {
@@ -185,7 +191,7 @@ final class ConfigManager {
 
     private func createDefaultSettingsIfNeeded() {
         let file = configDirectory.appendingPathComponent(SettingsParser.fileName)
-        guard !FileManager.default.fileExists(atPath: file.path) else { return }
+        guard (try? FileManager.default.attributesOfItem(atPath: file.path)) == nil else { return }
         try? Self.defaultSettingsContent.write(to: file, atomically: true, encoding: .utf8)
     }
 

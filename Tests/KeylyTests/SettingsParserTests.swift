@@ -49,6 +49,9 @@ import Testing
         ComboCase(value: "opt+esc", modifiers: .option, keyCode: AppConstants.KeyCodes.escape),
         ComboCase(value: "ctrl+page up", modifiers: .control, keyCode: AppConstants.KeyCodes.pageUp),
         ComboCase(value: "shift+f12", modifiers: .shift, keyCode: AppConstants.KeyCodes.f12),
+        ComboCase(value: "cmd+enter", modifiers: .command, keyCode: AppConstants.KeyCodes.returnKey),
+        ComboCase(value: "ctrl+del", modifiers: .control, keyCode: AppConstants.KeyCodes.delete),
+        ComboCase(value: "ctrl+keypad enter", modifiers: .control, keyCode: AppConstants.KeyCodes.enter),
     ])
     func superKeyForms(_ combo: ComboCase) {
         let result = parse("super_key = \(combo.value)")

@@ -4,8 +4,8 @@ final class FileWatcher {
     private var streamRef: FSEventStreamRef?
     private let paths: [String]
     private let callback: () -> Void
-    private var lastEventTime: Date = .distantPast
-    private let debounceInterval: TimeInterval = 0.5
+    private var pendingCallback: DispatchWorkItem?
+    private let debounceInterval: TimeInterval = 0.3
     
     init(paths: [String], callback: @escaping () -> Void) {
         self.paths = paths
@@ -41,6 +41,8 @@ final class FileWatcher {
     }
     
     func stop() {
+        pendingCallback?.cancel()
+        pendingCallback = nil
         guard let stream = streamRef else { return }
         FSEventStreamStop(stream)
         FSEventStreamInvalidate(stream)
@@ -49,13 +51,12 @@ final class FileWatcher {
     }
     
     private func handleEvents() {
-        let now = Date()
-        guard now.timeIntervalSince(lastEventTime) > debounceInterval else { return }
-        lastEventTime = now
-        
-        DispatchQueue.main.async { [weak self] in
+        pendingCallback?.cancel()
+        let work = DispatchWorkItem { [weak self] in
             self?.callback()
         }
+        pendingCallback = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + debounceInterval, execute: work)
     }
     
     deinit {

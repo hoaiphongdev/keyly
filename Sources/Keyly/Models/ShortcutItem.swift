@@ -1,6 +1,6 @@
 import Foundation
 
-struct ShortcutItem {
+struct ShortcutItem: Equatable {
     let category: String
     let action: String
     let shortcut: String

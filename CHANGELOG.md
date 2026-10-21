@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Added
+- **Config problems in the ⚙︎ menu**: A line or value Keyly can't read is listed under "⚠︎ config problems"; click one to open the file at that line. Problems are also logged to Console.app (`com.keyly`).
+- **`# App:` takes a name or bundle id**: `# App: Figma` and `# App: com.figma.Desktop` work next to the path. Sheets also match by name, so apps in `~/Applications`, Setapp or a newer year (Photoshop 2025 for a 2024 template) are found.
+- **Escaped keys**: `\#`, `\[` and `\>` write a shortcut whose key starts with that character.
+
+### Changed
+- **Forgiving settings**: Names and values ignore case; quotes and trailing `# comments` are fine; `super_key` takes `command`, `option`, `control` and ⌘⌃⌥⇧ symbols; `hold_duration` takes `500ms`; numbers out of range are clamped (`hold_duration` 0.1–3s, `press_count` 1–4) instead of being accepted or reset. Typos get a "did you mean".
+- **`setting.conf` is created on first launch**, with every option commented out.
+- **Modifier-only triggers count on release**: With `super_key = cmd` and `trigger_type = press`, a tap counts when ⌘ is let go and any other key or modifier in between cancels it, so ⌘C or ⌘⇧ never open Keyly, even with `press_count = 1`.
+- **`super_key` names**: `enter` means Return and `del` means ⌫, as in sheets. `fn` can't be combined with arrows, F keys, Home/End or Page Up/Down, because macOS reports fn for those keys on its own.
+- **Same file in two folders**: When `templates/` and `~/.config/keyly/` both have a file with the same name, the one saved last is used and the other is listed in the ⚙︎ menu.
+- **Faster, steadier reloads**: Config files are parsed off the main thread, the reload waits for the last save, and a file that can't be read mid-save keeps its previous version.
+
+### Fixed
+- **Trigger with extra modifiers**: `super_key = ctrl+k` no longer opens on ⌃⌘K.
+- **Holding ⌘ then pressing ⌘C** cancels the hold, and typing in between no longer counts toward a double tap.
+- **Evernote, Notion and Illustrator templates**: Markdown shortcuts (`#`, `##`, `>`) were read as comments or descriptions.
+- **`⌘+click`** keeps its `+`.
+- **Symlinked `templates/` folder** (dotfiles setups): its sheets load and reload on save.
+- **Opening a config file in VS Code** works when Keyly is launched from Finder, where `code` in `/usr/local/bin` or `/opt/homebrew/bin` wasn't found before.
+- **A missed key release** no longer blocks the next key + modifier trigger.
+- **Open window keeps its search** when something unrelated changes in `~/.config/keyly` (Finder's `.DS_Store`, editor swap files).
+- **UTF-16 config files** (with a byte order mark) are read correctly.
+
 ## [1.9.0] - 2026-10-20
 
 ### Added

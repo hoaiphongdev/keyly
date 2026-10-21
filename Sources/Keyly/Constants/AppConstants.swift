@@ -4,9 +4,9 @@ import Cocoa
 struct AppConstants {
     static let escapeKeyCode: UInt16 = 53
     static let doubleClickTimeInterval: TimeInterval = 0.5
-    static let defaultHoldDuration: TimeInterval = 0.5
     static let aboutIconSize = NSSize(width: 64, height: 64)
     static let globalTemplateFileName = "global.keyly"
+    static let isDevMode = ProcessInfo.processInfo.environment["KEYLY_DEV"] == "1"
     
     struct KeyCodes {
         /// Names accepted as the main key of `super_key` in setting.conf

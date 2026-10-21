@@ -2,15 +2,11 @@ import Cocoa
 
 final class ShortcutExtractor {
     
-    func getShortcuts(for app: NSRunningApplication, mergeCustom: Bool = true) -> [ShortcutItem] {
+    func getShortcuts(for app: NSRunningApplication, sheets: [ShortcutSheet], mergeCustom: Bool = true) -> [ShortcutItem] {
         var shortcuts: [ShortcutItem] = []
         
-        var appSpecificSheet: ShortcutSheet?
-        if let bundleId = app.bundleIdentifier {
-            appSpecificSheet = ConfigManager.shared.sheets(for: bundleId).first
-        }
-        
-        let shouldHideDefaults = appSpecificSheet?.hideDefaultShortcuts ?? false
+        let sheets = mergeCustom ? sheets : []
+        let shouldHideDefaults = sheets.contains { $0.hideDefaultShortcuts }
         
         if !shouldHideDefaults {
             let appElement = AXUIElementCreateApplication(app.processIdentifier)
@@ -18,20 +14,14 @@ final class ShortcutExtractor {
             var menuBar: AnyObject?
             let result = AXUIElementCopyAttributeValue(appElement, kAXMenuBarAttribute as CFString, &menuBar)
             
-            if result == .success, let menuBarElement = menuBar {
+            if result == .success, let menuBarElement = menuBar, CFGetTypeID(menuBarElement) == AXUIElementGetTypeID() {
                 shortcuts = extractShortcutsFromMenuBar(menuBarElement as! AXUIElement)
             }
         }
         
-        if mergeCustom, let bundleId = app.bundleIdentifier {
-            let customSheets = ConfigManager.shared.sheets(for: bundleId)
-            for sheet in customSheets {
-                shortcuts = sheet.shortcuts + shortcuts
-            }
-        }
-        
         if mergeCustom {
-            shortcuts = ConfigManager.shared.globalShortcuts + shortcuts
+            let custom = (ConfigManager.shared.globalSheets + sheets).flatMap(\.shortcuts)
+            shortcuts = custom + shortcuts
         }
         
         if shortcuts.isEmpty && !shouldHideDefaults {
@@ -41,19 +31,17 @@ final class ShortcutExtractor {
         return shortcuts
     }
     
-    func getCategoryDescriptions(for app: NSRunningApplication) -> [String: String] {
-        guard let bundleId = app.bundleIdentifier else { return [:] }
+    func getCategoryDescriptions(of sheets: [ShortcutSheet]) -> [String: String] {
         var descriptions: [String: String] = [:]
-        for sheet in ConfigManager.shared.sheets(for: bundleId) {
+        for sheet in sheets {
             descriptions.merge(sheet.categoryDescriptions) { _, new in new }
         }
         return descriptions
     }
     
-    func getGroupDescriptions(for app: NSRunningApplication) -> [String: String] {
-        guard let bundleId = app.bundleIdentifier else { return [:] }
+    func getGroupDescriptions(of sheets: [ShortcutSheet]) -> [String: String] {
         var descriptions: [String: String] = [:]
-        for sheet in ConfigManager.shared.sheets(for: bundleId) {
+        for sheet in sheets {
             descriptions.merge(sheet.groupDescriptions) { _, new in new }
         }
         return descriptions

@@ -54,7 +54,15 @@ enum ShortcutMapping {
         "DOWN": KeySymbol.down,
         "LEFT": KeySymbol.left,
         "RIGHT": KeySymbol.right,
-    ]
+        "HOME": "↖",
+        "END": "↘",
+        "PGUP": "⇞",
+        "PAGEUP": "⇞",
+        "PGDN": "⇟",
+        "PAGEDOWN": "⇟",
+        "FWDDEL": "⌦",
+        "FORWARDDELETE": "⌦",
+    ].merging((1...20).map { ("F\($0)", "F\($0)") }) { current, _ in current }
     
     static let unicodeToSymbol: [String: String] = [
         "\u{007F}": KeySymbol.delete,

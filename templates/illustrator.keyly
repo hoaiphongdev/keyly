@@ -145,7 +145,7 @@ F               Toggle screen modes
 X               Toggle fill/stroke
 D               Default fill/stroke
 ⇧X              Swap fill/stroke
->               Gradient fill mode
+\>              Gradient fill mode
 <               Color fill mode
 /               No stroke/fill
 ⌥⌘G             Hide gradient annotator

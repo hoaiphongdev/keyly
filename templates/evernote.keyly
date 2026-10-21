@@ -117,9 +117,9 @@ F2              Rename
 
 [Auto Formatting]
 > Type these at start of line.
-#               Large header
-##              Medium header
-###             Small header
+\#              Large header
+\##             Medium header
+\###            Small header
 ()              Task
 (x)             Task (checked)
 []              Checklist
@@ -129,7 +129,7 @@ F2              Rename
 -               Bulleted list
 ---             Divider
 ```             Code block
->               Quote block
+\>              Quote block
 
 [AI Assistant]
 ⌥A              Toggle AI Assistant

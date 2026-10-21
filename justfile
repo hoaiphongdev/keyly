@@ -17,6 +17,26 @@ build:
 build-release:
     swift build -c release
 
+test:
+    DEVELOPER_DIR="${DEVELOPER_DIR:-/Applications/Xcode.app/Contents/Developer}" swift test
+
+verify-app:
+    swift build
+    swift scripts/verify/verify-app.swift --repo "$PWD"
+
+verify-sanitize:
+    DEVELOPER_DIR="${DEVELOPER_DIR:-/Applications/Xcode.app/Contents/Developer}" swift test --sanitize=thread --skip PerformanceTests --skip largeFileIsLinear --skip parsingTimeGrowsLinearly
+    DEVELOPER_DIR="${DEVELOPER_DIR:-/Applications/Xcode.app/Contents/Developer}" swift test --sanitize=address --skip PerformanceTests --skip largeFileIsLinear --skip parsingTimeGrowsLinearly
+    swift build --sanitize=thread
+    swift scripts/verify/verify-app.swift --repo "$PWD" --skip-performance
+    swift build
+
+verify-release:
+    env -u KEYLY_SIGN_IDENTITY ./scripts/build-dmg.sh 99.0.0
+    swift scripts/verify/verify-app.swift --repo "$PWD" --release --binary "$PWD/.build/release/Keyly.app/Contents/MacOS/Keyly"
+
+verify-all: test verify-app verify-sanitize verify-release
+
 alias run := dev
 
 # Run dev mode (shows shortcut window, no keyboard monitoring)

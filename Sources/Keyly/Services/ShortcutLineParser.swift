@@ -84,8 +84,11 @@ enum ShortcutLineParser {
 
         let orderedModifiers = ShortcutMapping.modifierOrder.filter(modifiers.contains).joined()
         if let namedKey { return orderedModifiers + namedKey }
-        return key.count == 1 ? orderedModifiers + key.uppercased() : orderedModifiers + "+" + key
+        if mouseWords.contains(key.lowercased()) { return orderedModifiers + "+" + key }
+        return orderedModifiers + (key.count == 1 ? key.uppercased() : key)
     }
+
+    private static let mouseWords: Set<String> = ["click", "double-click", "right-click", "drag", "scroll"]
 
     private static func nonEmpty(_ left: String, _ right: String) -> (String, String)? {
         let left = left.trimmingCharacters(in: .whitespaces)

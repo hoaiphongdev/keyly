@@ -107,8 +107,8 @@ enum SheetParser {
     }
 
     private static func directive(in line: String) -> (String, String)? {
-        let body = line.drop { $0 == "#" }
-        guard let colon = body.firstIndex(of: ":") else { return nil }
+        let body = line.dropFirst()
+        guard !body.hasPrefix("#"), let colon = body.firstIndex(of: ":") else { return nil }
         let name = body[..<colon].trimmingCharacters(in: .whitespaces).lowercased()
         guard ["sheet name", "app", "hide default", "hide defaults", "group"].contains(name) else { return nil }
         return (name, body[body.index(after: colon)...].trimmingCharacters(in: .whitespaces))

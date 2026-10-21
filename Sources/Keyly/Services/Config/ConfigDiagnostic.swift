@@ -56,32 +56,12 @@ enum ConfigText {
     static func read(_ url: URL) -> ReadResult {
         guard FileManager.default.fileExists(atPath: url.path) else { return .missing }
 
-        if let size = try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize, size > maxFileSize {
+        if let size = try? url.resolvingSymlinksInPath().resourceValues(forKeys: [.fileSizeKey]).fileSize, size > maxFileSize {
             return .failed(ConfigDiagnostic(file: url, line: nil, message: "File is larger than 1 MB, skipped"))
         }
         guard let data = try? Data(contentsOf: url) else {
             return .failed(ConfigDiagnostic(file: url, line: nil, message: "Couldn't read the file"))
         }
         return .text(decode(data))
-    }
-}
-
-extension String {
-    func distance(to other: String) -> Int {
-        let a = Array(self), b = Array(other)
-        if a.isEmpty { return b.count }
-        if b.isEmpty { return a.count }
-
-        var previous = Array(0...b.count)
-        var current = [Int](repeating: 0, count: b.count + 1)
-        for i in 1...a.count {
-            current[0] = i
-            for j in 1...b.count {
-                let cost = a[i - 1] == b[j - 1] ? 0 : 1
-                current[j] = Swift.min(previous[j] + 1, current[j - 1] + 1, previous[j - 1] + cost)
-            }
-            swap(&previous, &current)
-        }
-        return previous[b.count]
     }
 }

@@ -63,8 +63,8 @@ import Testing
 
         #expect(snapshot.settings.trigger.label == "⌃K")
         #expect(snapshot.sheets.count == 2)
-        #expect(snapshot.sheetsByBundleId["com.example.a"].map { $0.map { snapshot.sheets[$0].shortcuts[0].action } } == ["From user"])
-        #expect(snapshot.sheetsByName["some app"]?.count == 1)
+        #expect(snapshot.sheets.filter { $0.target?.bundleId == "com.example.a" }.map { $0.shortcuts[0].action } == ["From user"])
+        #expect(snapshot.sheets.filter { $0.target?.nameKey == "some app" }.count == 1)
         #expect(snapshot.globalSheets.first?.shortcuts.first?.action == "Quit")
         #expect(snapshot.diagnostics.count == 3)
         #expect(snapshot.diagnostics.contains { $0.file?.lastPathComponent == "a.keyly" && $0.message.contains("Not used") })
@@ -91,7 +91,7 @@ import Testing
 
         try "# App: COM.Example.A\nCMD+A  Works".write(to: folder.templates.appendingPathComponent("a.keyly"), atomically: true, encoding: .utf8)
         let snapshot = ConfigLoader.load(configDirectory: folder.config, templatesDirectory: folder.templates, previous: ConfigSnapshot())
-        #expect(snapshot.sheetsByBundleId["com.example.a"] == [0])
+        #expect(snapshot.sheets.map(\.target?.bundleId) == ["COM.Example.A"])
     }
 
     @Test func unreadableFileKeepsThePreviousVersion() throws {

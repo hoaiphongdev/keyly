@@ -33,7 +33,7 @@ final class ShortcutExtractor {
     
     func getCategoryDescriptions(for app: NSRunningApplication) -> [String: String] {
         var descriptions: [String: String] = [:]
-        for sheet in ConfigManager.shared.globalSheets + ConfigManager.shared.sheets(for: app) {
+        for sheet in ConfigManager.shared.sheets(for: app) {
             descriptions.merge(sheet.categoryDescriptions) { _, new in new }
         }
         return descriptions
@@ -41,7 +41,7 @@ final class ShortcutExtractor {
     
     func getGroupDescriptions(for app: NSRunningApplication) -> [String: String] {
         var descriptions: [String: String] = [:]
-        for sheet in ConfigManager.shared.globalSheets + ConfigManager.shared.sheets(for: app) {
+        for sheet in ConfigManager.shared.sheets(for: app) {
             descriptions.merge(sheet.groupDescriptions) { _, new in new }
         }
         return descriptions

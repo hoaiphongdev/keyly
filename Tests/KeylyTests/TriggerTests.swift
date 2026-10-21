@@ -18,8 +18,9 @@ import Testing
     @Test func capsLockAndFnFlagsAreIgnoredUnlessAsked() {
         let ctrlK = trigger("ctrl+k")
         #expect(ctrlK.matchesKey(AppConstants.KeyCodes.k, flags: [.control, .capsLock, .function, .numericPad]))
-        #expect(trigger("fn+f1").matchesKey(AppConstants.KeyCodes.f1, flags: [.function]))
-        #expect(!trigger("fn+f1").matchesKey(AppConstants.KeyCodes.f1, flags: []))
+        #expect(trigger("fn+k").matchesKey(AppConstants.KeyCodes.k, flags: [.function]))
+        #expect(!trigger("fn+k").matchesKey(AppConstants.KeyCodes.k, flags: []))
+        #expect(trigger("ctrl+up").matchesKey(AppConstants.KeyCodes.up, flags: [.control, .function, .numericPad]))
     }
 
     @Test func modifierOnlyTrigger() {

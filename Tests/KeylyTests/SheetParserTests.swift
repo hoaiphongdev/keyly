@@ -13,6 +13,8 @@ import Testing
         # app: Figma
         # HIDE DEFAULT: yes
         # a plain comment: with a colon
+        ## App: com.disabled.App
+        ## Hide Default: false
 
         # Group: Canvas - Moving around
         [View]
@@ -109,6 +111,8 @@ import Testing
         ("ctrl-alt-delete\tForce quit", "⌃⌥⌫", "Force quit"),
         ("tool attach <name> | Attach", "tool attach <name>", "Attach"),
         ("⌘+click         Add cursor", "⌘+click", "Add cursor"),
+        ("CMD+Comma  Settings", "⌘Comma", "Settings"),
+        ("CMD+Up/Down  Move", "⌘Up/Down", "Move"),
         ("CMD+F5  Run", "⌘F5", "Run"),
         ("CMD+K CMD+S  Save all", "⌘K ⌘S", "Save all"),
         ("Home  Start of line", "↖", "Start of line"),

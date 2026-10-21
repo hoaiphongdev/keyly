@@ -243,6 +243,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 triggerWentDown()
             } else if pressed != trigger.modifiers && isSuperKeyPressed {
                 triggerWentUp()
+                registerPress()
             }
         } else if isSuperKeyPressed && !trigger.matchesModifiers(flags) {
             triggerWentUp()
@@ -289,8 +290,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         switch trigger.kind {
         case .hold(let seconds):
             startHoldTimer(seconds)
-        case .press:
+        case .press where !trigger.isModifierOnly:
             registerPress()
+        case .press:
+            break
         }
     }
 

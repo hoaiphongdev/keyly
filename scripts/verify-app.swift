@@ -72,7 +72,9 @@ func waitFor(_ text: String, after start: Int, timeout: Double = 3) -> Bool {
 func writeSettings(_ text: String, expectTrigger label: String) -> Bool {
     let start = output.count
     try? text.write(to: settingsFile, atomically: true, encoding: .utf8)
-    return waitFor("trigger \(label) in", after: start)
+    let loaded = waitFor("trigger \(label) in", after: start)
+    pause(0.8)
+    return loaded
 }
 
 var pid: pid_t = 0
@@ -185,6 +187,18 @@ scenario("typing a letter between ⌘ taps does not open", opens: false) {
     flags(cmd, .maskCommand); flags(cmd, [])
 }
 
+check(writeSettings("super_key = cmd\ntrigger_type = press\npress_count = 1", expectTrigger: "⌘"), "reloads super_key = cmd, press_count = 1")
+scenario("⌘C with press_count = 1 does not open", opens: false) {
+    flags(cmd, .maskCommand)
+    tap(cKey, .maskCommand)
+    flags(cmd, [])
+}
+scenario("a single ⌘ tap with press_count = 1 opens", opens: true) {
+    flags(cmd, .maskCommand); flags(cmd, [])
+}
+
+check(writeSettings("super_key = fn+f1\ntrigger_type = press", expectTrigger: "⇪"), "fn+f1 is rejected and falls back to Caps Lock")
+
 check(writeSettings("super_key = Command\ntrigger_type = Hold\nhold_duration = 300ms", expectTrigger: "⌘"), "reloads super_key = Command, Hold, 300ms")
 scenario("holding ⌘ 0.3s opens", opens: true, settle: 0.6) {
     flags(cmd, .maskCommand)
@@ -245,14 +259,14 @@ check(waitFor("trigger ⇪ in", after: start), "binary garbage in setting.conf f
 check(process.isRunning, "still running after garbage settings")
 
 start = output.count
-for value in ["1", "2", "3", "4"] {
-    try? "super_key = ctrl+k\npress_count = \(value)".write(to: settingsFile, atomically: true, encoding: .utf8)
+for value in ["cmd", "alt", "shift", "ctrl+k"] {
+    try? "super_key = \(value)".write(to: settingsFile, atomically: true, encoding: .utf8)
     pause(0.05)
 }
 check(waitFor("trigger ⌃K in", after: start), "rapid saves reload")
-pause(0.8)
-let pressLines = output.lines(from: start).filter { $0.contains("Loaded") }
-check(pressLines.count == 1, "rapid saves reload once", "(\(pressLines.count) reloads)")
+pause(1)
+let loadedLines = output.lines(from: start).filter { $0.contains("Loaded") }
+check(loadedLines.last?.contains("trigger ⌃K in") == true, "the last reload reads the last save", "(\(loadedLines.count) reloads)")
 start = output.count
 check(writeSettings("super_key = ctrl+k\ntrigger_type = press\npress_count = 4", expectTrigger: "⌃K"), "reloads press_count = 4")
 scenario("press_count = 4 needs four ⌃K", opens: true) {

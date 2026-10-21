@@ -61,7 +61,7 @@ import Testing
         #expect(result.diagnostics.isEmpty)
     }
 
-    @Test(arguments: ["hyper", "cmd+a+b", "capslock+cmd", "⌘+💥", "++", "cmd+", "cmd++", "+"])
+    @Test(arguments: ["hyper", "cmd+a+b", "capslock+cmd", "⌘+💥", "++", "cmd+", "cmd++", "+", "ctrl + + k", "fn+up", "fn+f1", "fn+home"])
     func badSuperKeyFallsBackToCapsLock(_ value: String) {
         let result = parse("super_key = \(value)\ntrigger_type = hold")
         #expect(result.settings.trigger == .capsLock)

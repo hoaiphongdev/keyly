@@ -5,15 +5,15 @@ struct ConfigSnapshot {
     var sheets: [ShortcutSheet] = []
     var globalSheets: [ShortcutSheet] = []
     var diagnostics: [ConfigDiagnostic] = []
-    var sheetsByBundleId: [String: [Int]] = [:]
-    var sheetsByName: [String: [Int]] = [:]
 
     func sheets(for app: NSRunningApplication) -> [ShortcutSheet] {
-        var indexes = app.bundleIdentifier.flatMap { sheetsByBundleId[$0.lowercased()] } ?? []
-        for key in AppResolver.nameKeys(for: app) {
-            indexes += sheetsByName[key] ?? []
+        let bundleId = app.bundleIdentifier?.lowercased()
+        let nameKeys = AppResolver.nameKeys(for: app)
+        return sheets.filter { sheet in
+            guard let target = sheet.target else { return false }
+            if let id = target.bundleId?.lowercased(), id == bundleId { return true }
+            return target.nameKey.map(nameKeys.contains) ?? false
         }
-        return Array(Set(indexes)).sorted().map { sheets[$0] }
     }
 }
 
@@ -50,7 +50,7 @@ enum ConfigLoader {
                 }
                 let (kept, ignored) = modificationDate(existing) >= modificationDate(file) ? (existing, file) : (file, existing)
                 filesByName[name] = kept
-                diagnostics.append(ConfigDiagnostic(file: ignored, line: nil, message: "Not used: a newer \(kept.lastPathComponent) is in \(kept.deletingLastPathComponent().lastPathComponent)/"))
+                diagnostics.append(ConfigDiagnostic(file: ignored, line: nil, message: "Not used: the \(kept.lastPathComponent) in \(kept.deletingLastPathComponent().lastPathComponent)/ was saved last and is used instead"))
             }
         }
 
@@ -80,11 +80,8 @@ enum ConfigLoader {
 
             if isGlobal {
                 snapshot.globalSheets.append(sheet)
-            } else if let target = sheet.target {
-                let index = snapshot.sheets.count
+            } else if sheet.target != nil {
                 snapshot.sheets.append(sheet)
-                if let bundleId = target.bundleId { snapshot.sheetsByBundleId[bundleId.lowercased(), default: []].append(index) }
-                if let nameKey = target.nameKey { snapshot.sheetsByName[nameKey, default: []].append(index) }
             }
         }
 

@@ -71,8 +71,8 @@ enum SettingsParser {
             let value = unquote(line[line.index(after: separator)...].trimmingCharacters(in: .whitespaces))
 
             guard knownNames.contains(name) else {
-                let suggestion = knownNames.min { name.distance(to: $0) < name.distance(to: $1) }
-                    .flatMap { name.distance(to: $0) <= 2 ? " Did you mean \($0)?" : nil } ?? ""
+                let suggestion = knownNames.min { editDistance(name, $0) < editDistance(name, $1) }
+                    .flatMap { editDistance(name, $0) <= 2 ? " Did you mean \($0)?" : nil } ?? ""
                 diagnostics.append(ConfigDiagnostic(line: lineNumber, message: "Unknown setting \"\(name)\".\(suggestion)"))
                 continue
             }
@@ -178,6 +178,24 @@ enum SettingsParser {
         return Double(lower).flatMap { $0.isNaN ? nil : $0 }
     }
 
+    private static func editDistance(_ lhs: String, _ rhs: String) -> Int {
+        let a = Array(lhs), b = Array(rhs)
+        if a.isEmpty { return b.count }
+        if b.isEmpty { return a.count }
+
+        var previous = Array(0...b.count)
+        var current = [Int](repeating: 0, count: b.count + 1)
+        for i in 1...a.count {
+            current[0] = i
+            for j in 1...b.count {
+                let cost = a[i - 1] == b[j - 1] ? 0 : 1
+                current[j] = Swift.min(previous[j] + 1, current[j - 1] + 1, previous[j - 1] + cost)
+            }
+            swap(&previous, &current)
+        }
+        return previous[b.count]
+    }
+
     private static func clamp<T: Comparable>(_ value: T, to range: ClosedRange<T>, onChange: (T) -> Void) -> T {
         let clamped = min(max(value, range.lowerBound), range.upperBound)
         if clamped != value { onChange(clamped) }
@@ -229,6 +247,11 @@ struct KeyCombo: Equatable {
         return codes
     }()
 
+    private static let fnImpliedKeyCodes: Set<UInt16> = [
+        122, 120, 99, 118, 96, 97, 98, 100, 101, 109, 103, 111,
+        123, 124, 125, 126, 115, 119, 116, 121, 117,
+    ]
+
     private static let modifierGlyphs: [(NSEvent.ModifierFlags, String)] = [
         (.function, "fn"), (.control, "⌃"), (.option, "⌥"), (.shift, "⇧"), (.command, "⌘"),
     ]
@@ -238,14 +261,13 @@ struct KeyCombo: Equatable {
         for glyph in ["⌘", "⌃", "⌥", "⇧", "⇪"] {
             spaced = spaced.replacingOccurrences(of: glyph, with: "+\(glyph)+")
         }
-        let parts = spaced.split(separator: "+", omittingEmptySubsequences: false)
-            .map { $0.trimmingCharacters(in: .whitespaces).lowercased().replacingOccurrences(of: " ", with: "_") }
-
-        let written = raw.trimmingCharacters(in: .whitespaces)
-        if written.hasSuffix("+") || written.contains("++") {
-            return .failure(ParseError(message: "super_key can't use the + key or end with +"))
+        let written = raw.split(separator: "+", omittingEmptySubsequences: false)
+        if written.count > 1 && written.contains(where: { $0.trimmingCharacters(in: .whitespaces).isEmpty }) {
+            return .failure(ParseError(message: "super_key can't use the + key or have an empty part"))
         }
-        let tokens = parts.filter { !$0.isEmpty }
+        let tokens = spaced.split(separator: "+")
+            .map { $0.trimmingCharacters(in: .whitespaces).lowercased().replacingOccurrences(of: " ", with: "_") }
+            .filter { !$0.isEmpty }
         guard !tokens.isEmpty else { return .failure(ParseError(message: "super_key is empty")) }
 
         var modifiers: NSEvent.ModifierFlags = []
@@ -265,6 +287,10 @@ struct KeyCombo: Equatable {
             } else {
                 return .failure(ParseError(message: "Unknown key \"\(token)\" in super_key"))
             }
+        }
+
+        if modifiers.contains(.function), let mainKey, fnImpliedKeyCodes.contains(mainKey.code) {
+            return .failure(ParseError(message: "fn can't be combined with \(mainKey.name): macOS reports fn for that key on its own"))
         }
 
         if hasCapsLock {

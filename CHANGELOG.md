@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Added
+- **Config problems in the ⚙︎ menu**: A line or value Keyly can't read is listed under "⚠︎ config problems"; click one to open the file at that line. Problems are also logged to Console.app (`com.keyly`).
+- **`# App:` takes a name or bundle id**: `# App: Figma` and `# App: com.figma.Desktop` work next to the path. Sheets also match by name, so apps in `~/Applications`, Setapp or a newer year (Photoshop 2025 for a 2024 template) are found.
+- **Escaped keys**: `\#`, `\[` and `\>` write a shortcut whose key starts with that character.
+
+### Changed
+- **Forgiving settings**: Names and values ignore case; quotes and trailing `# comments` are fine; `super_key` takes `command`, `option`, `control` and ⌘⌃⌥⇧ symbols; `hold_duration` takes `500ms`; numbers out of range are clamped (`hold_duration` 0.1–3s, `press_count` 1–4) instead of being accepted or reset. Typos get a "did you mean".
+- **`setting.conf` is created on first launch**, with every option commented out.
+- **Faster, steadier reloads**: Config files are parsed off the main thread, the reload waits for the last save, and a file that can't be read mid-save keeps its previous version.
+
+### Fixed
+- **Trigger with extra modifiers**: `super_key = ctrl+k` no longer opens on ⌃⌘K.
+- **Holding ⌘ then pressing ⌘C** cancels the hold, and typing in between no longer counts toward a double tap.
+- **Evernote, Notion and Illustrator templates**: Markdown shortcuts (`#`, `##`, `>`) were read as comments or descriptions.
+- **`⌘+click`** keeps its `+`.
+
 ## [1.9.0] - 2026-10-20
 
 ### Added

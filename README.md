@@ -103,11 +103,11 @@ curl -sL https://raw.githubusercontent.com/hoaiphongdev/keyly/main/scripts/insta
 
 ## Custom shortcuts
 
-Drop `.keyly` files in `~/.config/keyly/templates/` (files directly in `~/.config/keyly/` load too). Changes apply as soon as you save.
+Drop `.keyly` files in `~/.config/keyly/templates/` (files directly in `~/.config/keyly/` load too, and replace a template with the same name). Changes apply as soon as you save.
 
 ```keyly
 # Sheet Name: Safari Extras
-# App: /Applications/Safari.app
+# App: Safari
 
 # Group: Browsing - Everyday navigation
 
@@ -125,37 +125,43 @@ Each shortcut line is a key combination and a description, written either way:
 - `⇧⌘T | Reopen last tab` — split on `|`; use it when the left side has spaces
 - `CMD+SHIFT+T    Reopen last tab` — split on a tab or two or more spaces
 
-Written modifiers become symbols — `CMD`/`COMMAND` → ⌘, `CTRL`/`CONTROL` → ⌃, `OPT`/`OPTION`/`ALT` → ⌥, `SHIFT` → ⇧ — as do named keys like `ENTER`, `TAB`, `ESC`, `SPACE`, `DELETE` and the arrows.
+Written modifiers become symbols — `CMD`/`COMMAND` → ⌘, `CTRL`/`CONTROL` → ⌃, `OPT`/`OPTION`/`ALT` → ⌥, `SHIFT` → ⇧ — as do named keys like `ENTER`, `TAB`, `ESC`, `SPACE`, `DELETE`, `HOME`, `END`, `PGUP`, `PGDN`, `F1`–`F20` and the arrows.
 
 | Directive                     | What it does                                                 |
 | ----------------------------- | ------------------------------------------------------------ |
-| `# App: /path/to/App.app`     | **Required.** The app this sheet belongs to                  |
+| `# App: …`                    | **Required.** The app: its name (`Figma`), bundle id (`com.figma.Desktop`) or path (`/Applications/Figma.app`) |
 | `# Sheet Name: …`             | Optional label for the file                                  |
 | `# Hide Default: true`        | Show only your shortcuts, not the app's menu shortcuts       |
 | `# Group: Name - Description` | Put the following categories in a card (`# Group: none` ends it) |
 | `[Category]`                  | Start a category                                             |
 | `> Description`               | Subtitle for the current category                            |
+| `\#`, `\[`, `\>`              | A shortcut whose key starts with `#`, `[` or `>` (e.g. `\##  Heading 2`) |
+
+Directives ignore case. A sheet matches by name too, so it keeps working when the app lives in `~/Applications`, comes from Setapp or is a newer year (`Adobe Photoshop 2024` matches Photoshop 2025).
 
 Shortcuts in `templates/global.keyly` appear for **every** app — the place for system shortcuts like ⌘Tab that no menu lists.
 
+A line Keyly can't read is skipped and the rest of the file still loads. Problems show up under **⚠︎ config problems** in the shortcuts window's ⚙︎ menu (click one to jump to the line) and in Console.app under `com.keyly`.
+
 ## Settings
 
-`~/.config/keyly/setting.conf`
+`~/.config/keyly/setting.conf` is created on first launch with every option commented out. Remove the `#` in front of a line to change it.
 
 ```ini
-super_key=capslock
-trigger_type=press
-press_count=2
-screen_width_ratio=0.7
+super_key = ctrl+k
+trigger_type = hold
+hold_duration = 400ms
 ```
 
 | Key                  | Values                                                                                     |
 | -------------------- | ------------------------------------------------------------------------------------------ |
-| `super_key`          | `capslock` (default) or a combination such as `cmd`, `cmd+shift`, `ctrl+alt`. Unknown names fall back to the default |
-| `trigger_type`       | `press` or `hold` (`capslock` always uses `press`)                                         |
-| `press_count`        | Taps needed for `press` (default `2`, within half a second)                                |
-| `hold_duration`      | Seconds to hold for `hold`                                                                 |
-| `screen_width_ratio` | Maximum window width as a share of the screen (`0.1`–`1.0`, default `0.7`)                 |
+| `super_key`          | `capslock` (default), a modifier such as `cmd`, or a combination: `ctrl+k`, `Command + Shift + K`, `⌃⌥Space`. Names: `cmd`/`command`/`⌘`, `ctrl`/`control`/`⌃`, `alt`/`opt`/`option`/`⌥`, `shift`/`⇧`, `fn` |
+| `trigger_type`       | `press` or `hold`. Default `press` for `capslock` (which can only be pressed), `hold` for any other key |
+| `press_count`        | Taps in a row for `press`, `1`–`4` (default `2`, each within half a second of the last)   |
+| `hold_duration`      | How long to hold for `hold`: `0.5`, `0.5s` or `500ms`, between `0.1s` and `3s` (default `0.5`) |
+| `screen_width_ratio` | Widest the window gets, as a share of the screen: `0.1`–`1.0` or `70%` (default `0.7`)    |
+
+Settings are forgiving: names and values ignore case, quotes and a trailing `# comment` are fine, a number outside its range is clamped, and anything Keyly can't read falls back to its default and shows up in the ⚙︎ menu, with a suggestion for typos.
 
 ## Updates
 

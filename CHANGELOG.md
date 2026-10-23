@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [1.10.1] - 2026-10-23
 
 ### Added
 - **Install with Homebrew**: `brew install --cask hoaiphongdev/keyly/keyly`. No security prompt on first launch, and Keyly keeps updating itself. Already installed with `curl`? Add `--adopt` to let Homebrew take over the app you have.

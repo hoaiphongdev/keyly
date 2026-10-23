@@ -7,6 +7,9 @@ All notable changes to this project will be documented in this file.
 ### Added
 - **Install with Homebrew**: `brew install --cask hoaiphongdev/keyly/keyly`. No security prompt on first launch, and Keyly keeps updating itself. Already installed with `curl`? Add `--adopt` to let Homebrew take over the app you have.
 
+### Changed
+- **Reinstalling keeps Accessibility**: Running the install command again no longer resets the Accessibility permission, unless you're coming from 1.7.3 or older.
+
 ## [1.10.0] - 2026-10-21
 
 ### Added

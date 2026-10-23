@@ -16,6 +16,28 @@ if [ ! -s /tmp/Keyly.dmg ]; then
     exit 1
 fi
 
+echo "💿 Mounting DMG..."
+MOUNT_OUTPUT=$(hdiutil attach /tmp/Keyly.dmg -nobrowse)
+MOUNT_POINT=$(echo "$MOUNT_OUTPUT" | grep -o '/Volumes/[^"]*' | head -1)
+
+if [ -z "$MOUNT_POINT" ]; then
+    echo "❌ Failed to mount DMG"
+    exit 1
+fi
+
+designated_requirement() {
+    codesign -d -r- "$1" 2>/dev/null | sed -n 's/^designated => //p'
+}
+
+KEEP_PERMISSION=false
+if [ -d "/Applications/Keyly.app" ]; then
+    OLD_REQUIREMENT=$(designated_requirement /Applications/Keyly.app)
+    NEW_REQUIREMENT=$(designated_requirement "$MOUNT_POINT/Keyly.app")
+    if [ -n "$OLD_REQUIREMENT" ] && [ "$OLD_REQUIREMENT" = "$NEW_REQUIREMENT" ]; then
+        KEEP_PERMISSION=true
+    fi
+fi
+
 if pgrep -x "Keyly" > /dev/null; then
     echo "🔄 Stopping existing Keyly..."
     pkill -x "Keyly" || true
@@ -27,16 +49,11 @@ if [ -d "/Applications/Keyly.app" ]; then
     rm -rf /Applications/Keyly.app
 fi
 
-echo "🔐 Resetting accessibility permissions..."
-tccutil reset Accessibility com.keyly.app 2>/dev/null || true
-
-echo "💿 Mounting DMG..."
-MOUNT_OUTPUT=$(hdiutil attach /tmp/Keyly.dmg -nobrowse)
-MOUNT_POINT=$(echo "$MOUNT_OUTPUT" | grep -o '/Volumes/[^"]*' | head -1)
-
-if [ -z "$MOUNT_POINT" ]; then
-    echo "❌ Failed to mount DMG"
-    exit 1
+if [ "$KEEP_PERMISSION" = true ]; then
+    echo "🔐 Same signature as the installed version, keeping Accessibility permission"
+else
+    echo "🔐 Resetting accessibility permissions..."
+    tccutil reset Accessibility com.keyly.app 2>/dev/null || true
 fi
 
 echo "📂 Copying app to /Applications..."
@@ -65,7 +82,11 @@ echo -e "${GREEN}${BOLD}╚═════════════════�
 echo ""
 echo -e "${CYAN}${BOLD}🚀 Getting started:${NC}"
 echo -e "   ${BOLD}1.${NC} Open Spotlight ${CYAN}${BOLD}⌘ + Space${NC}, search ${BOLD}'Keyly'${NC} and open it"
-echo -e "   ${BOLD}2.${NC} Grant ${BOLD}Accessibility${NC} permission when prompted"
+if [ "$KEEP_PERMISSION" = true ]; then
+    echo -e "   ${BOLD}2.${NC} Accessibility permission is kept from your previous install"
+else
+    echo -e "   ${BOLD}2.${NC} Grant ${BOLD}Accessibility${NC} permission when prompted"
+fi
 echo -e "   ${BOLD}3.${NC} Done! Double-tap ${CYAN}⇪ Caps Lock${NC} to show shortcuts"
 echo ""
 echo -e "${YELLOW}⚠️  If shortcuts don't work:${NC}"

@@ -38,11 +38,19 @@
 
 Requires macOS 12 or later on a Mac with Apple silicon (M1 or newer).
 
-Open any terminal (Terminal, iTerm, Warp…) and run:
+With [Homebrew](https://brew.sh):
+
+```bash
+brew install --cask hoaiphongdev/keyly/keyly
+```
+
+Or without Homebrew, open any terminal (Terminal, iTerm, Warp…) and run:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/hoaiphongdev/keyly/main/scripts/install.sh | bash
 ```
+
+Already installed with `curl`? Switch to Homebrew with `brew install --cask --adopt hoaiphongdev/keyly/keyly`. Keyly keeps updating itself either way.
 
 Then grant **Accessibility** permission when prompted (**System Settings → Privacy & Security → Accessibility → Keyly**). That's it — double-tap <kbd>⇪ Caps Lock</kbd>.
 
@@ -166,6 +174,8 @@ Settings are forgiving: names and values ignore case, quotes and a trailing `# c
 ## Updates
 
 Keyly checks for a new version every 6 hours. When one is out, the menu bar icon gets a red dot and an **Update to x.y.z…** item; you can also use **Check for Updates...** at any time. Every release is signed with the same certificate, so the Accessibility permission stays granted.
+
+Installed with Homebrew? Keyly still updates itself. To update through Homebrew instead, run `brew upgrade --cask --greedy keyly`.
 
 > [!IMPORTANT]
 > **Coming from 1.7.3 or older?** Those builds have no updater. Run the install command once more and grant Accessibility again; updates are automatic from then on.

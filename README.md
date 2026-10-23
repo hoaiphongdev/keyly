@@ -16,7 +16,7 @@
   <img src="https://img.shields.io/badge/macOS-12%2B-111111?style=flat-square&logo=apple" alt="macOS 12+">
   <img src="https://img.shields.io/badge/Apple_silicon-M1%2B-111111?style=flat-square" alt="Apple silicon">
   <img src="https://img.shields.io/badge/Swift-5.9-F05138?style=flat-square&logo=swift&logoColor=white" alt="Swift 5.9">
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/hoaiphongdev/keyly?style=flat-square&color=111111" alt="MIT License"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/hoaiphongdev/keyly?style=flat-square&color=111111" alt="GPL-3.0 License"></a>
 </p>
 
 <p align="center">
@@ -213,4 +213,6 @@ just prod      # release build and run
 
 ## License
 
-[MIT](LICENSE) · Made with ❤️ by [hoaiphongdev](https://github.com/hoaiphongdev)
+Keyly is licensed under the [GNU General Public License v3.0](LICENSE) (GPL-3.0). Releases up to 1.10.1 were published under MIT.
+
+Copyright (c) 2025 Nguyễn Hoài Phong · Made with ❤️ by [hoaiphongdev](https://github.com/hoaiphongdev)

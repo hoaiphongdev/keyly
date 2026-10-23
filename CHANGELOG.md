@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Changed
+- **License**: Keyly is now licensed under GPL-3.0. Previous releases were published under MIT.
+
 ## [1.10.1] - 2026-10-23
 
 ### Added
